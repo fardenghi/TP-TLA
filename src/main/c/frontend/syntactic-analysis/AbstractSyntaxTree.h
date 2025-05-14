@@ -19,8 +19,10 @@ typedef enum FactorType FactorType;
 
 typedef struct Constant Constant;
 typedef struct Expression Expression;
+typedef struct ArithmeticExpression ArithmeticExpression;
 typedef struct Factor Factor;
 typedef struct Program Program;
+typedef struct Option Option;
 
 /**
  * Node types for the Abstract Syntax Tree (AST).
@@ -64,6 +66,14 @@ struct Expression {
 
 struct Program {
 	Expression * expression;
+};
+
+struct ArithmeticExpression {
+
+};
+
+struct Option {
+	// Una union gigante de structs de cada tipo de opcion con su contenido correspondiente 
 };
 
 /**
