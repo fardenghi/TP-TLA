@@ -215,15 +215,17 @@ struct NeigborhoodExpression {
 };
 
 struct Program {
-	ProgramType type;
-	Option * justOptions;
 	union {
-		Option * options;
-		union {
-			TransitionExpression * transitionExpression;
-			NeighborhoodExpression * neighborhoodExpression;
+		Option * justOptions;
+		struct {
+			Option * options;
+			union {
+				TransitionExpression * transitionExpression;
+				NeighborhoodExpression * neighborhoodExpression;
+			};
 		};
 	};
+	ProgramType type;
 };
 
 struct ArithmeticExpression {
