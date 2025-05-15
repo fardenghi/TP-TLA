@@ -19,48 +19,39 @@ void shutdownAbstractSyntaxTreeModule() {
 void releaseConstant(Constant * constant) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (constant != NULL) {
+		if (constant->type == STRING) {
+			free(constant->value);
+		}
 		free(constant);
 	}
 }
 
-void releaseExpression(Expression * expression) {
+void releaseArithmeticExpression(ArithmeticExpression * expression) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (expression != NULL) {
-		switch (expression->type) {
-			case ADDITION:
-			case DIVISION:
-			case MULTIPLICATION:
-			case SUBTRACTION:
-				releaseExpression(expression->leftExpression);
-				releaseExpression(expression->rightExpression);
+		if (expression->type < LOGIC_NOT) {
+				releaseArithmeticExpression(expression->leftExpression);
+				releaseArithmeticExpression(expression->rightExpression);
+		} else {
+			switch (expression->type) {
+			case ALL_ARE:
+			case ANY_ARE:
+			case AT_LEAST_ARE:
+				releaseCellList(expression->cellList);
 				break;
 			case FACTOR:
-				releaseFactor(expression->factor);
+				releaseExpression(expression->expression);
 				break;
+			default:
+				releaseConstant(expression->constant);
+				break;
+			}
 		}
 		free(expression);
 	}
 }
 
-void releaseFactor(Factor * factor) {
-	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
-	if (factor != NULL) {
-		switch (factor->type) {
-			case CONSTANT:
-				releaseConstant(factor->constant);
-				break;
-			case EXPRESSION:
-				releaseExpression(factor->expression);
-				break;
-		}
-		free(factor);
-	}
-}
-
 void releaseProgram(Program * program) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
-	if (program != NULL) {
-		releaseExpression(program->expression);
-		free(program);
-	}
+	
 }

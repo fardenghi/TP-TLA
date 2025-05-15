@@ -18,11 +18,18 @@ void shutdownBisonActionsModule();
  * Bison semantic actions.
  */
 
+Program * DefaultProgramSemanticAction(CompilerState * compilerState, Option * finalOptions);
+Program * TransitionProgramSemanticAction(CompilerState * compilerState, Option * options, TransitionExpression * transitionExpression);
+Program * NeighborhoodProgramSemanticAction(CompilerState * compilerState, Option * options, NeighborhoodExpression * neigborhoodExpression);
+
 Constant * IntegerConstantSemanticAction(const int value);
-Expression * ArithmeticExpressionSemanticAction(Expression * leftExpression, Expression * rightExpression, ExpressionType type);
-Expression * FactorExpressionSemanticAction(Factor * factor);
-Factor * ConstantFactorSemanticAction(Constant * constant);
-Factor * ExpressionFactorSemanticAction(Expression * expression);
-Program * ExpressionProgramSemanticAction(CompilerState * compilerState, Expression * expression);
+Constant * StringConstantSemanticAction(const char * value);
+ArithmeticExpression * BinaryArithmeticExpressionSemanticAction(ArithmeticExpression * leftExpression, ArithmeticExpression * rightExpression, ArithmeticExpressionType type);
+ArithmeticExpression * UnaryArithmeticExpressionSemanticAction(ArithmeticExpression * expression, ArithmeticExpressionType type);
+ArithmeticExpression * CellListArithmeticExpressionSemanticAction(CellList * cellList, ArithmeticExpressionType type);
+ArithmeticExpression * ConstantArithmeticExpressionSemanticAction(Constant * cellList);
+
+IntArray * IntArraySemanticAction(const int value, IntArray * arr);
+StringArray * StringArraySemanticAction(const char * value, StringArray * arr);
 
 #endif
