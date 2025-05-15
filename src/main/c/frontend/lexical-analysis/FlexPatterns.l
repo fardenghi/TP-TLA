@@ -49,6 +49,19 @@
 "/"									{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), DIV); }
 "+"									{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), ADD); }
 
+"%"                                 { return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), MOD); }
+
+"=="                                { return RelationalOperatorLexemeAction(createLexicalAnalyzerContext(), EQ); }
+"!="                                { return RelationalOperatorLexemeAction(createLexicalAnalyzerContext(), NEQ); }
+"<"                                 { return RelationalOperatorLexemeAction(createLexicalAnalyzerContext(), LT); }
+"<="                                { return RelationalOperatorLexemeAction(createLexicalAnalyzerContext(), LTE); }
+">"                                 { return RelationalOperatorLexemeAction(createLexicalAnalyzerContext(), GT); }
+">="                                { return RelationalOperatorLexemeAction(createLexicalAnalyzerContext(), GTE); }
+
+"&&"                                { return LogicalOperatorLexemeAction(createLexicalAnalyzerContext(), AND); }
+"||"                                { return LogicalOperatorLexemeAction(createLexicalAnalyzerContext(), OR); }
+"!"                                 { return LogicalOperatorLexemeAction(createLexicalAnalyzerContext(), NOT); }
+
 "("									{ return ParenthesisLexemeAction(createLexicalAnalyzerContext(), OPEN_PARENTHESIS); }
 ")"									{ return ParenthesisLexemeAction(createLexicalAnalyzerContext(), CLOSE_PARENTHESIS); }
 
