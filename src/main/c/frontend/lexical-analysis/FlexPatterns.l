@@ -44,6 +44,26 @@
 "{"                                 { return KeyWordLexemeAction(createLexicalAnalyzerContext(), OPEN_BRACE); }
 "}"                                 { return KeyWordLexemeAction(createLexicalAnalyzerContext(), CLOSE_BRACE); }
 
+
+"if"                                { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), IF); }
+"all"                               { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), ALL); }
+"are"                               { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), ARE); }
+"then"                              { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), THEN); }
+"else"                              { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), ELSE); }
+"endif"                             { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), ENDIF); }
+"for"                               { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), FOR); }
+"in"                                { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), IN); }
+"do"                                { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), DO); }
+"add"                               { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), ADD); }
+"end"                               { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), END); }
+
+"->"                                { return ReturnOperatorLexemeAction(createLexicalAnalyzerContext()); }
+
+"diag_asc"                          { return DirectionLexemeAction(createLexicalAnalyzerContext(), DIAG_ASC); }
+"diag_dec"                          { return DirectionLexemeAction(createLexicalAnalyzerContext(), DIAG_DEC); }
+"vert"                              { return DirectionLexemeAction(createLexicalAnalyzerContext(), VERT); }
+"hor"                               { return DirectionLexemeAction(createLexicalAnalyzerContext(), HOR); }
+
 "-"									{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), SUB); }
 "*"									{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), MUL); }
 "/"									{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), DIV); }
