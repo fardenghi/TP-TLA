@@ -144,8 +144,17 @@
  *
  * @see https://www.gnu.org/software/bison/manual/html_node/Precedence.html
  */
+%left OR
+%left AND
+%right NOT
+
+%nonassoc EQ NEQ LT LTE GT GTE
+
 %left ADD SUB
-%left MUL DIV
+%left MUL DIV MOD
+
+%nonassoc IFX
+%nonassoc ELSE
 
 %%
 
@@ -197,6 +206,8 @@ neighborhood_expression: neighborhood_expression neighborhood_expression
 	| ADD_CELL OPEN_PARENTHESIS cell_list CLOSE_PARENTHESIS
 	| REMOVE_CELL OPEN_PARENTHESIS cell_list CLOSE_PARENTHESIS
 	;
+
+	
 
 cell: OPEN_PARENTHESIS constant COMMA constant CLOSE_PARENTHESIS
 	| HORIZONTAL OPEN_PARENTHESIS constant CLOSE_PARENTHESIS
