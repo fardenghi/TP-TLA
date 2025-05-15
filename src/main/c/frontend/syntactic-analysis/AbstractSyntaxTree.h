@@ -166,7 +166,7 @@ struct Evolution {
 };
 
 struct Configuration {
-	char isLast;
+	boolean isLast;
 	union {
 		Option * lastOption;
 		struct {
@@ -187,7 +187,7 @@ struct Constant {
 };
 
 struct IntArray {
-	char isLast;
+	boolean isLast;
 	union {
 		int lastValue;
 		struct {
@@ -198,7 +198,7 @@ struct IntArray {
 };
 
 struct StringArray {
-	char isLast;
+	boolean isLast;
 	union {
 		char * lastValue;
 		struct {
@@ -209,9 +209,12 @@ struct StringArray {
 };
 
 struct Cell {
-	char isSingleCoordenate;
+	boolean isSingleCoordenate;
 	union {
-		Constant * displacement;
+		struct {
+			Constant * displacement;
+			DisplacementType displacementType;
+		};
 		struct {
 			Constant * x;
 			Constant * y;
@@ -220,7 +223,7 @@ struct Cell {
 };
 
 struct CellList {
-	char isLast;
+	boolean isLast;
 	union {
 		Cell * last;
 		struct {

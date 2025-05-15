@@ -36,8 +36,9 @@ Evolution * EvolutionSemanticAction(IntArray * array, const int value, const Evo
 TransitionExpression * TransitionExpressionSemanticAction();
 NeighborhoodExpression * NeighborhoodExpressionSemanticAction();
 
-Cell * CellSemanticAction();
-CellList * CellListSemanticAction();
+Cell * SingleCoordinateCellSemanticAction(Constant * c, DisplacementType type);
+Cell * DoubleCoordinateCellSemanticAction(Constant * x, Constant * y);
+CellList * CellListSemanticAction(Cell * cell, CellList * list);
 
 ArithmeticExpression * BinaryArithmeticExpressionSemanticAction(ArithmeticExpression * leftExpression, ArithmeticExpression * rightExpression, ArithmeticExpressionType type);
 ArithmeticExpression * UnaryArithmeticExpressionSemanticAction(ArithmeticExpression * expression, ArithmeticExpressionType type);

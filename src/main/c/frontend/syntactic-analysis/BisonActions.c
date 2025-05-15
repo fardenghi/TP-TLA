@@ -143,6 +143,40 @@ Evolution * EvolutionSemanticAction(IntArray * array, const int value, const Evo
 }
 
 
+
+Cell * SingleCoordinateCellSemanticAction(Constant * c, DisplacementType type) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Cell * cell = calloc(1, sizeof(Cell));
+	cell->isSingleCoordenate = true;
+	cell->displacement = c;
+	cell->displacementType = type;
+	return cell;
+}
+
+Cell * DoubleCoordinateCellSemanticAction(Constant * x, Constant * y) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Cell * cell = calloc(1, sizeof(Cell));
+	cell->isSingleCoordenate = false;
+	cell->x = x;
+	cell->y = y;
+	return cell;
+}
+
+CellList * CellListSemanticAction(Cell * cell, CellList * list) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	CellList * cellList = calloc(1, sizeof(CellList));
+	if (list == NULL) {
+		cellList->isLast = true;
+		cellList->last = cell;
+	} else {
+		cellList->isLast = false;
+		cellList->cell = cell;
+		cellList->next = list;
+	}
+	
+	return cellList;
+}
+
 Constant * IntegerConstantSemanticAction(const int value) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Constant * constant = calloc(1, sizeof(Constant));

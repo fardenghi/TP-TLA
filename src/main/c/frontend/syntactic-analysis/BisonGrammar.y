@@ -14,6 +14,7 @@
 	FrontierEnum frontier;
 	NeighborhoodEnum neighborhood;
 	EvolutionEnum evolution;
+	DisplacementType displacement;
 	char * string;
 	Token token;
 
@@ -57,6 +58,7 @@
 %token <frontier> FRONTIER_ENUM
 %token <neighborhood> NEIGHBORHOOD_ENUM
 %token <evolution> EVOLUTION_ENUM
+%token <displacement> DISPLACEMENT_TYPE
 
 %token <token> OPEN_PARENTHESIS
 %token <token> CLOSE_PARENTHESIS
@@ -153,7 +155,7 @@
 %left ADD SUB
 %left MUL DIV MOD
 
-%nonassoc IFX
+%nonassoc IF
 %nonassoc ELSE
 
 %%
@@ -207,17 +209,12 @@ neighborhood_expression: neighborhood_expression neighborhood_expression
 	| REMOVE_CELL OPEN_PARENTHESIS cell_list CLOSE_PARENTHESIS
 	;
 
-	
-
-cell: OPEN_PARENTHESIS constant COMMA constant CLOSE_PARENTHESIS
-	| HORIZONTAL OPEN_PARENTHESIS constant CLOSE_PARENTHESIS
-	| VERTICAL OPEN_PARENTHESIS constant CLOSE_PARENTHESIS
-	| DIAG_ASC OPEN_PARENTHESIS constant CLOSE_PARENTHESIS
-	| DIAG_DESC OPEN_PARENTHESIS constant CLOSE_PARENTHESIS
+cell: OPEN_PARENTHESIS constant[x] COMMA constant[y] CLOSE_PARENTHESIS									{ $$ = DoubleCoordinateCellSemanticAction($x, $y) }
+	| DISPLACEMENT_TYPE OPEN_PARENTHESIS constant CLOSE_PARENTHESIS										{ $$ = SingleCoordinateCellSemanticAction($3, $1) }
 	;
 
-cell_list: cell
-	| cell COMMA cell_list
+cell_list: cell																						{ $$ = CellListSemanticAction($1, NULL) }
+	| cell COMMA cell_list																			{ $$ = CellListSemanticAction($1, $3) }
 	;
 
 range: OPEN_BRACKET int_array[array] CLOSE_BRACKET													{ $$ = RangeSemanticAction($array, NULL, NULL)}
