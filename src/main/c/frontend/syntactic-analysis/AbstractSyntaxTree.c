@@ -53,5 +53,190 @@ void releaseArithmeticExpression(ArithmeticExpression * expression) {
 
 void releaseProgram(Program * program) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
-	
+	if (program != NULL) {
+		switch (program->type) {
+			case DEFAULT:
+				releaseConfiguration(program->justConfiguration);
+				break;
+			case TRANSITION:
+				releaseConfiguration(program->configuration);
+				releaseTransitionExpression(program->transitionExpression);
+				break;
+			case NEIGHBORHOOD:
+				releaseConfiguration(program->configuration);
+				releaseTransitionExpression(program->neighborhoodExpression);
+				break;
+		}
+		free(program);
+	}
 }
+
+void releaseConfiguration(Configuration * configuration) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (configuration != NULL) {
+		if (configuration->isLast) {
+			releaseOption(configuration->lastOption);
+		} else {
+			releaseOption(configuration->option);
+			releaseConfiguration(configuration->next);
+		}
+		free(configuration);
+	}
+}
+
+
+void releaseOption(Option * option) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (option != NULL) {
+		switch (option->type) {
+			case COLORS_OPTION:
+				releaseIntArray(option->colors);
+				break;
+			case STATES_OPTION:
+				releaseStringArray(option->states);
+				break;
+			case EVOLUTION_OPTION:
+				releaseEvolution(option->evolution);
+				break;
+			default:
+				break;
+		}
+		free(option);
+	}
+}
+
+void releaseEvolution(Evolution * evolution) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (evolution != NULL) {
+		releaseIntArray(evolution->array);
+		free(evolution);
+	}
+}
+
+void releaseIntArray(IntArray * array) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (array != NULL) {
+		if (!array->isLast) {
+			releaseIntArray(array->next);
+		}
+		free(array);
+	}
+}
+
+void releaseStringArray(StringArray * array) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (array != NULL) {
+		if (array->isLast) {
+			free(array->lastValue);
+		} else {
+			free(array->value);
+			releaseStringArray(array->next);
+		}
+		free(array);
+	}
+}
+
+void releaseCell(Cell * cell) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (cell != NULL) {
+		if (cell->isSingleCoordenate) {
+			releaseConstant(cell->displacement);
+		} else {
+			releaseConstant(cell->x);
+			releaseConstant(cell->y);
+		}
+		free(cell);
+	}
+}
+
+void releaseCellList(CellList * list) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (list != NULL) {
+		if (list->isLast) {
+			releaseCell(list->last);
+		} else {
+			releaseCell(list->cell);
+			releaseCellList(list->next);
+		}
+		free(list);
+	}
+}
+
+void releaseRange(Range * range) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (range != NULL) {
+		switch (range->type) {
+			case ARRAY:
+				releaseIntArray(range->array);
+				break;
+			case INTERVAL:
+				releaseConstant(range->start);
+				releaseConstant(range->end);
+				break;
+		}
+		free(range);
+	}
+}
+
+void releaseNeighborhoodExpression(NeighborhoodExpression * expression) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (expression != NULL) {
+		switch (expression->type) {
+			case NEIGHBORHOOD_BLOCK:
+				releaseNeighborhoodExpression(expression->leftExpression);
+				releaseNeighborhoodExpression(expression->rightExpression);
+				break;
+			case NEIGHBORHOOD_FOR_LOOP:
+				releaseRange(expression->range);
+				releaseNeighborhoodExpression(expression->forBody);
+				break;
+			case NEIGHBORHOOD_IF:
+				releaseArithmeticExpression(expression->ifCondition);
+				releaseNeighborhoodExpression(expression->ifBody);
+				break;
+			case NEIGHBORHOOD_IF_ELSE:
+				releaseArithmeticExpression(expression->ifElseCondition);
+				releaseNeighborhoodExpression(expression->ifElseBody);
+				break;
+			case ADD_CELL_EXP:
+				releaseCellList(expression->toAddList);
+				break;
+			case REMOVE_CELL_EXP:
+				releaseCellList(expression->toRemoveList);
+				break;
+		}
+		free(expression);
+	}
+}
+
+void releaseTransitionExpression(TransitionExpression * expression) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (expression != NULL) {
+		switch (expression->type) {
+			case TRANSITION_BLOCK:
+				releaseTransitionExpression(expression->leftExpression);
+				releaseTransitionExpression(expression->rightExpression);
+				break;
+			case TRANSITION_FOR_LOOP:
+				releaseRange(expression->range);
+				releaseTransitionExpression(expression->forBody);
+				break;
+			case TRANSITION_IF:
+				releaseArithmeticExpression(expression->ifCondition);
+				releaseTransitionExpression(expression->ifBody);
+				break;
+			case TRANSITION_IF_ELSE:
+				releaseArithmeticExpression(expression->ifElseCondition);
+				releaseTransitionExpression(expression->ifElseBody);
+				break;
+			case RETURN_STRING:
+				free(expression->returnString);
+				break;
+			case RETURN_INT:
+				releaseArithmeticExpression(expression->returnValue);
+				break;
+		}
+		free(expression);
+	}
+}
+

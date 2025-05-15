@@ -42,34 +42,106 @@ void compilerStateCheck(CompilerState * compilerState, Program * program) {
 	}
 }
 
-Program * DefaultProgramSemanticAction(CompilerState * compilerState, Option * justOptions) {
+Program * DefaultProgramSemanticAction(CompilerState * compilerState, Configuration * justConfiguration) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Program * program = calloc(1, sizeof(Program));
-	program->justOptions = justOptions;
+	program->justConfiguration = justConfiguration;
 	program->type = DEFAULT;
 	compilerStateCheck(compilerState, program);
 	return program;
 }
 
-Program * TransitionProgramSemanticAction(CompilerState * compilerState, Option * options, TransitionExpression * transitionExpression) {
+Program * TransitionProgramSemanticAction(CompilerState * compilerState, Configuration * configuration, TransitionExpression * transitionExpression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Program * program = calloc(1, sizeof(Program));
-	program->options = options;
+	program->configuration = configuration;
 	program->transitionExpression = transitionExpression;
 	program->type = TRANSITION;
 	compilerStateCheck(compilerState, program);
 	return program;
 }
 
-Program * NeighborhoodProgramSemanticAction(CompilerState * compilerState, Option * options, NeighborhoodExpression * neigborhoodExpression) {
+Program * NeighborhoodProgramSemanticAction(CompilerState * compilerState, Configuration * configuration, NeighborhoodExpression * neigborhoodExpression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Program * program = calloc(1, sizeof(Program));
-	program->options = options;
+	program->configuration = configuration;
 	program->neighborhoodExpression = neigborhoodExpression;
 	program->type = NEIGHBORHOOD;
 	compilerStateCheck(compilerState, program);
 	return program;
 }
+
+Configuration * ConfigurationSemanticAction(Option * option, Configuration * config) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Configuration * configuration = calloc(1, sizeof(Configuration));
+	if (configuration == NULL) {
+		configuration->isLast = 1;
+		configuration->lastOption = option;
+	} else {
+		configuration->isLast = 0;
+		configuration->option = option;
+		configuration->next = configuration;
+	}
+	return configuration;
+}
+
+Option * IntValuedOptionSemanticAction(const int value, OptionType type) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Option * option = calloc(1, sizeof(Option));
+	option->type = type;
+	option->value = value;
+	return option;
+}
+Option * IntArrayValuedOptionSemanticAction(IntArray * value) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Option * option = calloc(1, sizeof(Option));
+	option->type = COLORS_OPTION;
+	option->colors = value;
+	return option;
+}
+Option * StringArrayValuedOptionSemanticAction(StringArray * value) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Option * option = calloc(1, sizeof(Option));
+	option->type = STATES_OPTION;
+	option->states = value;
+	return option;
+}
+Option * FrontierOptionSemanticAction(const FrontierEnum value) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Option * option = calloc(1, sizeof(Option));
+	option->type = FRONTIER_OPTION;
+	option->frontierType = value;
+	return option;
+}
+Option * NeighborhoodOptionSemanticAction(const NeighborhoodEnum value) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Option * option = calloc(1, sizeof(Option));
+	option->type = NEIGHBORHOOD_OPTION;
+	option->neighborhoodEnum = value;
+	return option;
+}
+Option * EvolutionOptionSemanticAction(Evolution * value) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Option * option = calloc(1, sizeof(Option));
+	option->type = EVOLUTION_OPTION;
+	option->evolution = value;
+	return option;
+}
+
+Evolution * EvolutionSemanticAction(IntArray * array, const int value, const EvolutionEnum type) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Evolution * evolution = calloc(1, sizeof(Evolution));
+	if (array != NULL) {
+		evolution->isDefault = false;
+		evolution->array = array;
+		evolution->value = value;
+	} else {
+		evolution->isDefault = true;
+		evolution->evolutionTypes = type;
+	}
+	return evolution;
+}
+
 
 Constant * IntegerConstantSemanticAction(const int value) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
@@ -133,6 +205,7 @@ IntArray * IntArraySemanticAction(const int value, IntArray * arr) {
 	}
 	return intArray;
 }
+
 StringArray * StringArraySemanticAction(const char * value, StringArray * arr) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	IntArray * intArray = calloc(1, sizeof(StringArray));
@@ -147,4 +220,18 @@ StringArray * StringArraySemanticAction(const char * value, StringArray * arr) {
 		intArray->next = arr;
 	}
 	return intArray;
+}
+
+Range * RangeSemanticAction(IntArray * array, Constant * start, Constant * end) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Range * range = calloc(1, sizeof(Range));
+	if (array == NULL) {
+		range->type = INTERVAL;
+		range->start = start;
+		range->end = end;
+	} else {
+		range->type = ARRAY;
+		range->array = array;
+	}
+	return range;
 }

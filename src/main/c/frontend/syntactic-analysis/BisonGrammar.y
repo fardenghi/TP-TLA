@@ -33,6 +33,7 @@
 	Cell * cell;
 	CellList * cell_list;
 	Range * range;
+	Configuration * config;
 }
 
 /**
@@ -129,6 +130,7 @@
 %type <neighborhood_expression> neighborhood_expression
 %type <arithmetic_expression> arithmetic_expression
 %type <constant> constant
+%type <config> config
 %type <option> option
 %type <evolution> evolution
 %type <int_array> int_array
@@ -149,31 +151,33 @@
 
 // IMPORTANT: To use λ in the following grammar, use the %empty symbol.
 
-program: CONFIGURATION option[options] TRANSITION_FUNCTION transition_expression[exp]	{ $$ = TransitionProgramSemanticAction(currentCompilerState(), $options, $exp)}
-	| CONFIGURATION option[options] NEIGHBORHOOD_FUNCTION neighborhood_expression[exp]	{ $$ = NeighborhoodProgramSemanticAction(currentCompilerState(), $options, $exp)}
-	| CONFIGURATION option[options]														{ $$ = DefaultProgramSemanticAction(currentCompilerState(), $options)}
+program: CONFIGURATION config[options] TRANSITION_FUNCTION transition_expression[exp]	{ $$ = TransitionProgramSemanticAction(currentCompilerState(), $options, $exp)}
+	| CONFIGURATION config[options] NEIGHBORHOOD_FUNCTION neighborhood_expression[exp]	{ $$ = NeighborhoodProgramSemanticAction(currentCompilerState(), $options, $exp)}
+	| CONFIGURATION config[options]														{ $$ = DefaultProgramSemanticAction(currentCompilerState(), $options)}
 	;
 
-option: option
-	| option option
-	| HEIGHT INTEGER SEMICOLON
-    | WIDTH INTEGER SEMICOLON
-    | FRONTIER FRONTIER_ENUM SEMICOLON
-    | COLORS OPEN_BRACE int_array CLOSE_BRACE SEMICOLON
-    | STATES OPEN_BRACE string_array SEMICOLON
-    | NEIGHBORHOOD NEIGHBORHOOD_ENUM SEMICOLON
-    | EVOLUTION evolution SEMICOLON
+config: option																			{ $$ = ConfigurationSemanticAction($1, NULL) }
+	| option config																		{ $$ = ConfigurationSemanticAction($1, $2) }
 	;
 
-evolution: EVOLUTION_ENUM
-	| int_array DIV INTEGER
-
-int_array: INTEGER																		{$$ = IntArraySemanticAction($1, NULL)}
-	| INTEGER COMMA int_array[arr]														{$$ = IntArraySemanticAction($1, $arr)}
+option: HEIGHT INTEGER SEMICOLON														{ $$ = IntValuedOptionSemanticAction($2, HEIGHT_OPTION) }
+    | WIDTH INTEGER SEMICOLON															{ $$ = IntValuedOptionSemanticAction($2, WIDTH_OPTION) }
+    | FRONTIER FRONTIER_ENUM SEMICOLON													{ $$ = FrontierOptionSemanticAction($2) }
+    | COLORS OPEN_BRACE int_array CLOSE_BRACE SEMICOLON									{ $$ = IntArrayValuedOptionSemanticAction($3) }
+    | STATES OPEN_BRACE string_array SEMICOLON											{ $$ = StringArrayValuedOptionSemanticAction($3) }
+    | NEIGHBORHOOD NEIGHBORHOOD_ENUM SEMICOLON											{ $$ = NeighborhoodOptionSemanticAction($2) }
+    | EVOLUTION evolution SEMICOLON														{ $$ = EvolutionOptionSemanticAction($2) }
 	;
 
-string_array: STRING
-	| STRING COMMA STRING
+evolution: EVOLUTION_ENUM																{ $$ = EvolutionSemanticAction(NULL, 0, ) }
+	| int_array DIV INTEGER																{ $$ = EvolutionSemanticAction($1, $3, 0) }
+
+int_array: INTEGER																		{ $$ = IntArraySemanticAction($1, NULL) }
+	| INTEGER COMMA int_array[arr]														{ $$ = IntArraySemanticAction($1, $arr) }
+	;
+
+string_array: STRING																	{ $$ = StringArraySemanticAction($1, NULL) }
+	| STRING COMMA string_array[arr]													{ $$ = StringArraySemanticAction($1, $arr) }
 	;
 
 transition_expression: transition_expression transition_expression
@@ -205,8 +209,8 @@ cell_list: cell
 	| cell COMMA cell_list
 	;
 
-range: OPEN_BRACKET int_array CLOSE_BRACKET
-	| OPEN_BRACKET constant SUB constant CLOSE_BRACKET
+range: OPEN_BRACKET int_array[array] CLOSE_BRACKET													{ $$ = RangeSemanticAction($array, NULL, NULL)}
+	| OPEN_BRACKET constant[c1] SUB constant[c2] CLOSE_BRACKET										{ $$ = RangeSemanticAction(NULL, $c1, $c2) }
 	;
 
 arithmetic_expression: arithmetic_expression[left] ADD arithmetic_expression[right]					{ $$ = BinaryArithmeticExpressionSemanticAction($left, $right, ADDITION); }
