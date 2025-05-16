@@ -22,6 +22,7 @@ typedef enum ConstantType ConstantType;
 typedef enum RangeType RangeType;
 typedef enum TransitionExpressionType TransitionExpressionType;
 typedef enum NeighborhoodExpressionType NeighborhoodExpressionType;
+typedef enum OptionType OptionType;
 
 typedef struct Constant Constant;
 typedef struct Expression Expression;
@@ -29,6 +30,8 @@ typedef struct ArithmeticExpression ArithmeticExpression;
 typedef struct Factor Factor;
 typedef struct Program Program;
 typedef struct Option Option;
+typedef struct Configuration Configuration;
+typedef struct Evolution Evolution;
 
 typedef struct NeighborhoodExpression NeighborhoodExpression;
 typedef struct TransitionExpression TransitionExpression;
@@ -83,23 +86,95 @@ enum ConstantType {
 };
 
 enum TransitionExpressionType {
-    TRANSITION_BLOCK,
-    TRANSITION_ASSIGNMENT,
-    TRANSITION_FOR_LOOP,
-    TRANSITION_IF,
-    TRANSITION_IF_ELSE,
-    RETURN_STRING,
-    RETURN_INT
+	TRANSITION_BLOCK,
+	TRANSITION_ASSIGNMENT,
+	TRANSITION_FOR_LOOP,
+	TRANSITION_IF,
+	TRANSITION_IF_ELSE,
+	RETURN_STRING,
+	RETURN_INT
 };
 
 enum NeighborhoodExpressionType {
-    NEIGHBORHOOD_BLOCK,
-    NEIGHBORHOOD_ASSIGNMENT,
-    NEIGHBORHOOD_FOR_LOOP,
-    NEIGHBORHOOD_IF,
-    NEIGHBORHOOD_IF_ELSE,
-    ADD_CELL_EXP,
-    REMOVE_CELL_EXP
+	NEIGHBORHOOD_BLOCK,
+	NEIGHBORHOOD_ASSIGNMENT,
+	NEIGHBORHOOD_FOR_LOOP,
+	NEIGHBORHOOD_IF,
+	NEIGHBORHOOD_IF_ELSE,
+	ADD_CELL_EXP,
+	REMOVE_CELL_EXP
+};
+
+enum OptionType {
+    HEIGHT_OPTION,       
+    WIDTH_OPTION,                 
+    FRONTIER_OPTION,               
+    COLORS_OPTION,                 
+    STATES_OPTION,                 
+    NEIGHBORHOOD_OPTION,           
+    EVOLUTION_OPTION               
+};
+
+struct Program {
+	union {
+		Configuration * justConfiguration;
+		struct {
+			Configuration * configuration;
+			union {
+				TransitionExpression * transitionExpression;
+				NeighborhoodExpression * neighborhoodExpression;
+			};
+		};
+	};
+	ProgramType type;
+};
+
+struct ArithmeticExpression {
+	ArithmeticExpressionType type;
+	union {
+		Expression * expression;
+		struct {
+			Expression * leftExpression;
+			Expression * rightExpression;
+		};
+		CellList * cellList;
+		Constant * constant;
+	};
+};
+
+struct Option {
+	OptionType type;
+	union {
+		int value;
+		FrontierEnum frontierType;
+		IntArray * colors;
+		StringArray * states;
+		NeighborhoodEnum neighborhoodEnum;
+		Evolution * evolution;
+	};
+};
+
+struct Evolution {
+	boolean isDefault;
+	union {
+		EvolutionEnum evolutionTypes;
+		struct {
+			IntArray * array;
+			int value;
+		};
+	};
+};
+
+struct Configuration {
+	boolean isLast;
+	union {
+		Option * lastOption;
+		struct {
+			Option * option;
+			Configuration * next;
+		};
+		
+	};	
 };
 
 struct Constant {
@@ -112,7 +187,7 @@ struct Constant {
 };
 
 struct IntArray {
-	char isLast;
+	boolean isLast;
 	union {
 		int lastValue;
 		struct {
@@ -123,7 +198,7 @@ struct IntArray {
 };
 
 struct StringArray {
-	char isLast;
+	boolean isLast;
 	union {
 		char * lastValue;
 		struct {
@@ -134,9 +209,12 @@ struct StringArray {
 };
 
 struct Cell {
-	char isSingleCoordenate;
+	boolean isSingleCoordenate;
 	union {
-		Constant * displacement;
+		struct {
+			Constant * displacement;
+			DisplacementType displacementType;
+		};
 		struct {
 			Constant * x;
 			Constant * y;
@@ -145,7 +223,7 @@ struct Cell {
 };
 
 struct CellList {
-	char isLast;
+	boolean isLast;
 	union {
 		Cell * last;
 		struct {
@@ -190,7 +268,7 @@ struct TransitionExpression {
 	};
 };
 
-struct NeigborhoodExpression {
+struct NeighborhoodExpression {
 	NeighborhoodExpressionType type;
 	union {
 		struct {
@@ -214,43 +292,21 @@ struct NeigborhoodExpression {
 	};
 };
 
-struct Program {
-	union {
-		Option * justOptions;
-		struct {
-			Option * options;
-			union {
-				TransitionExpression * transitionExpression;
-				NeighborhoodExpression * neighborhoodExpression;
-			};
-		};
-	};
-	ProgramType type;
-};
-
-struct ArithmeticExpression {
-	ArithmeticExpressionType type;
-	union {
-		Expression * expression;
-		struct {
-			Expression * leftExpression;
-			Expression * rightExpression;
-		};
-		CellList * cellList;
-		Constant * constant;
-	};
-};
-
-struct Option {
-	// Una union gigante de structs de cada tipo de opcion con su contenido correspondiente 
-};
-
 /**
  * Node recursive destructors.
  */
 void releaseConstant(Constant * constant);
-void releaseExpression(Expression * expression);
-void releaseFactor(Factor * factor);
+void releaseArithmeticExpression(ArithmeticExpression * expression);
 void releaseProgram(Program * program);
+void releaseTransitionExpression(TransitionExpression * transitionExpression);
+void releaseNeighborhoodExpression(NeighborhoodExpression * neighborhoodExpression);
+void releaseOption(Option * option);
+void releaseEvolution(Evolution * evolution);
+void releaseConfiguration(Configuration * configuration);
+void releaseIntArray(IntArray * array);
+void releaseStringArray(StringArray * array);
+void releaseCell(Cell * cell);
+void releaseCellList(CellList * list);
+void releaseRange(Range * range);
 
 #endif
