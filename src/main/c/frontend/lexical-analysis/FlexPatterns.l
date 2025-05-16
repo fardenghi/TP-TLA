@@ -51,23 +51,22 @@
 
 
 "if"                                { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), IF); }
-"all"                               { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), ALL); }
+"all"                               { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), ALL_OPERAND); }
 "are"                               { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), ARE); }
 "then"                              { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), THEN); }
 "else"                              { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), ELSE); }
-"endif"                             { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), ENDIF); }
+"end"                               { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), END); }
 "for"                               { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), FOR); }
 "in"                                { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), IN); }
 "do"                                { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), DO); }
 "add"                               { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), ADD); }
-"end"                               { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), END); }
 
 "->"                                { return ReturnOperatorLexemeAction(createLexicalAnalyzerContext()); }
 
-"diag_asc"                          { return DirectionLexemeAction(createLexicalAnalyzerContext(), DIAG_ASC); }
-"diag_dec"                          { return DirectionLexemeAction(createLexicalAnalyzerContext(), DIAG_DEC); }
-"vert"                              { return DirectionLexemeAction(createLexicalAnalyzerContext(), VERT); }
-"hor"                               { return DirectionLexemeAction(createLexicalAnalyzerContext(), HOR); }
+"diag_asc"                          { return DirectionLexemeAction(createLexicalAnalyzerContext(), DIAGONAL_ASC_D); }
+"diag_dec"                          { return DirectionLexemeAction(createLexicalAnalyzerContext(), DIAGONAL_DESC_D); }
+"vert"                              { return DirectionLexemeAction(createLexicalAnalyzerContext(), VERTICAL_D); }
+"hor"                               { return DirectionLexemeAction(createLexicalAnalyzerContext(), HORIZONTAL_D); }
 
 "-"									{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), SUB); }
 "*"									{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), MUL); }
@@ -91,6 +90,7 @@
 ")"									{ return ParenthesisLexemeAction(createLexicalAnalyzerContext(), CLOSE_PARENTHESIS); }
 
 [[:digit:]]+						{ return IntegerLexemeAction(createLexicalAnalyzerContext()); }
+[[:alnum:]]+                        { return StringLexemeAction(createLexicalAnalyzerContext()); }
 [[:]]
 [[:space:]]+						{ IgnoredLexemeAction(createLexicalAnalyzerContext()); }
 .									{ return UnknownLexemeAction(createLexicalAnalyzerContext()); }

@@ -29,9 +29,19 @@ Token ArithmeticOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerCont
 Token IntegerLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
 Token ParenthesisLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token);
 
+Token IntegerLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+Token StringLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+
+Token FrontierLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext, FrontierEnum frontier);
+Token NeighborhoodLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext, NeighborhoodEnum neighborhood);
+Token EvolutionLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext, EvolutionEnum evolution);
+
+Token DirectionLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, DisplacementType type);
+
+Token ReturnOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+
 Token KeyWordLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token);
 Token ControlFlowLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token);
-Token DirectionLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token);
 Token ReturnOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
 Token LogicalOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token);
 Token RelationalOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token);

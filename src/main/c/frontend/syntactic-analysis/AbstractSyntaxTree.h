@@ -33,6 +33,8 @@ typedef struct Option Option;
 typedef struct Configuration Configuration;
 typedef struct Evolution Evolution;
 
+typedef struct NeighborhoodSequence NeighborhoodSequence;
+typedef struct TransitionSequence TransitionSequence;
 typedef struct NeighborhoodExpression NeighborhoodExpression;
 typedef struct TransitionExpression TransitionExpression;
 
@@ -50,7 +52,7 @@ typedef struct Range Range;
 enum ProgramType {
 	DEFAULT,
 	TRANSITION,
-	NEIGHBORHOOD
+	NEIGHBORHOOD_PROGRAM
 };
 
 enum ArithmeticExpressionType {
@@ -81,8 +83,8 @@ enum RangeType {
 };
 
 enum ConstantType {
-	INTEGER,
-	STRING
+	INTEGER_C,
+	STRING_C
 };
 
 enum TransitionExpressionType {
@@ -96,7 +98,6 @@ enum TransitionExpressionType {
 };
 
 enum NeighborhoodExpressionType {
-	NEIGHBORHOOD_BLOCK,
 	NEIGHBORHOOD_ASSIGNMENT,
 	NEIGHBORHOOD_FOR_LOOP,
 	NEIGHBORHOOD_IF,
@@ -132,10 +133,10 @@ struct Program {
 struct ArithmeticExpression {
 	ArithmeticExpressionType type;
 	union {
-		Expression * expression;
+		ArithmeticExpression * expression;
 		struct {
-			Expression * leftExpression;
-			Expression * rightExpression;
+			ArithmeticExpression * leftExpression;
+			ArithmeticExpression * rightExpression;
 		};
 		CellList * cellList;
 		Constant * constant;
@@ -244,12 +245,34 @@ struct Range {
 	};
 };
 
+struct TransitionSequence {
+	boolean binary;
+	union {
+		TransitionExpression * expression;
+		struct {
+			TransitionSequence * sequence;
+			TransitionExpression *rightExpression;
+		};
+	};
+};
+
+struct NeighborhoodSequence {
+	boolean binary;
+	union {
+		NeighborhoodExpression * expression;
+		struct {
+			NeighborhoodSequence * sequence;
+			NeighborhoodExpression * rightExpression;
+		};
+	};
+};
+
 struct TransitionExpression {
 	TransitionExpressionType type;
 	union {
 		struct {
-			TransitionExpression * leftExpression;
-			TransitionExpression * rightExpression;
+			ArithmeticExpression * assignment;
+			char * variable;
 		};
 		struct {
 			Range * range;
@@ -272,8 +295,8 @@ struct NeighborhoodExpression {
 	NeighborhoodExpressionType type;
 	union {
 		struct {
-			NeighborhoodExpression * leftExpression;
-			NeighborhoodExpression * rightExpression;
+			ArithmeticExpression * assignment;
+			char * variable;
 		};
 		struct {
 			Range * range;

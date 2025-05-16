@@ -19,8 +19,8 @@ void shutdownAbstractSyntaxTreeModule() {
 void releaseConstant(Constant * constant) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (constant != NULL) {
-		if (constant->type == STRING) {
-			free(constant->value);
+		if (constant->type == STRING_C) {
+			free(constant->string);
 		}
 		free(constant);
 	}
@@ -40,7 +40,7 @@ void releaseArithmeticExpression(ArithmeticExpression * expression) {
 				releaseCellList(expression->cellList);
 				break;
 			case FACTOR:
-				releaseExpression(expression->expression);
+				releaseArithmeticExpression(expression->expression);
 				break;
 			default:
 				releaseConstant(expression->constant);
@@ -62,9 +62,9 @@ void releaseProgram(Program * program) {
 				releaseConfiguration(program->configuration);
 				releaseTransitionExpression(program->transitionExpression);
 				break;
-			case NEIGHBORHOOD:
+			case NEIGHBORHOOD_PROGRAM:
 				releaseConfiguration(program->configuration);
-				releaseTransitionExpression(program->neighborhoodExpression);
+				releaseNeighborhoodExpression(program->neighborhoodExpression);
 				break;
 		}
 		free(program);
@@ -178,14 +178,30 @@ void releaseRange(Range * range) {
 	}
 }
 
+void releaseNeighborhoodSequence(NeighborhoodSequence * sequence) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (sequence->binary) {
+		releaseNeighborhoodSequence(sequence->sequence);
+		releaseNeighborhoodExpression(sequence->rightExpression);
+	} else {
+		releaseNeighborhoodExpression(sequence->expression);
+	}
+}
+
+void releaseTransitionSequence(TransitionSequence * sequence) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (sequence->binary) {
+		releaseNeighborhoodSequence(sequence->sequence);
+		releaseNeighborhoodExpression(sequence->rightExpression);
+	} else {
+		releaseNeighborhoodExpression(sequence->expression);
+	}
+}
+
 void releaseNeighborhoodExpression(NeighborhoodExpression * expression) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (expression != NULL) {
 		switch (expression->type) {
-			case NEIGHBORHOOD_BLOCK:
-				releaseNeighborhoodExpression(expression->leftExpression);
-				releaseNeighborhoodExpression(expression->rightExpression);
-				break;
 			case NEIGHBORHOOD_FOR_LOOP:
 				releaseRange(expression->range);
 				releaseNeighborhoodExpression(expression->forBody);
@@ -197,6 +213,10 @@ void releaseNeighborhoodExpression(NeighborhoodExpression * expression) {
 			case NEIGHBORHOOD_IF_ELSE:
 				releaseArithmeticExpression(expression->ifElseCondition);
 				releaseNeighborhoodExpression(expression->ifElseBody);
+				break;
+			case NEIGHBORHOOD_ASSIGNMENT:
+				releaseArithmeticExpression(expression->assignment);
+				free(expression->variable);
 				break;
 			case ADD_CELL_EXP:
 				releaseCellList(expression->toAddList);
@@ -213,10 +233,6 @@ void releaseTransitionExpression(TransitionExpression * expression) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (expression != NULL) {
 		switch (expression->type) {
-			case TRANSITION_BLOCK:
-				releaseTransitionExpression(expression->leftExpression);
-				releaseTransitionExpression(expression->rightExpression);
-				break;
 			case TRANSITION_FOR_LOOP:
 				releaseRange(expression->range);
 				releaseTransitionExpression(expression->forBody);
@@ -228,6 +244,10 @@ void releaseTransitionExpression(TransitionExpression * expression) {
 			case TRANSITION_IF_ELSE:
 				releaseArithmeticExpression(expression->ifElseCondition);
 				releaseTransitionExpression(expression->ifElseBody);
+				break;
+			case TRANSITION_ASSIGNMENT:
+				releaseArithmeticExpression(expression->assignment);
+				free(expression->variable);
 				break;
 			case RETURN_STRING:
 				free(expression->returnString);

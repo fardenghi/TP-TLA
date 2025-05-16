@@ -66,7 +66,7 @@ Program * NeighborhoodProgramSemanticAction(CompilerState * compilerState, Confi
 	Program * program = calloc(1, sizeof(Program));
 	program->configuration = configuration;
 	program->neighborhoodExpression = neigborhoodExpression;
-	program->type = NEIGHBORHOOD;
+	program->type = NEIGHBORHOOD_PROGRAM;
 	compilerStateCheck(compilerState, program);
 	return program;
 }
@@ -181,6 +181,7 @@ Constant * IntegerConstantSemanticAction(const int value) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Constant * constant = calloc(1, sizeof(Constant));
 	constant->value = value;
+	constant->type = INTEGER_C;
 	return constant;
 }
 
@@ -190,6 +191,7 @@ Constant * StringConstantSemanticAction(const char * value) {
 	char * string = malloc(strlen(value) + 1);
 	strcpy(string, value);
 	constant->string = string;
+	constant->type = STRING_C;
 	return constant;
 }
 
@@ -202,10 +204,10 @@ ArithmeticExpression * BinaryArithmeticExpressionSemanticAction(ArithmeticExpres
 	return expression;
 }
 
-ArithmeticExpression * UnaryArithmeticExpressionSemanticAction(ArithmeticExpression * expression, ArithmeticExpressionType type) {
+ArithmeticExpression * UnaryArithmeticExpressionSemanticAction(ArithmeticExpression * innerExpression, ArithmeticExpressionType type) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	ArithmeticExpression * expression = calloc(1, sizeof(ArithmeticExpression));
-	expression->expression = expression;
+	expression->expression = innerExpression;
 	expression->type = type;
 	return expression;
 }
@@ -221,7 +223,7 @@ ArithmeticExpression * CellListArithmeticExpressionSemanticAction(CellList * cel
 ArithmeticExpression * ConstantArithmeticExpressionSemanticAction(Constant * constant) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	ArithmeticExpression * expression = calloc(1, sizeof(ArithmeticExpression));
-	expression->cellList = constant;
+	expression->constant = constant;
 	expression->type = CONSTANT;
 	return expression;
 }
@@ -242,18 +244,18 @@ IntArray * IntArraySemanticAction(const int value, IntArray * arr) {
 
 StringArray * StringArraySemanticAction(const char * value, StringArray * arr) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
-	IntArray * intArray = calloc(1, sizeof(StringArray));
+	StringArray * stringArray = calloc(1, sizeof(StringArray));
 	char * string = malloc(strlen(value) + 1);
 	strcpy(string, value);
 	if (arr == NULL) {
-		intArray->isLast = 1;
-		intArray->lastValue = string;
+		stringArray->isLast = 1;
+		stringArray->lastValue = string;
 	} else {
-		intArray->isLast = 0;
-		intArray->value = string;
-		intArray->next = arr;
+		stringArray->isLast = 0;
+		stringArray->value = string;
+		stringArray->next = arr;
 	}
-	return intArray;
+	return stringArray;
 }
 
 Range * RangeSemanticAction(IntArray * array, Constant * start, Constant * end) {

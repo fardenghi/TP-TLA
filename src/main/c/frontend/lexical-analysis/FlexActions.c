@@ -78,6 +78,13 @@ Token IntegerLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext)
 	return INTEGER;
 }
 
+Token StringLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	lexicalAnalyzerContext->semanticValue->string = malloc(strlen(lexicalAnalyzerContext->lexeme) + 1);
+	strcpy(lexicalAnalyzerContext->semanticValue->string, lexicalAnalyzerContext->lexeme);
+	return STRING;
+}
+
 Token FrontierLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext, FrontierEnum frontier) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
 	lexicalAnalyzerContext->semanticValue->frontier = frontier;
@@ -117,11 +124,11 @@ Token ControlFlowLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, To
 	return token;
 }
 
-Token DirectionLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token)
+Token DirectionLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, DisplacementType type)
 {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	lexicalAnalyzerContext->semanticValue->token = token;
-	return token;
+	lexicalAnalyzerContext->semanticValue->displacement = type;
+	return DISPLACEMENT_TYPE;
 }
 
 Token ReturnOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext)
