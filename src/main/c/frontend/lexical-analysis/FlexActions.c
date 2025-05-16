@@ -66,6 +66,24 @@ Token IntegerLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext) {
 	return INTEGER;
 }
 
+Token FrontierLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext, FrontierEnum frontier) {
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	lexicalAnalyzerContext->semanticValue->frontier = frontier;
+	return FRONTIER_ENUM;
+}
+
+Token NeighborhoodLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext, NeighborhoodEnum neighborhood) {
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	lexicalAnalyzerContext->semanticValue->neighborhood = neighborhood;
+	return NEIGHBORHOOD_ENUM;
+}
+
+Token EvolutionLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext, EvolutionEnum evolution) {
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	lexicalAnalyzerContext->semanticValue->evolution = evolution;
+	return EVOLUTION_ENUM;
+}
+
 Token ParenthesisLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext, Token token) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
 	lexicalAnalyzerContext->semanticValue->token = token;

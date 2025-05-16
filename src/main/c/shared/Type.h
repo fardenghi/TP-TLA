@@ -8,4 +8,21 @@ typedef enum {
 
 typedef int Token;
 
+typedef enum FrontierEnum {
+	PERIODIC = 0,
+	OPEN = 1,
+	MIRROR = 2
+} FrontierEnum;
+
+typedef enum {
+	CUSTOM = 0,
+	MOORE = 1,
+	VON_NEUMANN = 2,
+	K_NEIGHBORHOOD = 3
+} NeighborhoodEnum;
+
+typedef enum {
+	CONWAY = 0
+} EvolutionEnum;
+
 #endif

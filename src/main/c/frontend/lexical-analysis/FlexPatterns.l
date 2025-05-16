@@ -43,6 +43,11 @@
 ";"                                 { return KeyWordLexemeAction(createLexicalAnalyzerContext(), SEMICOLON); }
 "{"                                 { return KeyWordLexemeAction(createLexicalAnalyzerContext(), OPEN_BRACE); }
 "}"                                 { return KeyWordLexemeAction(createLexicalAnalyzerContext(), CLOSE_BRACE); }
+"Periodic"                          { return FrontierLexemeAction(createLexicalAnalyzerContext(), PERIODIC); }
+"Mirror"                            { return FrontierLexemeAction(createLexicalAnalyzerContext(), MIRROR); }
+"MOORE"                             { return NeighborhoodLexemeAction(createLexicalAnalyzerContext(), MOORE); }
+"CONWAY"                            { return EvolutionLexemeAction(createLexicalAnalyzerContext(), CONWAY); }
+
 
 "-"									{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), SUB); }
 "*"									{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), MUL); }
