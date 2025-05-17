@@ -51,21 +51,21 @@ Program * DefaultProgramSemanticAction(CompilerState * compilerState, Configurat
 	return program;
 }
 
-Program * TransitionProgramSemanticAction(CompilerState * compilerState, Configuration * configuration, TransitionExpression * transitionExpression) {
+Program * TransitionProgramSemanticAction(CompilerState * compilerState, Configuration * configuration, TransitionSequence * transitionSequence) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Program * program = calloc(1, sizeof(Program));
 	program->configuration = configuration;
-	program->transitionExpression = transitionExpression;
+	program->transitionSequence = transitionSequence;
 	program->type = TRANSITION;
 	compilerStateCheck(compilerState, program);
 	return program;
 }
 
-Program * NeighborhoodProgramSemanticAction(CompilerState * compilerState, Configuration * configuration, NeighborhoodExpression * neigborhoodExpression) {
+Program * NeighborhoodProgramSemanticAction(CompilerState * compilerState, Configuration * configuration, NeighborhoodSequence * neigborhoodSequence) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Program * program = calloc(1, sizeof(Program));
 	program->configuration = configuration;
-	program->neighborhoodExpression = neigborhoodExpression;
+	program->neighborhoodSequence = neigborhoodSequence;
 	program->type = NEIGHBORHOOD_PROGRAM;
 	compilerStateCheck(compilerState, program);
 	return program;
@@ -83,6 +83,128 @@ Configuration * ConfigurationSemanticAction(Option * option, Configuration * con
 		configuration->next = configuration;
 	}
 	return configuration;
+}
+
+TransitionSequence * TransitionUnarySequenceSemanticAction(TransitionExpression * expression) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	TransitionSequence * rta = calloc(1, sizeof(TransitionSequence));
+	rta->binary = false;
+	rta->expression = expression;
+	return rta;
+}
+TransitionSequence * TransitionBinarySequenceSemanticAction(TransitionSequence * sequence, TransitionExpression * expression) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	TransitionSequence * rta = calloc(1, sizeof(TransitionSequence));
+	rta->binary = true;
+	rta->sequence = sequence;
+	rta->rightExpression = expression;
+	return rta;
+}
+
+TransitionExpression * TransitionAssignmentExpressionSemanticAction(char * variable, ArithmeticExpression * arithmeticExpression) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	TransitionExpression * expression = calloc(1, sizeof(TransitionExpression));
+	expression->type = TRANSITION_ASSIGNMENT;
+	expression->variable = variable;
+	expression->assignment = arithmeticExpression;
+	return expression;
+}
+TransitionExpression * TransitionForLoopExpressionSemanticAction(char * variable, Range * range, TransitionExpression * transitionExpression) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	TransitionExpression * expression = calloc(1, sizeof(TransitionExpression));
+	expression->type = TRANSITION_FOR_LOOP;
+	expression->forVariable = variable;
+	expression->range = range;
+	expression->forBody = transitionExpression;
+	return expression;
+}
+TransitionExpression * TransitionIfExpressionSemanticAction(ArithmeticExpression * arithmeticExpression, TransitionExpression * transitionExpression) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	TransitionExpression * expression = calloc(1, sizeof(TransitionExpression));
+	expression->type = TRANSITION_IF;
+	expression->ifCondition = arithmeticExpression;
+	expression->ifBody = transitionExpression;
+	return expression;
+}
+TransitionExpression * TransitionIfElseExpressionSemanticAction(ArithmeticExpression * arithmeticExpression, TransitionExpression * ifTransitionExpression, TransitionExpression * elseTransitionExpression) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	TransitionExpression * expression = calloc(1, sizeof(TransitionExpression));
+	expression->type = TRANSITION_IF_ELSE;
+	expression->ifElseCondition = arithmeticExpression;
+	expression->ifElseIfBody = ifTransitionExpression;
+	expression->ifElseElseBody = elseTransitionExpression;
+	return expression;
+}
+TransitionExpression * TransitionReturnExpressionSemanticAction(ArithmeticExpression * arithmeticExpression) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	TransitionExpression * expression = calloc(1, sizeof(TransitionExpression));
+	expression->type = RETURN_VALUE;
+	expression->returnValue = arithmeticExpression;
+	return expression;
+}
+
+NeighborhoodSequence * NeighborhoodUnarySequenceSemanticAction(NeighborhoodExpression * expression) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	NeighborhoodSequence * rta = calloc(1, sizeof(NeighborhoodSequence));
+	rta->binary = false;
+	rta->expression = expression;
+	return rta;
+}
+NeighborhoodSequence * NeighborhoodBinarySequenceSemanticAction(NeighborhoodSequence * sequence, NeighborhoodExpression * expression) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	NeighborhoodSequence * rta = calloc(1, sizeof(NeighborhoodSequence));
+	rta->binary = true;
+	rta->sequence = sequence;
+	rta->rightExpression = expression;
+	return rta;
+}
+
+NeighborhoodExpression * NeighborhoodAssignmentExpressionSemanticAction(char * variable, ArithmeticExpression * arithmeticExpression) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	NeighborhoodExpression * expression = calloc(1, sizeof(NeighborhoodExpression));
+	expression->type = NEIGHBORHOOD_ASSIGNMENT;
+	expression->variable = variable;
+	expression->assignment = arithmeticExpression;
+	return expression;
+}
+NeighborhoodExpression * NeighborhoodForLoopExpressionSemanticAction(char * variable, Range * range, NeighborhoodExpression * neighborhoodExpression) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	NeighborhoodExpression * expression = calloc(1, sizeof(NeighborhoodExpression));
+	expression->type = NEIGHBORHOOD_FOR_LOOP;
+	expression->forVariable = variable;
+	expression->range = range;
+	expression->forBody = neighborhoodExpression;
+	return expression;
+}
+NeighborhoodExpression * NeighborhoodIfExpressionSemanticAction(ArithmeticExpression * arithmeticExpression, NeighborhoodExpression * neighborhoodExpression) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	NeighborhoodExpression * expression = calloc(1, sizeof(NeighborhoodExpression));
+	expression->type = NEIGHBORHOOD_IF;
+	expression->ifCondition = arithmeticExpression;
+	expression->ifBody = neighborhoodExpression;
+	return expression;
+}
+NeighborhoodExpression * NeighborhoodIfElseExpressionSemanticAction(ArithmeticExpression * arithmeticExpression, NeighborhoodExpression * ifNeighborhoodExpression, NeighborhoodExpression * elseNeighborhoodExpression) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	NeighborhoodExpression * expression = calloc(1, sizeof(NeighborhoodExpression));
+	expression->type = NEIGHBORHOOD_IF_ELSE;
+	expression->ifElseCondition = arithmeticExpression;
+	expression->ifElseIfBody = ifNeighborhoodExpression;
+	expression->ifElseElseBody = elseNeighborhoodExpression;
+	return expression;
+}
+NeighborhoodExpression * NeighborhoodCellExpressionSemanticAction(boolean add, CellList * cellList) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	NeighborhoodExpression * expression = calloc(1, sizeof(NeighborhoodExpression));
+	if (add) {
+		expression->type = ADD_CELL_EXP;
+		expression->toAddList = cellList;
+	} else {
+		expression->type = REMOVE_CELL_EXP;
+		expression->toRemoveList = cellList;
+	}
+	
+	return expression;
 }
 
 Option * IntValuedOptionSemanticAction(const int value, OptionType type) {
@@ -185,7 +307,7 @@ Constant * IntegerConstantSemanticAction(const int value) {
 	return constant;
 }
 
-Constant * StringConstantSemanticAction(const char * value) {
+Constant * StringConstantSemanticAction(char * value) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Constant * constant = calloc(1, sizeof(Constant));
 	char * string = malloc(strlen(value) + 1);
@@ -242,7 +364,7 @@ IntArray * IntArraySemanticAction(const int value, IntArray * arr) {
 	return intArray;
 }
 
-StringArray * StringArraySemanticAction(const char * value, StringArray * arr) {
+StringArray * StringArraySemanticAction(char * value, StringArray * arr) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	StringArray * stringArray = calloc(1, sizeof(StringArray));
 	char * string = malloc(strlen(value) + 1);

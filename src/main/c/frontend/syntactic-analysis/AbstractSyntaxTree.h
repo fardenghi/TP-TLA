@@ -88,13 +88,11 @@ enum ConstantType {
 };
 
 enum TransitionExpressionType {
-	TRANSITION_BLOCK,
 	TRANSITION_ASSIGNMENT,
 	TRANSITION_FOR_LOOP,
 	TRANSITION_IF,
 	TRANSITION_IF_ELSE,
-	RETURN_STRING,
-	RETURN_INT
+	RETURN_VALUE
 };
 
 enum NeighborhoodExpressionType {
@@ -122,8 +120,8 @@ struct Program {
 		struct {
 			Configuration * configuration;
 			union {
-				TransitionExpression * transitionExpression;
-				NeighborhoodExpression * neighborhoodExpression;
+				TransitionSequence * transitionSequence;
+				NeighborhoodSequence * neighborhoodSequence;
 			};
 		};
 	};
@@ -275,6 +273,7 @@ struct TransitionExpression {
 			char * variable;
 		};
 		struct {
+			char * forVariable;
 			Range * range;
 			TransitionExpression * forBody;
 		};
@@ -284,9 +283,9 @@ struct TransitionExpression {
 		};
 		struct {
 			ArithmeticExpression * ifElseCondition;
-			TransitionExpression * ifElseBody;
+			TransitionExpression * ifElseIfBody;
+			TransitionExpression * ifElseElseBody;
 		};
-		char * returnString;
 		ArithmeticExpression * returnValue;
 	};
 };
@@ -299,6 +298,7 @@ struct NeighborhoodExpression {
 			char * variable;
 		};
 		struct {
+			char * forVariable;
 			Range * range;
 			NeighborhoodExpression * forBody;
 		};
@@ -308,7 +308,8 @@ struct NeighborhoodExpression {
 		};
 		struct {
 			ArithmeticExpression * ifElseCondition;
-			NeighborhoodExpression * ifElseBody;
+			NeighborhoodExpression * ifElseIfBody;
+			NeighborhoodExpression * ifElseElseBody;
 		};
 		CellList * toAddList;
 		CellList * toRemoveList;
@@ -321,6 +322,8 @@ struct NeighborhoodExpression {
 void releaseConstant(Constant * constant);
 void releaseArithmeticExpression(ArithmeticExpression * expression);
 void releaseProgram(Program * program);
+void releaseTransitionSequence(TransitionSequence * transitionSequence);
+void releaseNeighborhoodSequence(NeighborhoodSequence * neighborhoodSequence);
 void releaseTransitionExpression(TransitionExpression * transitionExpression);
 void releaseNeighborhoodExpression(NeighborhoodExpression * neighborhoodExpression);
 void releaseOption(Option * option);

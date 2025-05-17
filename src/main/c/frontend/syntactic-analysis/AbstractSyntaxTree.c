@@ -60,11 +60,11 @@ void releaseProgram(Program * program) {
 				break;
 			case TRANSITION:
 				releaseConfiguration(program->configuration);
-				releaseTransitionExpression(program->transitionExpression);
+				releaseTransitionSequence(program->transitionSequence);
 				break;
 			case NEIGHBORHOOD_PROGRAM:
 				releaseConfiguration(program->configuration);
-				releaseNeighborhoodExpression(program->neighborhoodExpression);
+				releaseNeighborhoodSequence(program->neighborhoodSequence);
 				break;
 		}
 		free(program);
@@ -191,10 +191,10 @@ void releaseNeighborhoodSequence(NeighborhoodSequence * sequence) {
 void releaseTransitionSequence(TransitionSequence * sequence) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (sequence->binary) {
-		releaseNeighborhoodSequence(sequence->sequence);
-		releaseNeighborhoodExpression(sequence->rightExpression);
+		releaseTransitionSequence(sequence->sequence);
+		releaseTransitionExpression(sequence->rightExpression);
 	} else {
-		releaseNeighborhoodExpression(sequence->expression);
+		releaseTransitionExpression(sequence->expression);
 	}
 }
 
@@ -212,7 +212,8 @@ void releaseNeighborhoodExpression(NeighborhoodExpression * expression) {
 				break;
 			case NEIGHBORHOOD_IF_ELSE:
 				releaseArithmeticExpression(expression->ifElseCondition);
-				releaseNeighborhoodExpression(expression->ifElseBody);
+				releaseNeighborhoodExpression(expression->ifElseIfBody);
+				releaseNeighborhoodExpression(expression->ifElseElseBody);
 				break;
 			case NEIGHBORHOOD_ASSIGNMENT:
 				releaseArithmeticExpression(expression->assignment);
@@ -243,16 +244,14 @@ void releaseTransitionExpression(TransitionExpression * expression) {
 				break;
 			case TRANSITION_IF_ELSE:
 				releaseArithmeticExpression(expression->ifElseCondition);
-				releaseTransitionExpression(expression->ifElseBody);
+				releaseTransitionExpression(expression->ifElseIfBody);
+				releaseTransitionExpression(expression->ifElseElseBody);
 				break;
 			case TRANSITION_ASSIGNMENT:
 				releaseArithmeticExpression(expression->assignment);
 				free(expression->variable);
 				break;
-			case RETURN_STRING:
-				free(expression->returnString);
-				break;
-			case RETURN_INT:
+			case RETURN_VALUE:
 				releaseArithmeticExpression(expression->returnValue);
 				break;
 		}
