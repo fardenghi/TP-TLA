@@ -78,6 +78,13 @@ Token IntegerLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext)
 	return INTEGER;
 }
 
+Token ColorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext)
+{
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	lexicalAnalyzerContext->semanticValue->integer = (int)strtol(lexicalAnalyzerContext->lexeme + 1, NULL, 16);
+	return INTEGER;
+}
+
 Token StringLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
 	lexicalAnalyzerContext->semanticValue->string = malloc(strlen(lexicalAnalyzerContext->lexeme) + 1);

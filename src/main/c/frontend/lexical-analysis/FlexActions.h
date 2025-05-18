@@ -30,6 +30,8 @@ Token IntegerLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
 Token ParenthesisLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token);
 
 Token IntegerLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+Token ColorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+
 Token StringLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
 
 Token FrontierLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext, FrontierEnum frontier);

@@ -23,6 +23,8 @@
  * @see https://westes.github.io/flex/manual/Patterns.html
  */
 
+HEX_DIGIT  [0-9a-fA-F]
+
 %%
 
 "/*"								{ BEGIN(MULTILINE_COMMENT); BeginMultilineCommentLexemeAction(createLexicalAnalyzerContext()); }
@@ -58,7 +60,7 @@
 "CONWAY"                            { return EvolutionLexemeAction(createLexicalAnalyzerContext(), CONWAY); }
 
 "-"[[:digit:]]+                     { return IntegerLexemeAction(createLexicalAnalyzerContext()); }
-
+"#"{HEX_DIGIT}{6}                   { return ColorLexemeAction(createLexicalAnalyzerContext()); }
 
 "if"                                { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), IF); }
 "all"                               { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), ALL_OPERAND); }
