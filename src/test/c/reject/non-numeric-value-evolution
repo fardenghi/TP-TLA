@@ -1,0 +1,7 @@
+configuration:
+   Height: 100;
+   Width: 100;
+   States: {on, off};
+   Colors: {1, 2};
+   Neighborhood: MOORE;
+   Evolution: a,b / c;

@@ -1,0 +1,8 @@
+configuration : Height : 100;
+Width : 100;
+States : {1, 0};
+Colors : {rojo, azul};
+Neighborhood : CUSTOM;
+Evolution : 3 / 2;
+
+neighborhood:

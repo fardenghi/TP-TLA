@@ -1,0 +1,12 @@
+configuration : Height : 100;
+Width : 100;
+Frontier : Periodic;
+States : {a, b};
+Colors : {1, 2};
+Neighborhood : CUSTOM;
+Evolution : 3, 2 / 1;
+
+neighborhood:
+   for i in [-2,2] do
+
+   end

@@ -1,0 +1,12 @@
+configuration:
+   Height: 10;
+   Width: 10;
+   States: {alive, dead};
+   Colors: {white, black};
+
+transition:
+   if cell(0,1) == infected then
+      ->dead;
+   else
+      ->alive;
+   end
