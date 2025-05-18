@@ -33,6 +33,7 @@
 	Option * option;
 	IntArray * int_array;
 	StringArray * string_array;
+	ConstantArray * constant_array;
 	Cell * cell;
 	CellList * cell_list;
 	Range * range;
@@ -65,6 +66,8 @@
 
 %token <token> OPEN_PARENTHESIS
 %token <token> CLOSE_PARENTHESIS
+%token <token> ASSIGNMENT
+
 
 	/*arithmetic*/
 %token <token> ADD
@@ -138,6 +141,7 @@
 %type <evolution_t> evolution
 %type <int_array> int_array
 %type <string_array> string_array
+%type <constant_array> constant_array
 %type <cell> cell
 %type <cell_list> cell_list
 %type <range> range
@@ -163,8 +167,8 @@
 
 // IMPORTANT: To use λ in the following grammar, use the %empty symbol.
 
-program: CONFIGURATION COLON config[options] TRANSITION_FUNCTION transition_sequence[exp]	{ $$ = TransitionProgramSemanticAction(currentCompilerState(), $options, $exp); }
-	| CONFIGURATION COLON config[options] NEIGHBORHOOD_FUNCTION neighborhood_sequence[exp]	{ $$ = NeighborhoodProgramSemanticAction(currentCompilerState(), $options, $exp); }
+program: CONFIGURATION COLON config[options] TRANSITION_FUNCTION COLON transition_sequence[exp]	{ $$ = TransitionProgramSemanticAction(currentCompilerState(), $options, $exp); }
+	| CONFIGURATION COLON config[options] NEIGHBORHOOD_FUNCTION COLON neighborhood_sequence[exp]	{ $$ = NeighborhoodProgramSemanticAction(currentCompilerState(), $options, $exp); }
 	| CONFIGURATION COLON config[options]														{ $$ = DefaultProgramSemanticAction(currentCompilerState(), $options); }
 	;
 
@@ -192,27 +196,31 @@ string_array: STRING																	{ $$ = StringArraySemanticAction($1, NULL);
 	| STRING COMMA string_array[arr]													{ $$ = StringArraySemanticAction($1, $arr); }
 	;
 
-transition_sequence: transition_expression												{ $$ = TransitionUnarySequenceSemanticAction($1); }
-	| transition_sequence transition_expression											{ $$ = TransitionBinarySequenceSemanticAction($1, $2); }
+constant_array: constant																{ $$ = ConstantArraySemanticAction($1, NULL); }
+	| constant COMMA constant_array[arr]												{ $$ = ConstantArraySemanticAction($1, $arr); }
 	;
 
-transition_expression: STRING EQ arithmetic_expression SEMICOLON						{ $$ = TransitionAssignmentExpressionSemanticAction($1, $3); }
-	| FOR STRING IN range DO transition_expression END									{ $$ = TransitionForLoopExpressionSemanticAction($2, $4, $6); }
-	| IF arithmetic_expression THEN transition_expression END							{ $$ = TransitionIfExpressionSemanticAction($2, $4); }
-	| IF arithmetic_expression THEN transition_expression ELSE transition_expression END { $$ = TransitionIfElseExpressionSemanticAction($2, $4, $6); }
+transition_sequence: transition_expression	transition_sequence 						{ $$ = TransitionBinarySequenceSemanticAction($2, $1); }
+	| %empty																			{ $$ = NULL; }
+	;
+
+transition_expression: STRING ASSIGNMENT arithmetic_expression SEMICOLON						{ $$ = TransitionAssignmentExpressionSemanticAction($1, $3); }
+	| FOR STRING IN range DO transition_sequence END									{ $$ = TransitionForLoopExpressionSemanticAction($2, $4, $6); }
+	| IF arithmetic_expression THEN transition_sequence END								{ $$ = TransitionIfExpressionSemanticAction($2, $4); }
+	| IF arithmetic_expression THEN transition_sequence ELSE transition_sequence END 	{ $$ = TransitionIfElseExpressionSemanticAction($2, $4, $6); }
 	| RETURN arithmetic_expression														{ $$ = TransitionReturnExpressionSemanticAction($2); }
 	;
 
-neighborhood_sequence: neighborhood_expression											{ $$ = NeighborhoodUnarySequenceSemanticAction($1); }
-	| neighborhood_sequence neighborhood_expression										{ $$ = NeighborhoodBinarySequenceSemanticAction($1, $2); }
+neighborhood_sequence: neighborhood_expression neighborhood_sequence					{ $$ = NeighborhoodBinarySequenceSemanticAction($2, $1); }
+	| %empty																			{ $$ = NULL; }
 	;
 
-neighborhood_expression: STRING EQ arithmetic_expression SEMICOLON						{ $$ = NeighborhoodAssignmentExpressionSemanticAction($1, $3); }
-	| FOR STRING IN range DO neighborhood_expression END								{ $$ = NeighborhoodForLoopExpressionSemanticAction($2, $4, $6); }
-	| IF arithmetic_expression THEN neighborhood_expression END							{ $$ = NeighborhoodIfExpressionSemanticAction($2, $4); }
-	| IF arithmetic_expression THEN neighborhood_expression ELSE neighborhood_expression END { $$ = NeighborhoodIfElseExpressionSemanticAction($2, $4, $6); }
-	| ADD_CELL OPEN_PARENTHESIS cell_list CLOSE_PARENTHESIS								{ $$ = NeighborhoodCellExpressionSemanticAction(true, $3); }
-	| REMOVE_CELL OPEN_PARENTHESIS cell_list CLOSE_PARENTHESIS							{ $$ = NeighborhoodCellExpressionSemanticAction(false, $3); }
+neighborhood_expression: STRING ASSIGNMENT arithmetic_expression SEMICOLON						{ $$ = NeighborhoodAssignmentExpressionSemanticAction($1, $3); }
+	| FOR STRING IN range DO neighborhood_sequence END								{ $$ = NeighborhoodForLoopExpressionSemanticAction($2, $4, $6); }
+	| IF arithmetic_expression THEN neighborhood_sequence END							{ $$ = NeighborhoodIfExpressionSemanticAction($2, $4); }
+	| IF arithmetic_expression THEN neighborhood_sequence ELSE neighborhood_sequence END { $$ = NeighborhoodIfElseExpressionSemanticAction($2, $4, $6); }
+	| ADD_CELL OPEN_PARENTHESIS cell_list CLOSE_PARENTHESIS	SEMICOLON					{ $$ = NeighborhoodCellExpressionSemanticAction(true, $3); }
+	| REMOVE_CELL OPEN_PARENTHESIS cell_list CLOSE_PARENTHESIS	SEMICOLON				{ $$ = NeighborhoodCellExpressionSemanticAction(false, $3); }
 	;
 
 cell: OPEN_PARENTHESIS constant[x] COMMA constant[y] CLOSE_PARENTHESIS									{ $$ = DoubleCoordinateCellSemanticAction($x, $y); }
@@ -223,8 +231,8 @@ cell_list: cell																						{ $$ = CellListSemanticAction($1, NULL); }
 	| cell COMMA cell_list																			{ $$ = CellListSemanticAction($1, $3); }
 	;
 
-range: OPEN_BRACKET int_array[array] CLOSE_BRACKET													{ $$ = RangeSemanticAction($array, NULL, NULL); }
-	| OPEN_BRACKET constant[c1] SUB constant[c2] CLOSE_BRACKET										{ $$ = RangeSemanticAction(NULL, $c1, $c2); }
+range: OPEN_BRACE constant_array[array] CLOSE_BRACE														{ $$ = RangeSemanticAction($array, NULL, NULL); }
+	| OPEN_BRACKET constant[c1] COMMA constant[c2] CLOSE_BRACKET										{ $$ = RangeSemanticAction(NULL, $c1, $c2); }
 	;
 
 arithmetic_expression: arithmetic_expression[left] ADD arithmetic_expression[right]					{ $$ = BinaryArithmeticExpressionSemanticAction($left, $right, ADDITION); }

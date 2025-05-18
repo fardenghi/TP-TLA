@@ -43,6 +43,7 @@ typedef struct CellList CellList;
 
 typedef struct IntArray IntArray;
 typedef struct StringArray StringArray;
+typedef struct ConstantArray ConstantArray;
 typedef struct Range Range;
 
 /**
@@ -207,6 +208,17 @@ struct StringArray {
 	};
 };
 
+struct ConstantArray {
+	boolean isLast;
+	union {
+		Constant * lastValue;
+		struct {
+			Constant * value;
+			ConstantArray * next;
+		};
+	};
+};
+
 struct Cell {
 	boolean isSingleCoordenate;
 	union {
@@ -235,7 +247,7 @@ struct CellList {
 struct Range {
 	RangeType type;
 	union {
-		IntArray * array;
+		ConstantArray * array;
 		struct {
 			Constant * start;
 			Constant * end;
@@ -275,16 +287,16 @@ struct TransitionExpression {
 		struct {
 			char * forVariable;
 			Range * range;
-			TransitionExpression * forBody;
+			TransitionSequence * forBody;
 		};
 		struct {
 			ArithmeticExpression * ifCondition;
-			TransitionExpression * ifBody;
+			TransitionSequence * ifBody;
 		};
 		struct {
 			ArithmeticExpression * ifElseCondition;
-			TransitionExpression * ifElseIfBody;
-			TransitionExpression * ifElseElseBody;
+			TransitionSequence * ifElseIfBody;
+			TransitionSequence * ifElseElseBody;
 		};
 		ArithmeticExpression * returnValue;
 	};
@@ -300,16 +312,16 @@ struct NeighborhoodExpression {
 		struct {
 			char * forVariable;
 			Range * range;
-			NeighborhoodExpression * forBody;
+			NeighborhoodSequence * forBody;
 		};
 		struct {
 			ArithmeticExpression * ifCondition;
-			NeighborhoodExpression * ifBody;
+			NeighborhoodSequence * ifBody;
 		};
 		struct {
 			ArithmeticExpression * ifElseCondition;
-			NeighborhoodExpression * ifElseIfBody;
-			NeighborhoodExpression * ifElseElseBody;
+			NeighborhoodSequence * ifElseIfBody;
+			NeighborhoodSequence * ifElseElseBody;
 		};
 		CellList * toAddList;
 		CellList * toRemoveList;
@@ -331,6 +343,7 @@ void releaseEvolution(Evolution * evolution);
 void releaseConfiguration(Configuration * configuration);
 void releaseIntArray(IntArray * array);
 void releaseStringArray(StringArray * array);
+void releaseConstantArray(ConstantArray * array);
 void releaseCell(Cell * cell);
 void releaseCellList(CellList * list);
 void releaseRange(Range * range);

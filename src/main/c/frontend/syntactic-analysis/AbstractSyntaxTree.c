@@ -136,6 +136,19 @@ void releaseStringArray(StringArray * array) {
 	}
 }
 
+void releaseConstantArray(ConstantArray * array) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (array != NULL) {
+		if (array->isLast) {
+			releaseConstant(array->lastValue);
+		} else {
+			releaseConstant(array->value);
+			releaseConstantArray(array->next);
+		}
+		free(array);
+	}
+}
+
 void releaseCell(Cell * cell) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (cell != NULL) {
@@ -167,7 +180,7 @@ void releaseRange(Range * range) {
 	if (range != NULL) {
 		switch (range->type) {
 			case ARRAY:
-				releaseIntArray(range->array);
+				releaseConstantArray(range->array);
 				break;
 			case INTERVAL:
 				releaseConstant(range->start);
@@ -204,16 +217,16 @@ void releaseNeighborhoodExpression(NeighborhoodExpression * expression) {
 		switch (expression->type) {
 			case NEIGHBORHOOD_FOR_LOOP:
 				releaseRange(expression->range);
-				releaseNeighborhoodExpression(expression->forBody);
+				releaseNeighborhoodSequence(expression->forBody);
 				break;
 			case NEIGHBORHOOD_IF:
 				releaseArithmeticExpression(expression->ifCondition);
-				releaseNeighborhoodExpression(expression->ifBody);
+				releaseNeighborhoodSequence(expression->ifBody);
 				break;
 			case NEIGHBORHOOD_IF_ELSE:
 				releaseArithmeticExpression(expression->ifElseCondition);
-				releaseNeighborhoodExpression(expression->ifElseIfBody);
-				releaseNeighborhoodExpression(expression->ifElseElseBody);
+				releaseNeighborhoodSequence(expression->ifElseIfBody);
+				releaseNeighborhoodSequence(expression->ifElseElseBody);
 				break;
 			case NEIGHBORHOOD_ASSIGNMENT:
 				releaseArithmeticExpression(expression->assignment);
@@ -236,16 +249,16 @@ void releaseTransitionExpression(TransitionExpression * expression) {
 		switch (expression->type) {
 			case TRANSITION_FOR_LOOP:
 				releaseRange(expression->range);
-				releaseTransitionExpression(expression->forBody);
+				releaseTransitionSequence(expression->forBody);
 				break;
 			case TRANSITION_IF:
 				releaseArithmeticExpression(expression->ifCondition);
-				releaseTransitionExpression(expression->ifBody);
+				releaseTransitionSequence(expression->ifBody);
 				break;
 			case TRANSITION_IF_ELSE:
 				releaseArithmeticExpression(expression->ifElseCondition);
-				releaseTransitionExpression(expression->ifElseIfBody);
-				releaseTransitionExpression(expression->ifElseElseBody);
+				releaseTransitionSequence(expression->ifElseIfBody);
+				releaseTransitionSequence(expression->ifElseElseBody);
 				break;
 			case TRANSITION_ASSIGNMENT:
 				releaseArithmeticExpression(expression->assignment);

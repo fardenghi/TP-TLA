@@ -109,7 +109,7 @@ TransitionExpression * TransitionAssignmentExpressionSemanticAction(char * varia
 	expression->assignment = arithmeticExpression;
 	return expression;
 }
-TransitionExpression * TransitionForLoopExpressionSemanticAction(char * variable, Range * range, TransitionExpression * transitionExpression) {
+TransitionExpression * TransitionForLoopExpressionSemanticAction(char * variable, Range * range, TransitionSequence * transitionExpression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	TransitionExpression * expression = calloc(1, sizeof(TransitionExpression));
 	expression->type = TRANSITION_FOR_LOOP;
@@ -118,7 +118,7 @@ TransitionExpression * TransitionForLoopExpressionSemanticAction(char * variable
 	expression->forBody = transitionExpression;
 	return expression;
 }
-TransitionExpression * TransitionIfExpressionSemanticAction(ArithmeticExpression * arithmeticExpression, TransitionExpression * transitionExpression) {
+TransitionExpression * TransitionIfExpressionSemanticAction(ArithmeticExpression * arithmeticExpression, TransitionSequence * transitionExpression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	TransitionExpression * expression = calloc(1, sizeof(TransitionExpression));
 	expression->type = TRANSITION_IF;
@@ -126,7 +126,7 @@ TransitionExpression * TransitionIfExpressionSemanticAction(ArithmeticExpression
 	expression->ifBody = transitionExpression;
 	return expression;
 }
-TransitionExpression * TransitionIfElseExpressionSemanticAction(ArithmeticExpression * arithmeticExpression, TransitionExpression * ifTransitionExpression, TransitionExpression * elseTransitionExpression) {
+TransitionExpression * TransitionIfElseExpressionSemanticAction(ArithmeticExpression * arithmeticExpression, TransitionSequence * ifTransitionExpression, TransitionSequence * elseTransitionExpression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	TransitionExpression * expression = calloc(1, sizeof(TransitionExpression));
 	expression->type = TRANSITION_IF_ELSE;
@@ -167,7 +167,7 @@ NeighborhoodExpression * NeighborhoodAssignmentExpressionSemanticAction(char * v
 	expression->assignment = arithmeticExpression;
 	return expression;
 }
-NeighborhoodExpression * NeighborhoodForLoopExpressionSemanticAction(char * variable, Range * range, NeighborhoodExpression * neighborhoodExpression) {
+NeighborhoodExpression * NeighborhoodForLoopExpressionSemanticAction(char * variable, Range * range, NeighborhoodSequence * neighborhoodExpression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	NeighborhoodExpression * expression = calloc(1, sizeof(NeighborhoodExpression));
 	expression->type = NEIGHBORHOOD_FOR_LOOP;
@@ -176,7 +176,7 @@ NeighborhoodExpression * NeighborhoodForLoopExpressionSemanticAction(char * vari
 	expression->forBody = neighborhoodExpression;
 	return expression;
 }
-NeighborhoodExpression * NeighborhoodIfExpressionSemanticAction(ArithmeticExpression * arithmeticExpression, NeighborhoodExpression * neighborhoodExpression) {
+NeighborhoodExpression * NeighborhoodIfExpressionSemanticAction(ArithmeticExpression * arithmeticExpression, NeighborhoodSequence * neighborhoodExpression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	NeighborhoodExpression * expression = calloc(1, sizeof(NeighborhoodExpression));
 	expression->type = NEIGHBORHOOD_IF;
@@ -184,7 +184,7 @@ NeighborhoodExpression * NeighborhoodIfExpressionSemanticAction(ArithmeticExpres
 	expression->ifBody = neighborhoodExpression;
 	return expression;
 }
-NeighborhoodExpression * NeighborhoodIfElseExpressionSemanticAction(ArithmeticExpression * arithmeticExpression, NeighborhoodExpression * ifNeighborhoodExpression, NeighborhoodExpression * elseNeighborhoodExpression) {
+NeighborhoodExpression * NeighborhoodIfElseExpressionSemanticAction(ArithmeticExpression * arithmeticExpression, NeighborhoodSequence * ifNeighborhoodExpression, NeighborhoodSequence * elseNeighborhoodExpression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	NeighborhoodExpression * expression = calloc(1, sizeof(NeighborhoodExpression));
 	expression->type = NEIGHBORHOOD_IF_ELSE;
@@ -380,7 +380,21 @@ StringArray * StringArraySemanticAction(char * value, StringArray * arr) {
 	return stringArray;
 }
 
-Range * RangeSemanticAction(IntArray * array, Constant * start, Constant * end) {
+ConstantArray * ConstantArraySemanticAction(Constant * value, ConstantArray * arr) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	ConstantArray * constantArray = calloc(1, sizeof(ConstantArray));
+	if (arr == NULL) {
+		constantArray->isLast = 1;
+		constantArray->lastValue = value;
+	} else {
+		constantArray->isLast = 0;
+		constantArray->value = value;
+		constantArray->next = arr;
+	}
+	return constantArray;
+}
+
+Range * RangeSemanticAction(ConstantArray * array, Constant * start, Constant * end) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Range * range = calloc(1, sizeof(Range));
 	if (array == NULL) {
