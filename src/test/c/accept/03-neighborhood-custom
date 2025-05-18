@@ -8,7 +8,7 @@ configuration:
    Neighborhood: CUSTOM;
 
 neighborhood:
-    for i in [-3,3] do
+    for i in [0,3] do
       add((i,0));
       add((0,i));
     end

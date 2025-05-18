@@ -1,4 +1,5 @@
+configuration:
+	 Height: 100;
 /*
-	A multiline comment.
+	A multiline comment. Asi porque no aceptamos archivos vacios breo
 */
-0
