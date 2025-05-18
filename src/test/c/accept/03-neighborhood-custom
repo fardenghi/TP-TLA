@@ -4,11 +4,11 @@ configuration:
    Frontier: Mirror;
    States: {on, off};
    Colors: {1, 2};
-   Evolution: 10,9,8,7,6,5,4/6;
+   Evolution: -10,9,8,7,6,5,4/6;
    Neighborhood: CUSTOM;
 
 neighborhood:
-    for i in [0,3] do
+    for i in [-3,3] do
       add((i,0));
       add((0,i));
     end

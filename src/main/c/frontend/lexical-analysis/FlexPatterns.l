@@ -57,6 +57,7 @@
 "K_NEIGHBORHOOD"                    { return NeighborhoodLexemeAction(createLexicalAnalyzerContext(), K_NEIGHBORHOOD); }
 "CONWAY"                            { return EvolutionLexemeAction(createLexicalAnalyzerContext(), CONWAY); }
 
+"-"[[:digit:]]+                     { return IntegerLexemeAction(createLexicalAnalyzerContext()); }
 
 
 "if"                                { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), IF); }
