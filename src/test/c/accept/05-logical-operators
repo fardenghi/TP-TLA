@@ -1,0 +1,11 @@
+configuration:
+   Height: 75;
+   Width: 75;
+   Frontier: Open;
+   States: {a, b, c};
+   Colors: {0, 1, 2};
+
+transition:
+   if cell(1,0) == a && !(cell(-1,0) == b) || cell(0,1) == c then ->a;
+   else ->b;
+   end

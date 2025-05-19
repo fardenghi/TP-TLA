@@ -1,0 +1,12 @@
+configuration:
+   Height: 100;
+   Width: 100;
+   Frontier: Open;
+   States: {SANO, INFECTADO, RECUPERADO};
+   Colors: {0, 1, 2};
+
+transition:
+   if (cell(0,0)==SANO||cell(0,0)==RECUPERADO)&&(cell(1,0) == INFECTADO || cell(-1,0) == INFECTADO || cell(0,1) == INFECTADO || cell(0,-1) == INFECTADO) then ->INFECTADO;
+   else if (cell(0,0)==INFECTADO)&&(cell(1,0) == SANO || cell(1,0) == RECUPERADO ) && (cell(-1,0) == SANO || cell(-1,0) == RECUPERADO ) && (cell(0,1) == SANO || cell(0,1) == RECUPERADO ) && (cell(0,-1) == SANO || cell(0,-1) == RECUPERADO ) then -> RECUEPERADO;
+   else ->SANO;
+   end

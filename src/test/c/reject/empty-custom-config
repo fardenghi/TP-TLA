@@ -2,7 +2,7 @@ configuration : Height : 100;
 Width : 100;
 Frontier : Periodic;
 States : {a, b};
-Colors : {1, 2};
+Colors : { #00FF00, #FFA500};
 Neighborhood : CUSTOM;
 Evolution : 3, 2 / 1;
 

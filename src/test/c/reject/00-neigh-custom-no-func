@@ -3,6 +3,6 @@ configuration:
    Width:  100;
    Frontier: Mirror;
    States: {on, off};
-   Colors: {1, 2};
+   Colors: { #000000, #FFFFFF};
    Evolution: 10,9,8,7,6,5,4/6;
    Neighborhood: CUSTOM;

@@ -2,6 +2,6 @@ configuration:
    Height: 100;
    Width: 100;
    States: {on, off};
-   Colors: {1, 2};
+   Colors: { #FFA500, #00008B};
    Neighborhood: MOORE;
    Evolution: a,b / c;

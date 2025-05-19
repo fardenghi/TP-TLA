@@ -1,0 +1,10 @@
+configuration:
+Height: 10;
+Width: 10;
+States: {on, off};
+Colors: { #000000, #00FF00};
+Neighborhood: CUSTOM;
+
+neighborhood:
+add((1,0));
+end

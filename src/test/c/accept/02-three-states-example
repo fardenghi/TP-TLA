@@ -1,0 +1,12 @@
+configuration : 
+    Height : 50;
+    Width : 50;
+    Frontier : Open;
+    States : {a, b, c};
+    Colors : {1, 2, 3};
+
+transition : 
+    if (0, 1) == a then ->b;
+    else if (1, 0) == b then ->c;
+    else ->a;
+    end

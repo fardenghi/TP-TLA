@@ -1,0 +1,10 @@
+configuration:
+Height: 10;
+Width: 10;
+States: {on, off};
+Colors: { #008000, #FF0000};
+Neighborhood: CUSTOM;
+Evolution: CONWAY;
+
+neighborhood: 
+end

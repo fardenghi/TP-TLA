@@ -1,0 +1,9 @@
+configuration : Height : 75;
+Width : 200;
+Frontier : Mirror;
+States : {a, b};
+Colors : {0, 1, 2};
+
+transition : if cell (1, 0) == b then->b;
+else->a;
+end
