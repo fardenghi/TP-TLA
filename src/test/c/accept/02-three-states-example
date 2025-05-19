@@ -6,7 +6,12 @@ configuration :
     Colors : {1, 2, 3};
 
 transition : 
-    if (0, 1) == a then ->b;
-    else if (1, 0) == b then ->c;
-    else ->a;
+    if (0, 1) == a then
+        ->b
+    else 
+        if (1, 0) == b then 
+            ->c
+        else 
+            ->a
+        end
     end

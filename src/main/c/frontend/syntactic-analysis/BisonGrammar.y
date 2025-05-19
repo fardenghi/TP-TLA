@@ -258,6 +258,7 @@ arithmetic_expression: arithmetic_expression[left] ADD arithmetic_expression[rig
 
 constant: INTEGER																					{ $$ = IntegerConstantSemanticAction($1); }
 	| STRING																						{ $$ = StringConstantSemanticAction($1); }
+	| cell																				 			{ $$ = CellConstantSemanticAction($1); }
 	;
 
 
