@@ -3,6 +3,6 @@ configuration:
    Width: 50;
    Frontier: Mirror;
    States: {alive, dead};
-   Colors: {0, 1};
-   Neighborhood: VON_NEWMAN;
+   Colors: { #FFFFFF, #000000};
+   Neighborhood: VON_NEUMANN;
    Evolution: SEEDS;

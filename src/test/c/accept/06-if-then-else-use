@@ -2,8 +2,8 @@ configuration : Height : 75;
 Width : 200;
 Frontier : Mirror;
 States : {a, b};
-Colors : {0, 1, 2};
+Colors : { #FF00FF, #00008B, #FF0000};
 
-transition : if cell (1, 0) == b then->b;
+transition : if (1, 0) == b then->b;
 else->a;
 end
