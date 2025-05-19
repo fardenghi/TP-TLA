@@ -3,6 +3,6 @@ configuration :
     Width : 50;
     Frontier : Periodic;
     States : {alive, dead};
-    Colors : {1, 0};
+    Colors : { #FFFFFF, #000000};
     Neighborhood : MOORE;
     Evolution : 2, 3 / 3;

@@ -3,7 +3,7 @@ configuration :
     Width : 50;
     Frontier : Open;
     States : {a, b, c};
-    Colors : {1, 2, 3};
+    Colors : { #FF0000, #000000, #00FF00};
 
 transition : 
     if (0, 1) == a then
