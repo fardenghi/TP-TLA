@@ -6,7 +6,12 @@ configuration:
    Colors: { #800080, #008000, #800000};
 
 transition:
-   if ((0,0)==SANO||(0,0)==RECUPERADO)&&((1,0) == INFECTADO || (-1,0) == INFECTADO || (0,1) == INFECTADO || (0,-1) == INFECTADO) then ->INFECTADO;
-   else if ((0,0)==INFECTADO)&&((1,0) == SANO || (1,0) == RECUPERADO ) && ((-1,0) == SANO || (-1,0) == RECUPERADO ) && ((0,1) == SANO || (0,1) == RECUPERADO ) && ((0,-1) == SANO || (0,-1) == RECUPERADO ) then -> RECUEPERADO;
-   else ->SANO;
+   if ((0,0)==SANO||(0,0)==RECUPERADO)&&((1,0) == INFECTADO || (-1,0) == INFECTADO || (0,1) == INFECTADO || (0,-1) == INFECTADO) then 
+      ->INFECTADO
+   else 
+      if ((0,0)==INFECTADO)&&((1,0) == SANO || (1,0) == RECUPERADO ) && ((-1,0) == SANO || (-1,0) == RECUPERADO ) && ((0,1) == SANO || (0,1) == RECUPERADO ) && ((0,-1) == SANO || (0,-1) == RECUPERADO ) then 
+         -> RECUEPERADO
+      else 
+         ->SANO
+      end
    end

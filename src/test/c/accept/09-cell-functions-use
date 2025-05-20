@@ -6,8 +6,8 @@ States: {dead, alive};
 Colors: { #000000, #FFFFFF};
 
 transition:
-if all { cell.diag_asc(2), cell.diag_asc(-2), cell.diag_dec(-2), cell.diag_dec(2), cell.vert(2), cell.vert(-2), cell.hor(2), cell.hor(-2) } are alive then;
-->alive;
-else
-->dead;
-end
+    if all { diag_asc(2), diag_asc(-2), diag_dec(-2), diag_dec(2), vert(2), vert(-2), hor(2), hor(-2) } are alive then
+        ->alive
+    else
+        ->dead
+    end

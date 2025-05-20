@@ -6,7 +6,7 @@ configuration:
 
 transition:
    if (0,1) == infected then
-      ->dead;
+      ->dead
    else
-      ->alive;
+      ->alive
    end

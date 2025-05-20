@@ -3,5 +3,8 @@ Frontier : Myrror;
 States : {a, b};
 Colors : { #FF0000, #0000FF, #008000};
 
-transition : if (1, 0) = b then->b
-else->a;
+transition : 
+    if (1, 0) = b then
+        ->b
+    else
+        ->a
