@@ -1,0 +1,13 @@
+configuration:
+   Height: 75;
+   Width: 75;
+   Frontier: Open;
+   States: {a, b, c};
+   Colors: { #0000FF, #000000, #FF0000};
+
+transition:
+   if (1,0) == a && !((-1,0) == b) || (0,1) == c then 
+      ->a
+   else 
+      ->b
+   end
