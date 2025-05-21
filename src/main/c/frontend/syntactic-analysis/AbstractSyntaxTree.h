@@ -138,7 +138,10 @@ struct ArithmeticExpression {
 			ArithmeticExpression * leftExpression;
 			ArithmeticExpression * rightExpression;
 		};
-		CellList * cellList;
+		struct {
+			CellList * cellList;
+			int count;
+		};
 		Constant * constant;
 	};
 };

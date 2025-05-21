@@ -58,7 +58,7 @@ CellList * CellListSemanticAction(Cell * cell, CellList * list);
 
 ArithmeticExpression * BinaryArithmeticExpressionSemanticAction(ArithmeticExpression * leftExpression, ArithmeticExpression * rightExpression, ArithmeticExpressionType type);
 ArithmeticExpression * UnaryArithmeticExpressionSemanticAction(ArithmeticExpression * expression, ArithmeticExpressionType type);
-ArithmeticExpression * CellListArithmeticExpressionSemanticAction(CellList * cellList, ArithmeticExpressionType type);
+ArithmeticExpression * CellListArithmeticExpressionSemanticAction(CellList * cellList, ArithmeticExpressionType type, int count);
 ArithmeticExpression * ConstantArithmeticExpressionSemanticAction(Constant * cellList);
 
 Constant * IntegerConstantSemanticAction(const int value);
