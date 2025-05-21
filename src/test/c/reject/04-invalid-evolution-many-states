@@ -1,0 +1,7 @@
+configuration:
+Height: 10;
+Width: 10;
+States: {a, b, c};
+Colors: { #800080, #FFA500, #FFFFFF};
+Neighborhood: MOORE;
+Evolution: CONWAY;

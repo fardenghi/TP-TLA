@@ -1,0 +1,6 @@
+configuration : Height : 10;
+Width : 10;
+States : {dead, alive};
+Colors : { #FFFFFF, #FFA500};
+Neighborhood : VON_NEUMANN;
+Evolution : 5 / 10;      

@@ -1,0 +1,13 @@
+configuration:
+Height: 100;
+Width: 100;
+Frontier: Open;
+States: {dead, alive};
+Colors: { #000000, #FFFFFF};
+
+transition:
+    if at_least 4 { diag_asc(2), diag_asc(-2), diag_dec(-2), diag_dec(2), vert(2), vert(-2), hor(2), hor(-2) } are alive then
+        ->alive
+    else
+        ->dead
+    end
