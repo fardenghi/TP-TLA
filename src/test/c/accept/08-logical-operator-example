@@ -1,0 +1,13 @@
+configuration:
+   Height: 35;
+   Width: 45;
+   Frontier: Open;
+   States: {x, y};
+   Colors: { #000000, #FFFFFF};
+
+transition:
+   if ((1,0) != x && (0,-1) == y) || (0,1) >= (0,-1) then 
+      ->x
+   else 
+      ->y
+   end
