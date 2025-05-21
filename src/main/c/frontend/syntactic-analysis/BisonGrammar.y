@@ -49,12 +49,24 @@
  *
  * @see https://www.gnu.org/software/bison/manual/html_node/Destructor-Decl.html
  */
-/*
-%destructor { releaseConstant($$); } <constant>
-%destructor { releaseExpression($$); } <expression>
-%destructor { releaseFactor($$); } <factor>
+
 %destructor { releaseProgram($$); } <program>
-*/
+%destructor { releaseTransitionSequence($$); } <transition_sequence>
+%destructor { releaseNeighborhoodSequence($$); } <neighborhood_sequence>
+%destructor { releaseTransitionExpression($$); } <transition_expression>
+%destructor { releaseNeighborhoodExpression($$); } <neighborhood_expression>
+%destructor { releaseArithmeticExpression($$); } <arithmetic_expression>
+%destructor { releaseConstant($$); } <constant>
+%destructor { releaseConfiguration($$); } <config>
+%destructor { releaseOption($$); } <option>
+%destructor { releaseEvolution($$); } <evolution_t>
+%destructor { releaseIntArray($$); } <int_array>
+%destructor { releaseStringArray($$); } <string_array>
+%destructor { releaseConstantArray($$); } <constant_array>
+%destructor { releaseCell($$); } <cell>
+%destructor { releaseCellList($$); } <cell_list>
+%destructor { releaseRange($$); } <range>
+
 
 /** Terminals. */
 %token <integer> INTEGER
