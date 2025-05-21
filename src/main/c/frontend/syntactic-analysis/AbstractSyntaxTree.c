@@ -108,7 +108,9 @@ void releaseOption(Option * option) {
 void releaseEvolution(Evolution * evolution) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (evolution != NULL) {
-		releaseIntArray(evolution->array);
+		if (!evolution->isDefault) {
+			releaseIntArray(evolution->array);
+		}
 		free(evolution);
 	}
 }
@@ -193,21 +195,27 @@ void releaseRange(Range * range) {
 
 void releaseNeighborhoodSequence(NeighborhoodSequence * sequence) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
-	if (sequence->binary) {
-		releaseNeighborhoodSequence(sequence->sequence);
-		releaseNeighborhoodExpression(sequence->rightExpression);
-	} else {
-		releaseNeighborhoodExpression(sequence->expression);
+	if (sequence != NULL) {
+		if (sequence->binary) {
+			releaseNeighborhoodSequence(sequence->sequence);
+			releaseNeighborhoodExpression(sequence->rightExpression);
+		} else {
+			releaseNeighborhoodExpression(sequence->expression);
+		}
+		free(sequence);
 	}
 }
 
 void releaseTransitionSequence(TransitionSequence * sequence) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
-	if (sequence->binary) {
-		releaseTransitionSequence(sequence->sequence);
-		releaseTransitionExpression(sequence->rightExpression);
-	} else {
-		releaseTransitionExpression(sequence->expression);
+	if (sequence != NULL) {
+		if (sequence->binary) {
+			releaseTransitionSequence(sequence->sequence);
+			releaseTransitionExpression(sequence->rightExpression);
+		} else {
+			releaseTransitionExpression(sequence->expression);
+		}
+		free(sequence);
 	}
 }
 

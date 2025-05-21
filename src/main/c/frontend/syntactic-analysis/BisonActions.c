@@ -74,13 +74,13 @@ Program * NeighborhoodProgramSemanticAction(CompilerState * compilerState, Confi
 Configuration * ConfigurationSemanticAction(Option * option, Configuration * config) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Configuration * configuration = calloc(1, sizeof(Configuration));
-	if (configuration == NULL) {
+	if (config == NULL) {
 		configuration->isLast = 1;
 		configuration->lastOption = option;
 	} else {
 		configuration->isLast = 0;
 		configuration->option = option;
-		configuration->next = configuration;
+		configuration->next = config;
 	}
 	return configuration;
 }
