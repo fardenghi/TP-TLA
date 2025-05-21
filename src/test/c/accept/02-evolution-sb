@@ -1,9 +1,0 @@
-configuration:
-   Height: 100;
-   Width:  100;
-   Frontier: Mirror;
-   States: {on, off};
-   Colors: {#111111, #FFFFFF};
-   Evolution: 10,9,8,7,6,5,4/6;
-   Neighborhood: VON_NEUMANN;
-

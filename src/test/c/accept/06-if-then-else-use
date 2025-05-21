@@ -4,6 +4,9 @@ Frontier : Mirror;
 States : {a, b};
 Colors : { #FF00FF, #00008B, #FF0000};
 
-transition : if (1, 0) == b then->b;
-else->a;
-end
+transition : 
+    if (1, 0) == b then
+        ->b
+    else
+        ->a
+    end

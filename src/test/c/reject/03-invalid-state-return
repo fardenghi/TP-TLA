@@ -5,6 +5,8 @@ States: {a, b};
 Colors: { #FF0000, #800080};
 
 transition:
-if (0,0) == a then ->c;
-else ->b;
-end
+    if (0,0) == a then 
+        ->c
+    else 
+        ->b
+    end
