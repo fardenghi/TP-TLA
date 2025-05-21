@@ -1,0 +1,15 @@
+configuration:
+    Height: 250;
+    Width : 250;
+    States: {alive, dead};
+    Frontier : Open;
+    Colors : { #FF0000, #000000};
+    
+transition:
+    a = 12 + (20 / 5) - (1 * 2);
+    for i in {1,2,a} do
+        if (a,i) == alive
+        then 
+            ->alive 
+        end
+    end

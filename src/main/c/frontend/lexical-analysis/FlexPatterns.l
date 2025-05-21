@@ -73,7 +73,11 @@ HEX_DIGIT  [0-9a-fA-F]
 "in"                                { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), IN); }
 "do"                                { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), DO); }
 "add"                               { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), ADD_CELL); }
-"remove"                               { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), REMOVE_CELL); }
+"remove"                            { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), REMOVE_CELL); }
+"any"                               { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), ANY); }  
+"at_least"                          { return ControlFlowLexemeAction(createLexicalAnalyzerContext(), AT_LEAST); }
+
+
 
 "->"                                { return ReturnOperatorLexemeAction(createLexicalAnalyzerContext()); }
 
