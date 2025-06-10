@@ -23,7 +23,11 @@ typedef struct {
 	boolean succeed;
 
 	// TODO: Add an stack to handle nested scopes.
-	// TODO: Add a symbol table.
+	
+	SymbolTable * symbolTable;
+
+
+
 	// TODO: Add configuration.
 	// TODO: ...
 
