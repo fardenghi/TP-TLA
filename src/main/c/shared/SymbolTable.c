@@ -17,6 +17,7 @@ SymbolTable* createSymbolTable() {
     }
 
     table->size = 0;
+    table->capacity = INITIAL_CAPACITY;
     return table;
 }
 
@@ -45,7 +46,18 @@ Symbol* insertSymbol(SymbolTable* symbolTable, const char* name, const char type
     // Verificar si el símbolo ya existe
     Symbol* existingSymbol = lookupSymbol(symbolTable, name);
     if (existingSymbol != NULL) {
-        return existingSymbol;
+        return NULL; // Return NULL on duplicate
+    }
+
+    // Grow array if needed
+    if (symbolTable->size == symbolTable->capacity) {
+        int newCapacity = symbolTable->capacity * 2;
+        Symbol* newSymbols = (Symbol*)realloc(symbolTable->symbols, newCapacity * sizeof(Symbol));
+        if (newSymbols == NULL) {
+            return NULL;
+        }
+        symbolTable->symbols = newSymbols;
+        symbolTable->capacity = newCapacity;
     }
 
     // Crear nuevo símbolo

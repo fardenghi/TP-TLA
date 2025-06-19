@@ -7,6 +7,7 @@ typedef struct {
 typedef struct {
     Symbol * symbols;
     int size;
+    int capacity; // Added capacity for dynamic allocation
 } SymbolTable;
 
 SymbolTable * createSymbolTable();
