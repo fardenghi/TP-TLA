@@ -64,7 +64,6 @@ ArithmeticExpression * CellArithmeticExpressionSemanticAction(Cell * cell);
 
 Constant * IntegerConstantSemanticAction(const int value);
 Constant * StringConstantSemanticAction(char * value);
-Constant * CellConstantSemanticAction(Cell * cell);
 
 IntArray * IntArraySemanticAction(const int value, IntArray * arr);
 StringArray * StringArraySemanticAction(char * value, StringArray * arr);

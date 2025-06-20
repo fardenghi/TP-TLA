@@ -86,8 +86,7 @@ enum RangeType {
 
 enum ConstantType {
 	INTEGER_C,
-	STRING_C,
-	CELL_C
+	STRING_C
 };
 
 enum TransitionExpressionType {
@@ -189,7 +188,6 @@ struct Constant {
 	{
 		int value;
 		char * string;
-		Cell * cell;
 	};
 };
 

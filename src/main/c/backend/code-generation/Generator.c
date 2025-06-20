@@ -2,8 +2,8 @@
 
 /* MODULE INTERNAL STATE */
 
-const char _indentationCharacter = ' ';
-const char _indentationSize = 4;
+const char _indentationCharacter = '\t';
+const char _indentationSize = 1;
 static Logger * _logger = NULL;
 
 void initializeGeneratorModule() {
@@ -19,7 +19,7 @@ void shutdownGeneratorModule() {
 /** PRIVATE FUNCTIONS */
 
 static const char _expressionTypeToCharacter(const ExpressionType type);
-static void _generateConstant(const unsigned int indentationLevel, Constant * constant);
+static void _generateConstant(const Constant * constant);
 static void _generateEpilogue(const int value);
 static void _generateExpression(const unsigned int indentationLevel, Expression * expression);
 static void _generateFactor(const unsigned int indentationLevel, Factor * factor);
@@ -47,10 +47,68 @@ static const char _expressionTypeToCharacter(const ExpressionType type) {
 /**
  * Generates the output of a constant.
  */
-static void _generateConstant(const unsigned int indentationLevel, Constant * constant) {
-	_output(indentationLevel, "%s", "[ $C$, circle, draw, black!20\n");
-	_output(1 + indentationLevel, "%s%d%s", "[ $", constant->value, "$, circle, draw ]\n");
-	_output(indentationLevel, "%s", "]\n");
+static void _generateConstant(const Constant * constant) {
+	switch (constant->type) {
+	case INTEGER_C:
+		_output(0, "%d", constant->value);
+		break;
+	case STRING_C:
+		_output(0, "%s", constant->string);
+		break;
+	default:
+		break;
+	}
+}
+
+static char MAX_DISPLACEMENT_TAG_LENGTH = 256;
+
+static char * _displacementTypeToString(const DisplacementType displacementType, Constant * value) {
+	switch (displacementType)
+	{
+	case HORIZONTAL_D:
+		_output(0, "row+");
+		_generateConstant(value);
+		_output(0, ",col");
+		break;
+	case VERTICAL_D:
+		_output(0, "row,");
+		_output(0, "col+");
+		_generateConstant(value);
+		break;
+	case DIAGONAL_ASC_D:
+	//@todo: ver para donde crecen las columnas (si es positivo para abajp para arriba)
+		_output(0, "row+");
+		_generateConstant(value);		
+		_output(0, ",");
+		_output(0, "col+");
+		_generateConstant(value);		
+		break;
+	case DIAGONAL_DESC_D:
+		_output(0, "row+");
+		_generateConstant(value);		
+		_output(0, ",");
+		_output(0, "col-");
+		_generateConstant(value);
+		break;
+	default:
+		logError(_logger, "The specified displacement type is not valid: %d", displacementType);
+		return '\0';
+	}
+}
+
+static void _generateCell(const Cell * cell) {
+	if (cell->isSingleCoordenate) {
+		_output(0, "get_cell_value(cells,");
+		_outputDisplacement(cell->displacementType, cell->displacement);
+		_output(0,")");
+	} else {
+		_output(0,"get_cell_value(cells,row+");
+		_generateConstant(cell->x);
+		_output(0,",col+");
+		_generateConstant(cell->y);
+		_output(0,")");
+	}
+	
 }
 
 /**
@@ -190,7 +248,6 @@ static void _generateEpilogue(const int value) {
 	);
 }
 
-z
 /**
  * Creates the prologue of the generated output, a Latex document that renders
  * a tree thanks to the Forest package.

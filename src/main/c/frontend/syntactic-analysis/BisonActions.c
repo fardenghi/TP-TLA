@@ -317,14 +317,6 @@ Constant * StringConstantSemanticAction(char * value) {
 	return constant;
 }
 
-Constant * CellConstantSemanticAction(Cell * cell) {
-	_logSyntacticAnalyzerAction(__FUNCTION__);
-	Constant * constant = calloc(1, sizeof(Constant));
-	constant->cell = cell;
-	constant->type = CELL_C;
-	return constant;
-}
-
 ArithmeticExpression * BinaryArithmeticExpressionSemanticAction(ArithmeticExpression * leftExpression, ArithmeticExpression * rightExpression, ArithmeticExpressionType type) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	ArithmeticExpression * expression = calloc(1, sizeof(ArithmeticExpression));
