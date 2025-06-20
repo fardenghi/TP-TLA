@@ -58,11 +58,54 @@ static void _generateConstant(const unsigned int indentationLevel, Constant * co
  * completes a valid Latex document.
  */
 static void _generateEpilogue(const int value) {
-	_output(0, "%s%d%s",
-		"            [ $", value, "$, circle, draw, blue ]\n"
-		"        ]\n"
-		"    \\end{forest}\n"
-		"\\end{document}\n\n"
+	_output(0, "%s",
+		"N_CELLS_X = SCREEN_WIDTH // CELL_SIZE\n"
+		"N_CELLS_Y = SCREEN_HEIGHT // CELL_SIZE\n\n"
+		"def main():\n"
+		"    pygame.init()\n"
+		"    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))\n\n"
+		"    cells = np.zeros((N_CELLS_Y, N_CELLS_X))\n"
+		"    screen.fill(COLOR_GRID)\n"
+		"    update(screen, cells, CELL_SIZE)\n\n"
+		"    pygame.display.flip()\n"
+		"    \n"
+		"    running = False\n\n"
+		"    while True:\n"
+		"        for event in pygame.event.get():\n"
+		"            if event.type == pygame.QUIT:\n"
+		"                pygame.quit()\n"
+		"                return\n"
+		"            elif event.type == pygame.KEYDOWN:\n"
+		"                if event.key == pygame.K_SPACE:\n"
+		"                    running = not running\n"
+		"                    update(screen, cells, CELL_SIZE)\n"
+		"                elif event.key == pygame.K_c:\n"
+		"                    running = False\n"
+		"                    cells = np.zeros((N_CELLS_Y, N_CELLS_X))\n"
+		"                    screen.fill(COLOR_GRID)\n"
+		"                    update(screen, cells, CELL_SIZE)\n"
+		"            \n"
+		"            if pygame.mouse.get_pressed()[0]:\n"
+		"                pos = pygame.mouse.get_pos()\n"
+		"                row, col = pos[1] // CELL_SIZE, pos[0] // CELL_SIZE\n"
+		"                if row < N_CELLS_Y and col < N_CELLS_X:\n"
+		"                    cells[row, col] = 1\n"
+		"                    update(screen, cells, CELL_SIZE)\n"
+		"                    pygame.display.update()\n"
+		"            elif pygame.mouse.get_pressed()[2]:\n"
+		"                pos = pygame.mouse.get_pos()\n"
+		"                row, col = pos[1] // CELL_SIZE, pos[0] // CELL_SIZE\n"
+		"                if row < N_CELLS_Y and col < N_CELLS_X:\n"
+		"                    cells[row, col] = 0\n"
+		"                    update(screen, cells, CELL_SIZE)\n"
+		"                    pygame.display.update()\n\n"
+		"        screen.fill(COLOR_GRID)\n\n"
+		"        if running:\n"
+		"            cells = update(screen, cells, CELL_SIZE, with_progress=True)\n"
+		"            pygame.display.update()\n\n"
+		"        time.sleep(0.01)\n\n"
+		"if __name__ == '__main__':\n"
+		"    main()\n"
 	);
 }
 
@@ -75,16 +118,10 @@ z
  */
 static void _generatePrologue(void) {
 	_output(0, "%s",
-		"\\documentclass{standalone}\n\n"
-		"\\usepackage[utf8]{inputenc}\n"
-		"\\usepackage[T1]{fontenc}\n"
-		"\\usepackage{amsmath}\n"
-		"\\usepackage{forest}\n"
-		"\\usepackage{microtype}\n\n"
-		"\\begin{document}\n"
-		"    \\centering\n"
-		"    \\begin{forest}\n"
-		"        [ \\text{$=$}, circle, draw, purple\n"
+		"\\import time\n"
+		"\\import pygame\n"
+		"\\import numpy as np\n\n"
+		"\\CELL_SIZE = 20\n"
 	);
 }
 
