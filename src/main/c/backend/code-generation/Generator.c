@@ -18,7 +18,7 @@ void shutdownGeneratorModule() {
 
 /** PRIVATE FUNCTIONS */
 
-static const char _expressionTypeToCharacter(const ExpressionType type);
+static const char _arithmeticExpressionTypeToString(const ExpressionType type);
 static void _generateConstant(const Constant * constant);
 static void _generateEpilogue(const int value);
 static void _generateExpression(const unsigned int indentationLevel, Expression * expression);
@@ -32,16 +32,76 @@ static void _output(const unsigned int indentationLevel, const char * const form
  * Converts and expression type to the proper character of the operation
  * involved, or returns '\0' if that's not possible.
  */
-static const char _expressionTypeToCharacter(const ExpressionType type) {
+static char MAX_OPERAND_LENGTH = 16; 
+
+static char * _arithmeticExpressionTypeToString(const ArithmeticExpressionType type) {
+	char * operand = calloc(MAX_OPERAND_LENGTH, sizeof(char));
 	switch (type) {
-		case ADDITION: return '+';
-		case DIVISION: return '/';
-		case MULTIPLICATION: return '*';
-		case SUBTRACTION: return '-';
+		case ADDITION: 
+			operand[0] = '+';
+			break;
+		case DIVISION: 
+			operand[0] = '/';
+			break;
+		case MULTIPLICATION: 	
+			operand[0] = '*';
+			break;
+		case SUBTRACTION: 
+			operand[0] = '-';
+			break;
+		case MODULE: 
+			operand[0] = '%';
+			break;
+		case LOGIC_AND: 
+			operand[0] = '&';
+			operand[1] = '&';
+			break;
+		case LOGIC_OR:
+			operand[0] = '|';
+			operand[1] = '|';
+			break;
+		case EQUALS:
+			operand[0] = '=';
+			break;
+		case NOT_EQUALS:
+			operand[0] = '!';
+			operand[1] = '=';
+			break;
+		case LOWER_THAN:
+			operand[0] = '<';
+			break;
+		case LOWER_THAN_OR_EQUAL:
+			operand[0] = '<';
+			operand[1] = '=';
+			break;
+		case GREATER_THAN:
+			operand[0] = '>';
+			break;
+		case GREATER_THAN_OR_EQUAL:
+			operand[0] = '>';
+			operand[1] = '=';
+			break;
+		case LOGIC_NOT:
+			operand[0] = '!';
+			break;
+		case ALL_ARE:
+			strcpy(operand, "all(");
+			break;
+		case ANY_ARE:
+			strcpy(operand, "any(");
+			break;
+		case AT_LEAST_ARE:
+			strcpy(operand, "sum(");
+			break;
+		case FACTOR:
+		case CONSTANT:
+		case CELL_ARITHETIC_EXPRESSION:
+			break;
 		default:
 			logError(_logger, "The specified expression type cannot be converted into character: %d", type);
 			return '\0';
 	}
+	return operand;
 }
 
 /**
@@ -96,19 +156,90 @@ static char * _displacementTypeToString(const DisplacementType displacementType,
 	}
 }
 
+static char * GET_CELL_VALUE_FUN = "get_cell_value(cells,";
+
 static void _generateCell(const Cell * cell) {
 	if (cell->isSingleCoordenate) {
-		_output(0, "get_cell_value(cells,");
+		_output(0, GET_CELL_VALUE_FUN);
 		_outputDisplacement(cell->displacementType, cell->displacement);
 		_output(0,")");
 	} else {
-		_output(0,"get_cell_value(cells,row+");
+		_output(0,"%s%s", GET_CELL_VALUE_FUN, "row+");
 		_generateConstant(cell->x);
 		_output(0,",col+");
 		_generateConstant(cell->y);
 		_output(0,")");
 	}
-	
+}
+
+static void _generateCellList(const CellList * cellList) {
+	_output(0, "[");
+	_generateCellListRec(cellList);
+	_output(0, "]");
+}
+
+static void _generateCellListRec(const CellList * cellList) {
+	if (cellList->isLast) {
+		_generateCell(cellList->cell);
+		return;
+	}
+	_generateCell(cellList->cell);
+	_output(0,",");
+}
+
+static void _generateConstantArray(const ConstantArray * arr) {
+	_output(0, "[");
+	_generateConstantArrayRec(arr);
+	_output(0, "]");
+
+}
+
+static void _generateConstantArrayRec(const ConstantArray * arr) {
+	if (arr->isLast) {
+		_generateCell(arr->value);
+		return;
+	}
+	_generateConstant(arr->value);
+	_output(0,",");
+}
+
+static void _generateRange(const Range * range) {
+	if (range->type == ARRAY) {
+		_generateConstantArray(range->array);
+	} else {
+		_output(0, "range(");
+		_generateConstant(range->start);
+		_output(0, ",");
+		_generateConstant(range->end);
+		_output(0, ")");
+	}
+}
+
+static void _generateArithmeticExpression(const ArithmeticExpression * arithmeticExpression) {
+	if (arithmeticExpression->type <= GREATER_THAN_OR_EQUAL) {
+		_generateArithmeticExpression(arithmeticExpression->leftExpression);
+		_output(0, _arithmeticExpressionTypeToString(arithmeticExpression->type));
+		_generateArithmeticExpression(arithmeticExpression->rightExpression);
+	} else if (arithmeticExpression->type == LOGIC_NOT) {
+		_output(0, _arithmeticExpressionTypeToString(arithmeticExpression->type));
+		_generateArithmeticExpression(arithmeticExpression->expression);
+	} else if (arithmeticExpression->type == FACTOR) {
+		_output(0, "(");
+		_generateArithmeticExpression(arithmeticExpression->expression);
+		_output(0, ")");
+	} else if (arithmeticExpression->type == CONSTANT) {
+		_generateConstant(arithmeticExpression->constant);
+	} else if (arithmeticExpression->type == CELL_ARITHETIC_EXPRESSION) {
+		_generateCell(arithmeticExpression->cell);
+	} else {
+		_output(0, _arithmeticExpressionTypeToString(arithmeticExpression->type));
+		_output(0, "x == %s for x in ", arithmeticExpression->state);
+		_generateCellList(arithmeticExpression->cellList);
+		_output(0, ")");
+		if (arithmeticExpression->type == AT_LEAST_ARE) {
+			_output(0," >= %d", arithmeticExpression->count);
+		}
+	}
 }
 
 /**

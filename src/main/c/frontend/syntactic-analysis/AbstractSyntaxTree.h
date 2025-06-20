@@ -141,6 +141,7 @@ struct ArithmeticExpression {
 		struct {
 			CellList * cellList;
 			int count;
+			char * state;
 		};
 		Cell * cell;
 		Constant * constant;

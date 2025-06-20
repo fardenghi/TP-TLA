@@ -334,12 +334,13 @@ ArithmeticExpression * UnaryArithmeticExpressionSemanticAction(ArithmeticExpress
 	return expression;
 }
 
-ArithmeticExpression * CellListArithmeticExpressionSemanticAction(CellList * cellList, ArithmeticExpressionType type, int count) {
+ArithmeticExpression * CellListArithmeticExpressionSemanticAction(CellList * cellList, ArithmeticExpressionType type, int count, char * state) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	ArithmeticExpression * expression = calloc(1, sizeof(ArithmeticExpression));
 	expression->cellList = cellList;
 	expression->count = count;
 	expression->type = type;
+	expression->state = state;
 	return expression;
 }
 
