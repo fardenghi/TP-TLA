@@ -1,6 +1,7 @@
 #ifndef COMPILER_STATE_HEADER
 #define COMPILER_STATE_HEADER
 
+#include "SymbolTable.h"
 #include "Type.h"
 
 /**
