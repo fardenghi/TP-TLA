@@ -359,6 +359,15 @@ ArithmeticExpression * ConstantArithmeticExpressionSemanticAction(Constant * con
 	return expression;
 }
 
+ArithmeticExpression * CellArithmeticExpressionSemanticAction(Cell * cell) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	ArithmeticExpression * expression = calloc(1, sizeof(ArithmeticExpression));
+	expression->cell = cell;
+	expression->type = CELL_ARITHETIC_EXPRESSION;
+	return expression;
+}
+
+
 IntArray * IntArraySemanticAction(const int value, IntArray * arr) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	IntArray * intArray = calloc(1, sizeof(IntArray));

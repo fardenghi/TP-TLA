@@ -266,11 +266,11 @@ arithmetic_expression: arithmetic_expression[left] ADD arithmetic_expression[rig
 	| AT_LEAST INTEGER OPEN_BRACE cell_list[single] CLOSE_BRACE ARE STRING							{ $$ = CellListArithmeticExpressionSemanticAction($single, AT_LEAST_ARE, $2); }
 	| OPEN_PARENTHESIS arithmetic_expression[single] CLOSE_PARENTHESIS								{ $$ = UnaryArithmeticExpressionSemanticAction($single, FACTOR); }
 	| constant[single]																				{ $$ = ConstantArithmeticExpressionSemanticAction($single); }
+	| cell																				 			{ $$ = CellArithmeticExpressionSemanticAction($1); }
 	;
 
 constant: INTEGER																					{ $$ = IntegerConstantSemanticAction($1); }
 	| STRING																						{ $$ = StringConstantSemanticAction($1); }
-	| cell																				 			{ $$ = CellConstantSemanticAction($1); }
 	;
 
 

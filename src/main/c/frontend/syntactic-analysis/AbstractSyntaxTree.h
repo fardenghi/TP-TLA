@@ -75,7 +75,8 @@ enum ArithmeticExpressionType {
 	ANY_ARE,
 	AT_LEAST_ARE,
 	FACTOR,
-	CONSTANT
+	CONSTANT,
+	CELL_ARITHETIC_EXPRESSION
 };
 
 enum RangeType {
@@ -142,6 +143,7 @@ struct ArithmeticExpression {
 			CellList * cellList;
 			int count;
 		};
+		Cell * cell;
 		Constant * constant;
 	};
 };

@@ -60,6 +60,7 @@ ArithmeticExpression * BinaryArithmeticExpressionSemanticAction(ArithmeticExpres
 ArithmeticExpression * UnaryArithmeticExpressionSemanticAction(ArithmeticExpression * expression, ArithmeticExpressionType type);
 ArithmeticExpression * CellListArithmeticExpressionSemanticAction(CellList * cellList, ArithmeticExpressionType type, int count);
 ArithmeticExpression * ConstantArithmeticExpressionSemanticAction(Constant * cellList);
+ArithmeticExpression * CellArithmeticExpressionSemanticAction(Cell * cell);
 
 Constant * IntegerConstantSemanticAction(const int value);
 Constant * StringConstantSemanticAction(char * value);
