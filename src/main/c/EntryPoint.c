@@ -20,6 +20,7 @@ const int main(const int count, const char ** arguments) {
 	initializeBisonActionsModule();
 	initializeSyntacticAnalyzerModule();
 	initializeAbstractSyntaxTreeModule();
+	initializeSemanticAnalyzerModule();
 	//initializeCalculatorModule();
 	//initializeGeneratorModule();
 
@@ -41,14 +42,22 @@ const int main(const int count, const char ** arguments) {
 		// Beginning of the Backend... ------------------------------------------------------------
 		logDebugging(logger, "Computing expression value...");
 		Program * program = compilerState.abstractSyntaxtTree;
-		ComputationResult computationResult = computeExpression(program->expression);
-		if (computationResult.succeed) {
-			compilerState.value = computationResult.value;
-			generate(&compilerState);
-		}
-		else {
-			logError(logger, "The computation phase rejects the input program.");
+
+		SemanticAnalysisStatus semanticAnalysisStatus =checkSemantic(program->expression);
+		if(semanticAnalysisStatus == SEMANTIC_FAILURE){
+			logError(logger, "Type-checking failed: incompatinle types in the program.");
 			compilationStatus = FAILED;
+		}else{
+			logDebugging(logger, "Type-checking succeeded: the program is valid.");
+			ComputationResult computationResult = computeExpression(program->expression);
+			if (computationResult.succeed) {
+				compilerState.value = computationResult.value;
+				generate(&compilerState);
+			}
+			else {
+				logError(logger, "The computation phase rejects the input program.");
+				compilationStatus = FAILED;
+			}
 		}
 		// ...end of the Backend. -----------------------------------------------------------------
 		// ----------------------------------------------------------------------------------------
@@ -63,6 +72,7 @@ const int main(const int count, const char ** arguments) {
 	logDebugging(logger, "Releasing modules resources...");
 	//shutdownGeneratorModule();
 	//shutdownCalculatorModule();
+	shutdownSemanticAnalyzerModule();
 	shutdownAbstractSyntaxTreeModule();
 	shutdownSyntacticAnalyzerModule();
 	shutdownBisonActionsModule();
