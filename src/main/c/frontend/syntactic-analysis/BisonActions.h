@@ -7,6 +7,7 @@
 #include "AbstractSyntaxTree.h"
 #include "SyntacticAnalyzer.h"
 #include <stdlib.h>
+#include "../../shared/SymbolTable.h"
 
 /** Initialize module's internal state. */
 void initializeBisonActionsModule();
@@ -58,12 +59,12 @@ CellList * CellListSemanticAction(Cell * cell, CellList * list);
 
 ArithmeticExpression * BinaryArithmeticExpressionSemanticAction(ArithmeticExpression * leftExpression, ArithmeticExpression * rightExpression, ArithmeticExpressionType type);
 ArithmeticExpression * UnaryArithmeticExpressionSemanticAction(ArithmeticExpression * expression, ArithmeticExpressionType type);
-ArithmeticExpression * CellListArithmeticExpressionSemanticAction(CellList * cellList, ArithmeticExpressionType type, int count);
+ArithmeticExpression * CellListArithmeticExpressionSemanticAction(CellList * cellList, ArithmeticExpressionType type, int count, char * state);
 ArithmeticExpression * ConstantArithmeticExpressionSemanticAction(Constant * cellList);
+ArithmeticExpression * CellArithmeticExpressionSemanticAction(Cell * cell);
 
 Constant * IntegerConstantSemanticAction(const int value);
 Constant * StringConstantSemanticAction(char * value);
-Constant * CellConstantSemanticAction(Cell * cell);
 
 IntArray * IntArraySemanticAction(const int value, IntArray * arr);
 StringArray * StringArraySemanticAction(char * value, StringArray * arr);

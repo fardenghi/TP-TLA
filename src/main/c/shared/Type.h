@@ -35,7 +35,7 @@ typedef enum
 typedef enum
 {
 	CONWAY = 0,
-	SEEDS = 1,
+	SEEDS = 1
 } EvolutionEnum;
 
 #endif

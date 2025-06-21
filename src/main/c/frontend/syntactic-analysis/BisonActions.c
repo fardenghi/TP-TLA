@@ -85,17 +85,9 @@ Configuration * ConfigurationSemanticAction(Option * option, Configuration * con
 	return configuration;
 }
 
-TransitionSequence * TransitionUnarySequenceSemanticAction(TransitionExpression * expression) {
-	_logSyntacticAnalyzerAction(__FUNCTION__);
-	TransitionSequence * rta = calloc(1, sizeof(TransitionSequence));
-	rta->binary = false;
-	rta->expression = expression;
-	return rta;
-}
 TransitionSequence * TransitionBinarySequenceSemanticAction(TransitionSequence * sequence, TransitionExpression * expression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	TransitionSequence * rta = calloc(1, sizeof(TransitionSequence));
-	rta->binary = true;
 	rta->sequence = sequence;
 	rta->rightExpression = expression;
 	return rta;
@@ -143,17 +135,9 @@ TransitionExpression * TransitionReturnExpressionSemanticAction(ArithmeticExpres
 	return expression;
 }
 
-NeighborhoodSequence * NeighborhoodUnarySequenceSemanticAction(NeighborhoodExpression * expression) {
-	_logSyntacticAnalyzerAction(__FUNCTION__);
-	NeighborhoodSequence * rta = calloc(1, sizeof(NeighborhoodSequence));
-	rta->binary = false;
-	rta->expression = expression;
-	return rta;
-}
 NeighborhoodSequence * NeighborhoodBinarySequenceSemanticAction(NeighborhoodSequence * sequence, NeighborhoodExpression * expression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	NeighborhoodSequence * rta = calloc(1, sizeof(NeighborhoodSequence));
-	rta->binary = true;
 	rta->sequence = sequence;
 	rta->rightExpression = expression;
 	return rta;
@@ -226,6 +210,17 @@ Option * StringArrayValuedOptionSemanticAction(StringArray * value) {
 	Option * option = calloc(1, sizeof(Option));
 	option->type = STATES_OPTION;
 	option->states = value;
+	const CompilerState * compilerState = currentCompilerState();
+	int i = 0;
+	for (const StringArray * current = value; current != NULL; current = current->next) {
+		if (current->isLast) break;
+		if (current->value == NULL) {
+			logError(_logger, "StringArrayValuedOptionSemanticAction: A string in the array is NULL.");
+			free(option);
+			return NULL;
+		}
+		insertSymbol(compilerState->symbolTable, current->value, i++);
+	}
 	return option;
 }
 Option * FrontierOptionSemanticAction(const FrontierEnum value) {
@@ -317,14 +312,6 @@ Constant * StringConstantSemanticAction(char * value) {
 	return constant;
 }
 
-Constant * CellConstantSemanticAction(Cell * cell) {
-	_logSyntacticAnalyzerAction(__FUNCTION__);
-	Constant * constant = calloc(1, sizeof(Constant));
-	constant->cell = cell;
-	constant->type = CELL_C;
-	return constant;
-}
-
 ArithmeticExpression * BinaryArithmeticExpressionSemanticAction(ArithmeticExpression * leftExpression, ArithmeticExpression * rightExpression, ArithmeticExpressionType type) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	ArithmeticExpression * expression = calloc(1, sizeof(ArithmeticExpression));
@@ -342,12 +329,13 @@ ArithmeticExpression * UnaryArithmeticExpressionSemanticAction(ArithmeticExpress
 	return expression;
 }
 
-ArithmeticExpression * CellListArithmeticExpressionSemanticAction(CellList * cellList, ArithmeticExpressionType type, int count) {
+ArithmeticExpression * CellListArithmeticExpressionSemanticAction(CellList * cellList, ArithmeticExpressionType type, int count, char * state) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	ArithmeticExpression * expression = calloc(1, sizeof(ArithmeticExpression));
 	expression->cellList = cellList;
 	expression->count = count;
 	expression->type = type;
+	expression->state = state;
 	return expression;
 }
 
@@ -358,6 +346,15 @@ ArithmeticExpression * ConstantArithmeticExpressionSemanticAction(Constant * con
 	expression->type = CONSTANT;
 	return expression;
 }
+
+ArithmeticExpression * CellArithmeticExpressionSemanticAction(Cell * cell) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	ArithmeticExpression * expression = calloc(1, sizeof(ArithmeticExpression));
+	expression->cell = cell;
+	expression->type = CELL_ARITHETIC_EXPRESSION;
+	return expression;
+}
+
 
 IntArray * IntArraySemanticAction(const int value, IntArray * arr) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);

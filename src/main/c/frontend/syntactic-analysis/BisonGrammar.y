@@ -254,23 +254,23 @@ arithmetic_expression: arithmetic_expression[left] ADD arithmetic_expression[rig
 	| arithmetic_expression[left] MOD arithmetic_expression[right]									{ $$ = BinaryArithmeticExpressionSemanticAction($left, $right, MODULE); }
 	| arithmetic_expression[left] AND arithmetic_expression[right]									{ $$ = BinaryArithmeticExpressionSemanticAction($left, $right, LOGIC_AND); }
 	| arithmetic_expression[left] OR arithmetic_expression[right]									{ $$ = BinaryArithmeticExpressionSemanticAction($left, $right, LOGIC_OR); }
-	| NOT arithmetic_expression[single]																{ $$ = UnaryArithmeticExpressionSemanticAction($single, FACTOR); }
+	| NOT arithmetic_expression[single]																{ $$ = UnaryArithmeticExpressionSemanticAction($single, LOGIC_NOT); }
 	| arithmetic_expression[left] EQ arithmetic_expression[right]									{ $$ = BinaryArithmeticExpressionSemanticAction($left, $right, EQUALS); }
 	| arithmetic_expression[left] NEQ arithmetic_expression[right]									{ $$ = BinaryArithmeticExpressionSemanticAction($left, $right, NOT_EQUALS); }
 	| arithmetic_expression[left] LT arithmetic_expression[right]									{ $$ = BinaryArithmeticExpressionSemanticAction($left, $right, LOWER_THAN); }
 	| arithmetic_expression[left] LTE arithmetic_expression[right]									{ $$ = BinaryArithmeticExpressionSemanticAction($left, $right, LOWER_THAN_OR_EQUAL); }
 	| arithmetic_expression[left] GT arithmetic_expression[right]									{ $$ = BinaryArithmeticExpressionSemanticAction($left, $right, GREATER_THAN); }
 	| arithmetic_expression[left] GTE arithmetic_expression[right]									{ $$ = BinaryArithmeticExpressionSemanticAction($left, $right, GREATER_THAN_OR_EQUAL); }
-	| ALL_OPERAND OPEN_BRACE cell_list[single] CLOSE_BRACE ARE STRING								{ $$ = CellListArithmeticExpressionSemanticAction($single, ALL_ARE, -1); }
-	| ANY OPEN_BRACE cell_list[single] CLOSE_BRACE ARE STRING										{ $$ = CellListArithmeticExpressionSemanticAction($single, ANY_ARE, 1); }
-	| AT_LEAST INTEGER OPEN_BRACE cell_list[single] CLOSE_BRACE ARE STRING							{ $$ = CellListArithmeticExpressionSemanticAction($single, AT_LEAST_ARE, $2); }
+	| ALL_OPERAND OPEN_BRACE cell_list[single] CLOSE_BRACE ARE STRING[string]						{ $$ = CellListArithmeticExpressionSemanticAction($single, ALL_ARE, -1); }
+	| ANY OPEN_BRACE cell_list[single] CLOSE_BRACE ARE STRING[string]								{ $$ = CellListArithmeticExpressionSemanticAction($single, ANY_ARE, 1); }
+	| AT_LEAST INTEGER OPEN_BRACE cell_list[single] CLOSE_BRACE ARE STRING[string]					{ $$ = CellListArithmeticExpressionSemanticAction($single, AT_LEAST_ARE, $2); }
 	| OPEN_PARENTHESIS arithmetic_expression[single] CLOSE_PARENTHESIS								{ $$ = UnaryArithmeticExpressionSemanticAction($single, FACTOR); }
 	| constant[single]																				{ $$ = ConstantArithmeticExpressionSemanticAction($single); }
+	| cell																				 			{ $$ = CellArithmeticExpressionSemanticAction($1); }
 	;
 
 constant: INTEGER																					{ $$ = IntegerConstantSemanticAction($1); }
 	| STRING																						{ $$ = StringConstantSemanticAction($1); }
-	| cell																				 			{ $$ = CellConstantSemanticAction($1); }
 	;
 
 

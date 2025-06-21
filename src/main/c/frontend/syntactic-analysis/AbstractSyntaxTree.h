@@ -77,7 +77,8 @@ enum ArithmeticExpressionType
 	ANY_ARE,
 	AT_LEAST_ARE,
 	FACTOR,
-	CONSTANT
+	CONSTANT,
+	CELL_ARITHETIC_EXPRESSION
 };
 
 enum RangeType
@@ -89,8 +90,7 @@ enum RangeType
 enum ConstantType
 {
 	INTEGER_C,
-	STRING_C,
-	CELL_C
+	STRING_C
 };
 
 enum TransitionExpressionType
@@ -156,7 +156,9 @@ struct ArithmeticExpression
 		{
 			CellList *cellList;
 			int count;
+			char *state;
 		};
+		Cell *cell;
 		Constant *constant;
 	};
 };
@@ -210,7 +212,6 @@ struct Constant
 	{
 		int value;
 		char *string;
-		Cell *cell;
 	};
 };
 
@@ -304,30 +305,14 @@ struct Range
 
 struct TransitionSequence
 {
-	boolean binary;
-	union
-	{
-		TransitionExpression *expression;
-		struct
-		{
-			TransitionSequence *sequence;
-			TransitionExpression *rightExpression;
-		};
-	};
+	TransitionSequence *sequence;
+	TransitionExpression *rightExpression;
 };
 
 struct NeighborhoodSequence
 {
-	boolean binary;
-	union
-	{
-		NeighborhoodExpression *expression;
-		struct
-		{
-			NeighborhoodSequence *sequence;
-			NeighborhoodExpression *rightExpression;
-		};
-	};
+	NeighborhoodSequence *sequence;
+	NeighborhoodExpression *rightExpression;
 };
 
 struct TransitionExpression

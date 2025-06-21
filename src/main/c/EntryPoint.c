@@ -8,6 +8,7 @@
 #include "shared/Environment.h"
 #include "shared/Logger.h"
 #include "shared/String.h"
+#include "shared/SymbolTable.h"
 #include "backend/semantic-analysis/SemanticAnalyzer.h"
 
 /**
@@ -36,7 +37,8 @@ const int main(const int count, const char **arguments)
 	CompilerState compilerState = {
 		.abstractSyntaxtTree = NULL,
 		.succeed = false,
-		.value = 0};
+		.value = 0,
+		.symbolTable = createSymbolTable()};
 	const SyntacticAnalysisStatus syntacticAnalysisStatus = parse(&compilerState);
 	CompilationStatus compilationStatus = SUCCEED;
 	if (syntacticAnalysisStatus == ACCEPT)
