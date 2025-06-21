@@ -104,34 +104,35 @@ static char * _arithmeticExpressionTypeToString(const ArithmeticExpressionType t
 	return operand;
 }
 
-static void _generateTransitionExpression(const TransitionExpression * transitionExpression) {
+static void _generateTransitionExpression(unsigned int indentation, const TransitionExpression * transitionExpression) {
 	switch (transitionExpression->type)
 	{
 		case TRANSITION_ASSIGNMENT:
+			_output(indentation,"%s=", transitionExpression->variable);
 			_generateArithmeticExpression(transitionExpression->assignment);
 			break;
 		case TRANSITION_FOR_LOOP:
-			_output(0, "for %s in ", transitionExpression->forVariable);
+			_output(indentation, "for %s in ", transitionExpression->forVariable);
 			_generateRange(transitionExpression->range);
 			_output(0, ":\n");
-			_generateTransitionExpression(transitionExpression->forBody);
+			_generateTransitionExpression(indentation + 1, transitionExpression->forBody);
 			break;
 		case TRANSITION_IF:
-			_output(0, "if ");
+			_output(indentation, "if ");
 			_generateArithmeticExpression(transitionExpression->ifCondition);
 			_output(0, ":\n");
-			_generateTransitionExpression(transitionExpression->ifBody); // Esto es un transition sequence, llamo a transition secuence en vez de expression 
+			_generateTransitionExpression(indentation + 1, transitionExpression->ifBody); // Esto es un transition sequence, llamo a transition secuence en vez de expression 
 			break;
 		case TRANSITION_IF_ELSE:
-			_output(0, "if ");
+			_output(indentation, "if ");
 			_generateArithmeticExpression(transitionExpression->ifElseCondition);
 			_output(0, ":\n");
-			_generateTransitionExpression(transitionExpression->ifElseIfBody);
-			_output(0, "\nelse:\n");
-			_generateTransitionExpression(transitionExpression->ifElseElseBody);
+			_generateTransitionExpression(indentation + 1, transitionExpression->ifElseIfBody);
+			_output(indentation, "\nelse:\n");
+			_generateTransitionExpression(indentation + 1, transitionExpression->ifElseElseBody);
 			break;
 		case RETURN_VALUE:
-			_output(0, "return ");
+			_output(indentation, "return ");
 			_generateArithmeticExpression(transitionExpression->returnValue);
 			break;
 	default:
@@ -139,38 +140,39 @@ static void _generateTransitionExpression(const TransitionExpression * transitio
 	}
 }
 
-static void _generateNeighborhoodExpression(const NeighborhoodExpression * neighborhoodExpression) {
+static void _generateNeighborhoodExpression(unsigned int indentation, const NeighborhoodExpression * neighborhoodExpression) {
 	switch (neighborhoodExpression->type)
 	{
 		case NEIGHBORHOOD_ASSIGNMENT:
+			_output(indentation,"%s=",neighborhoodExpression->variable);
 			_generateArithmeticExpression(neighborhoodExpression->assignment);
 			break;
 		case NEIGHBORHOOD_FOR_LOOP:
-			_output(0, "for %s in ", neighborhoodExpression->forVariable);
+			_output(indentation, "for %s in ", neighborhoodExpression->forVariable);
 			_generateRange(neighborhoodExpression->range);
 			_output(0, ":\n");
-			_generateNeighborhoodSequence(neighborhoodExpression->forBody);
+			_generateNeighborhoodSequence(indentation + 1, neighborhoodExpression->forBody);
 			break;
 		case NEIGHBORHOOD_IF:
-			_output(0, "if ");
+			_output(indentation, "if ");
 			_generateArithmeticExpression(neighborhoodExpression->ifCondition);
 			_output(0, ":\n");
-			_generateNeighborhoodSequence(neighborhoodExpression->ifBody);
+			_generateNeighborhoodSequence(indentation + 1, neighborhoodExpression->ifBody);
 			break;
 		case NEIGHBORHOOD_IF_ELSE:
-			_output(0, "if ");
+			_output(indentation, "if ");
 			_generateArithmeticExpression(neighborhoodExpression->ifElseCondition);
 			_output(0, ":\n");
-			_generateNeighborhoodExpression(neighborhoodExpression->ifElseIfBody);
-			_output(0, "\nelse:\n");
-			_generateNeighborhoodSequence(neighborhoodExpression->ifElseElseBody);
+			_generateNeighborhoodExpression(indentation + 1, neighborhoodExpression->ifElseIfBody);
+			_output(indentation, "\nelse:\n");
+			_generateNeighborhoodSequence(indentation + 1, neighborhoodExpression->ifElseElseBody);
 			break;
 		case ADD_CELL_EXP:
-			_output(0, "neighbors.update(\n");
+			_output(indentation, "neighbors.update(\n");
 			_generateCellList(neighborhoodExpression->toAddList);
 			_output(0, ")");
 		case REMOVE_CELL_EXP:
-			_output(0, "neighbors.difference_update(\n");
+			_output(indentation, "neighbors.difference_update(\n");
 			_generateCellList(neighborhoodExpression->toRemoveList);
 			_output(0, ")");
 		break;
@@ -181,21 +183,21 @@ static void _generateNeighborhoodExpression(const NeighborhoodExpression * neigh
 
 
 
-static void _generateTransitionSequence(const TransitionSequence * transitionSequence) {
-	_generateTransitionExpression(transitionSequence->expression);
+static void _generateTransitionSequence(unsigned int indentation, const TransitionSequence * transitionSequence) {
+	_generateTransitionExpression(indentation, transitionSequence->rightExpression);
 	if (transitionSequence->sequence != NULL) {
-		_generateTransitionSequence(transitionSequence->sequence);
+		_generateTransitionSequence(indentation, transitionSequence->sequence);
 	} else {
 		_output(0, "\n");
 	}
 }
 
-static void _generateNeighborSequence(const NeighborSequence * neighborSequence) {
-	_generateNeighborExpression(neighborSequence->expression);
+static void _generateNeighborhoodSequence(unsigned int indentation, const NeighborhoodSequence * neighborSequence) {
+	_generateNeighborhoodExpression(indentation, neighborSequence->rightExpression);
 	if (neighborSequence->sequence != NULL) {
-		_generateNeighborSequence(neighborSequence->sequence);
+		_generateNeighborhoodSequence(indentation, neighborSequence->sequence);
 	} else {
-		_output(0, "return neighbors\n");
+		_output(indentation, "return neighbors\n");
 	}
 }
 
@@ -384,6 +386,21 @@ static char * _getStringFromFrontierType(const FrontierEnum type) {
 			strcpy(operand, "Mirror");
 			break;
 		default:
+			logError(_logger, "The specified frontier type is not valid: %d", type);
+			break;
+	}
+}
+
+static char * _getStringFromEvolutionType(const EvolutionEnum type) {
+	char * operand = calloc(MAX_FRONTIER_TYPE_LENGTH, sizeof(char));
+	switch (type) {
+		case CONWAY:
+			strcpy(operand, "Conway");
+			break;
+		case SEEDS:
+			strcpy(operand, "Seeds");
+			break;
+			logError(_logger, "The specified evolution type is not valid: %d", type);
 			break;
 	}
 }
@@ -409,12 +426,21 @@ static void _generateOption(const Option * option) {
 			_generateStringArray(option->states);
 			_output(0,"\n");  
 			break;            
-		case NEIGHBORHOOD_OPTION:  
+		case NEIGHBORHOOD_OPTION:
 			break;      
 		case EVOLUTION_OPTION:
-			_output(0,"EVOLUTION_MODE=%d\n", option->value);
+			if(option->evolution->isDefault) {
+				_output(0,"EVOLUTION_MODE=%s\n", _getStringFromEvolutionType(option->value));
+				
+			} else {
+				_output(0,"EVOLUTION_MODE='SB'\n");
+				_generateIntArray(option->evolution->array);
+				//@todo: cambiar para que sea un array tambien
+				_output(0,"[%d]", option->evolution->value);
+			}
 			break;
 		default:
+			logError(_logger, "The specified option type is not valid: %d", option->type);
 			break;
 	}
 }

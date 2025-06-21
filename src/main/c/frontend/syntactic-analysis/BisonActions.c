@@ -85,17 +85,9 @@ Configuration * ConfigurationSemanticAction(Option * option, Configuration * con
 	return configuration;
 }
 
-TransitionSequence * TransitionUnarySequenceSemanticAction(TransitionExpression * expression) {
-	_logSyntacticAnalyzerAction(__FUNCTION__);
-	TransitionSequence * rta = calloc(1, sizeof(TransitionSequence));
-	rta->binary = false;
-	rta->expression = expression;
-	return rta;
-}
 TransitionSequence * TransitionBinarySequenceSemanticAction(TransitionSequence * sequence, TransitionExpression * expression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	TransitionSequence * rta = calloc(1, sizeof(TransitionSequence));
-	rta->binary = true;
 	rta->sequence = sequence;
 	rta->rightExpression = expression;
 	return rta;
@@ -143,17 +135,9 @@ TransitionExpression * TransitionReturnExpressionSemanticAction(ArithmeticExpres
 	return expression;
 }
 
-NeighborhoodSequence * NeighborhoodUnarySequenceSemanticAction(NeighborhoodExpression * expression) {
-	_logSyntacticAnalyzerAction(__FUNCTION__);
-	NeighborhoodSequence * rta = calloc(1, sizeof(NeighborhoodSequence));
-	rta->binary = false;
-	rta->expression = expression;
-	return rta;
-}
 NeighborhoodSequence * NeighborhoodBinarySequenceSemanticAction(NeighborhoodSequence * sequence, NeighborhoodExpression * expression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	NeighborhoodSequence * rta = calloc(1, sizeof(NeighborhoodSequence));
-	rta->binary = true;
 	rta->sequence = sequence;
 	rta->rightExpression = expression;
 	return rta;
