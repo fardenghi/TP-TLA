@@ -2,8 +2,8 @@
 #define SEMANTIC_ANALYZER_HEADER
 #include "../../shared/Logger.h"
 #include "../../shared/CompilerState.h"
-#include "../../syntactic-analysis/AbstractSyntaxTree.h"
-#include "../../syntactic-analysis/SyntacticAnalyzer.h"
+#include "../../frontend/syntactic-analysis/AbstractSyntaxTree.h"
+#include "../../frontend/syntactic-analysis/SyntacticAnalyzer.h"
 
 typedef enum {
     SEMANTIC_SUCCESS,
