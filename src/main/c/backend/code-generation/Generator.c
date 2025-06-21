@@ -427,16 +427,41 @@ static void _generateOption(const Option * option) {
 			_output(0,"\n");  
 			break;            
 		case NEIGHBORHOOD_OPTION:
-			break;      
+			if (option->neighborhoodEnum == MOORE) {
+				_output(0, "%s",
+							"def neighborhood_function(row, col):\n"
+							"    return {\n"
+							"        (-1, -1), (-1, 0), (-1, 1),\n"
+							"        (0, -1),          (0, 1),\n"
+							"        (1, -1),  (1, 0),  (1, 1)\n"
+							"    }\n");
+			}
+			else if (option->neighborhoodEnum == VON_NEUMANN) {
+				_output(0, "%s",
+							"def neighborhood_function(row, col):\n"
+							"    return {\n"
+							"        (-1, 0), (1, 0), (0, -1), (0, 1)\n"
+							"    }\n");
+			}
 		case EVOLUTION_OPTION:
+			_output(0,"EVOLUTION_MODE='SB'\n");
+			_output(0,"SURVIVE_RULES = ");
 			if(option->evolution->isDefault) {
-				_output(0,"EVOLUTION_MODE=%s\n", _getStringFromEvolutionType(option->value));
-				
+					if (option->evolution->evolutionTypes == CONWAY)
+					{
+						_output(0,"[2,3]\n");
+						_output(0,"BIRTH_RULES = [3]\n");
+					} else if (option->evolution->evolutionTypes == SEEDS) {
+						_output(0,"[2]\n");
+						_output(0,"BIRTH_RULES = []\n");
+					} 
+					else {
+						logError(_logger, "The specified evolution type is not valid: %d", option->evolution->evolutionTypes);
+					}
 			} else {
-				_output(0,"EVOLUTION_MODE='SB'\n");
-				_generateIntArray(option->evolution->array);
-				//@todo: cambiar para que sea un array tambien
-				_output(0,"[%d]", option->evolution->value);
+				_generateIntArray(option->evolution->surviveArray);
+				_output(0,"BIRTH_RULES = ");
+				_generateIntArray(option->evolution->birthArray);
 			}
 			break;
 		default:
