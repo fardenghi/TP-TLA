@@ -245,13 +245,13 @@ Option * EvolutionOptionSemanticAction(Evolution * value) {
 	return option;
 }
 
-Evolution * EvolutionSemanticAction(IntArray * array, const int value, const EvolutionEnum type) {
+Evolution * EvolutionSemanticAction(IntArray * surviveArray, IntArray * birthArray, const EvolutionEnum type) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Evolution * evolution = calloc(1, sizeof(Evolution));
 	if (array != NULL) {
 		evolution->isDefault = false;
-		evolution->array = array;
-		evolution->value = value;
+		evolution->surviveArray = surviveArray;
+		evolution->birthArray = birthArray;
 	} else {
 		evolution->isDefault = true;
 		evolution->evolutionTypes = type;
