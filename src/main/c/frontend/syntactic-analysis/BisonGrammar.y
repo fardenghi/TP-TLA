@@ -1,6 +1,9 @@
 %{
 
 #include "BisonActions.h"
+#include "../../shared/SymbolTable.h"
+#include "../../shared/CompilerState.h"
+#include "SyntacticAnalyzer.h"
 
 %}
 
@@ -217,9 +220,9 @@ transition_sequence: transition_expression	transition_sequence 						{ $$ = Tran
 	;
 
 transition_expression: STRING ASSIGNMENT arithmetic_expression SEMICOLON						{ $$ = TransitionAssignmentExpressionSemanticAction($1, $3); }
-	| FOR STRING IN range DO transition_sequence END									{ $$ = TransitionForLoopExpressionSemanticAction($2, $4, $6); }
-	| IF arithmetic_expression THEN transition_sequence END								{ $$ = TransitionIfExpressionSemanticAction($2, $4); }
-	| IF arithmetic_expression THEN transition_sequence ELSE transition_sequence END 	{ $$ = TransitionIfElseExpressionSemanticAction($2, $4, $6); }
+	| FOR { pushScope(currentCompilerState()->symbolTable) } STRING IN range DO transition_sequence { popScope(currentCompilerState()->symbolTable) } END									{ $$ = TransitionForLoopExpressionSemanticAction($2, $4, $6); }
+	| IF { pushScope(currentCompilerState()->symbolTable) } arithmetic_expression THEN transition_sequence { popScope(currentCompilerState()->symbolTable) } END								{ $$ = TransitionIfExpressionSemanticAction($2, $4); }
+	| IF { pushScope(currentCompilerState()->symbolTable) } arithmetic_expression THEN transition_sequence { popScope(currentCompilerState()->symbolTable) } ELSE { pushScope(currentCompilerState()->symbolTable) } transition_sequence { popScope(currentCompilerState()->symbolTable) } END 	{ $$ = TransitionIfElseExpressionSemanticAction($2, $4, $6); }
 	| RETURN arithmetic_expression														{ $$ = TransitionReturnExpressionSemanticAction($2); }
 	;
 
@@ -228,9 +231,9 @@ neighborhood_sequence: neighborhood_expression neighborhood_sequence					{ $$ = 
 	;
 
 neighborhood_expression: STRING ASSIGNMENT arithmetic_expression SEMICOLON						{ $$ = NeighborhoodAssignmentExpressionSemanticAction($1, $3); }
-	| FOR STRING IN range DO neighborhood_sequence END								{ $$ = NeighborhoodForLoopExpressionSemanticAction($2, $4, $6); }
-	| IF arithmetic_expression THEN neighborhood_sequence END							{ $$ = NeighborhoodIfExpressionSemanticAction($2, $4); }
-	| IF arithmetic_expression THEN neighborhood_sequence ELSE neighborhood_sequence END { $$ = NeighborhoodIfElseExpressionSemanticAction($2, $4, $6); }
+	| FOR { pushScope(currentCompilerState()->symbolTable) } STRING IN range DO neighborhood_sequence { popScope(currentCompilerState()->symbolTable) } END								{ $$ = NeighborhoodForLoopExpressionSemanticAction($2, $4, $6); }
+	| IF { pushScope(currentCompilerState()->symbolTable) } arithmetic_expression THEN neighborhood_sequence { popScope(currentCompilerState()->symbolTable) } END							{ $$ = NeighborhoodIfExpressionSemanticAction($2, $4); }
+	| IF { pushScope(currentCompilerState()->symbolTable) } arithmetic_expression THEN neighborhood_sequence { popScope(currentCompilerState()->symbolTable) } ELSE { pushScope(currentCompilerState()->symbolTable) } neighborhood_sequence END { popScope(currentCompilerState()->symbolTable) } { $$ = NeighborhoodIfElseExpressionSemanticAction($2, $4, $6); }
 	| ADD_CELL OPEN_PARENTHESIS cell_list CLOSE_PARENTHESIS	SEMICOLON					{ $$ = NeighborhoodCellExpressionSemanticAction(true, $3); }
 	| REMOVE_CELL OPEN_PARENTHESIS cell_list CLOSE_PARENTHESIS	SEMICOLON				{ $$ = NeighborhoodCellExpressionSemanticAction(false, $3); }
 	;
