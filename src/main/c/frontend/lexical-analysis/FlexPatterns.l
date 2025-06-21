@@ -56,7 +56,6 @@ HEX_DIGIT  [0-9a-fA-F]
 "MOORE"                             { return NeighborhoodLexemeAction(createLexicalAnalyzerContext(), MOORE); }
 "CUSTOM"                            { return NeighborhoodLexemeAction(createLexicalAnalyzerContext(), CUSTOM); }
 "VON_NEUMANN"                       { return NeighborhoodLexemeAction(createLexicalAnalyzerContext(), VON_NEUMANN); }
-"K_NEIGHBORHOOD"                    { return NeighborhoodLexemeAction(createLexicalAnalyzerContext(), K_NEIGHBORHOOD); }
 "CONWAY"                            { return EvolutionLexemeAction(createLexicalAnalyzerContext(), CONWAY); }
 "SEEDS"                             { return EvolutionLexemeAction(createLexicalAnalyzerContext(), SEEDS); }
 
