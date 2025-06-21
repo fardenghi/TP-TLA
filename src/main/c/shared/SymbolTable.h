@@ -1,8 +1,10 @@
 #ifndef SYMBOL_TABLE_HEADER
 #define SYMBOL_TABLE_HEADER
+#include "Type.h"
 
 typedef struct {
     char * name;
+    boolean readOnly;
     int value;
     int scope; // Nuevo campo para el scope
 } Symbol;
@@ -21,6 +23,7 @@ typedef struct {
 
 SymbolTable * createSymbolTable();
 void destroySymbolTable(SymbolTable * symbolTable);
+Symbol* insertReadOnlySymbol(SymbolTable * symbolTable, const char * name, const int value);
 Symbol* insertSymbol(SymbolTable * symbolTable, const char * name, const int value);
 Symbol * lookupSymbol(const SymbolTable * symbolTable, const char * name);
 void pushScope(SymbolTable * symbolTable);

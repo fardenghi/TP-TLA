@@ -219,7 +219,7 @@ Option * StringArrayValuedOptionSemanticAction(StringArray * value) {
 			free(option);
 			return NULL;
 		}
-		insertSymbol(compilerState->symbolTable, current->value, i++);
+		insertReadOnlySymbol(compilerState->symbolTable, current->value, i++);
 	}
 	return option;
 }
