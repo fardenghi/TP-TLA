@@ -211,7 +211,6 @@ Option * StringArrayValuedOptionSemanticAction(StringArray * value) {
 	option->type = STATES_OPTION;
 	option->states = value;
 	const CompilerState * compilerState = currentCompilerState();
-	int i = 0;
 	for (const StringArray * current = value; current != NULL; current = current->next) {
 		if (current->isLast) break;
 		if (current->value == NULL) {
@@ -219,7 +218,7 @@ Option * StringArrayValuedOptionSemanticAction(StringArray * value) {
 			free(option);
 			return NULL;
 		}
-		insertReadOnlySymbol(compilerState->symbolTable, current->value, i++);
+		insertReadOnlySymbol(compilerState->symbolTable, current->value);
 	}
 	return option;
 }
@@ -248,7 +247,7 @@ Option * EvolutionOptionSemanticAction(Evolution * value) {
 Evolution * EvolutionSemanticAction(IntArray * surviveArray, IntArray * birthArray, const EvolutionEnum type) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Evolution * evolution = calloc(1, sizeof(Evolution));
-	if (array != NULL) {
+	if (surviveArray != NULL && birthArray != NULL) {
 		evolution->isDefault = false;
 		evolution->surviveArray = surviveArray;
 		evolution->birthArray = birthArray;
