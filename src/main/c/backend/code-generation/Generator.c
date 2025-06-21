@@ -18,7 +18,7 @@ void shutdownGeneratorModule() {
 
 /** PRIVATE FUNCTIONS */
 
-static const char _arithmeticExpressionTypeToString(const ExpressionType type);
+static char * _arithmeticExpressionTypeToString(const ArithmeticExpressionType type);
 static void _generateConstant(const Constant * constant);
 static void _generateEpilogue(const int value);
 static void _generateExpression(const unsigned int indentationLevel, Expression * expression);
@@ -280,6 +280,7 @@ static void _generateCellListRec(const CellList * cellList) {
 	}
 	_generateCell(cellList->cell);
 	_output(0,",");
+	_generateCellListRec(cellList);
 }
 
 static void _generateConstantArray(const ConstantArray * arr) {
@@ -296,6 +297,37 @@ static void _generateConstantArrayRec(const ConstantArray * arr) {
 	}
 	_generateConstant(arr->value);
 	_output(0,",");
+	_generateConstantArrayRec(arr);
+}
+
+static void _generateIntArray(const IntArray * arr) {
+	_output(0, "[");
+	_generateIntArrayRec(arr);
+	_output(0, "]");
+}
+
+static void _generateIntArrayRec(const IntArray * arr) {
+	if (arr->isLast) {
+		_output(0,"%d", arr->value);
+		return;
+	}
+	_output(0,"%d,", arr->value);
+	_generateIntArrayRec(arr);
+}
+
+static void _generateStringArray(const StringArray * arr) {
+	_output(0, "{");
+	_generateStringArrayRec(0, arr);
+	_output(0, "}");
+}
+
+static void _generateStringArrayRec(unsigned int depth, const StringArray * arr) {
+	if (arr->isLast) {
+		_output(0,"'%s': %d", arr->value, depth);
+		return;
+	}
+	_output(0,"'%s': %d", arr->value, depth);
+	_generateStringArrayRec(depth + 1, arr);
 }
 
 static void _generateRange(const Range * range) {
@@ -334,6 +366,56 @@ static void _generateArithmeticExpression(const ArithmeticExpression * arithmeti
 		if (arithmeticExpression->type == AT_LEAST_ARE) {
 			_output(0," >= %d", arithmeticExpression->count);
 		}
+	}
+}
+
+static char MAX_FRONTIER_TYPE_LENGTH = 16;
+
+static char * _getStringFromFrontierType(const FrontierEnum type) {
+	char * operand = calloc(MAX_FRONTIER_TYPE_LENGTH, sizeof(char));
+	switch (type) {
+		case PERIODIC:
+			strcpy(operand, "Periodic");
+			break;
+		case OPEN:
+			strcpy(operand, "Open");
+			break;
+		case MIRROR:
+			strcpy(operand, "Mirror");
+			break;
+		default:
+			break;
+	}
+}
+
+static void _generateOption(const Option * option) {
+	switch (option->type){
+		case HEIGHT_OPTION:
+			_output(0,"SCREEN_HEIGHT=%d\n", option->value);
+			break; 
+		case WIDTH_OPTION:   
+			_output(0,"SCREEN_WIDTH=%d\n", option->value);
+			break;          
+		case FRONTIER_OPTION:   
+			_output(0,"FRONTIER_MODE=%s\n", _getStringFromFrontierType(option->frontierType));
+			break;          
+		case COLORS_OPTION:
+			_output(0,"STATE_COLORS=");
+			_generateIntArray(option->colors);
+			_output(0,"\n");
+			break;                
+		case STATES_OPTION: 
+			_output(0,"STATE=");
+			_generateStringArray(option->states);
+			_output(0,"\n");  
+			break;            
+		case NEIGHBORHOOD_OPTION:  
+			break;      
+		case EVOLUTION_OPTION:
+			_output(0,"EVOLUTION_MODE=%d\n", option->value);
+			break;
+		default:
+			break;
 	}
 }
 

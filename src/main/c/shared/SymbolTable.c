@@ -80,11 +80,11 @@ void popScope(SymbolTable* symbolTable) {
     }
 }
 
-int getCurrentScope(SymbolTable* symbolTable) {
+int getCurrentScope(const SymbolTable* symbolTable) {
     return symbolTable->currentScope;
 }
 
-Symbol* insertSymbol(SymbolTable* symbolTable, const char* name, const char type, const int value) {
+Symbol* insertSymbol(SymbolTable* symbolTable, const char* name, const int value) {
     if (symbolTable == NULL || name == NULL) {
         return NULL;
     }
@@ -95,7 +95,7 @@ Symbol* insertSymbol(SymbolTable* symbolTable, const char* name, const char type
         }
     }
     if (symbolTable->size == symbolTable->capacity) {
-        int newCapacity = symbolTable->capacity * 2;
+        const int newCapacity = symbolTable->capacity * 2;
         Symbol* newSymbols = (Symbol*)realloc(symbolTable->symbols, newCapacity * sizeof(Symbol));
         if (newSymbols == NULL) {
             return NULL;
@@ -108,20 +108,19 @@ Symbol* insertSymbol(SymbolTable* symbolTable, const char* name, const char type
     if (newSymbol->name == NULL) {
         return NULL;
     }
-    newSymbol->type = type;
     newSymbol->value = value;
     newSymbol->scope = symbolTable->currentScope;
     symbolTable->size++;
     return newSymbol;
 }
 
-Symbol* lookupSymbol(SymbolTable* symbolTable, const char* name) {
+Symbol* lookupSymbol(const SymbolTable* symbolTable, const char* name) {
     if (symbolTable == NULL || name == NULL) {
         return NULL;
     }
     // Buscar desde el scope más interno al más externo
     for (int s = symbolTable->scopeDepth - 1; s >= 0; s--) {
-        int scope = symbolTable->scopes[s];
+        const int scope = symbolTable->scopes[s];
         for (int i = symbolTable->size - 1; i >= 0; i--) {
             if (strcmp(symbolTable->symbols[i].name, name) == 0 && symbolTable->symbols[i].scope == scope) {
                 return &(symbolTable->symbols[i]);
