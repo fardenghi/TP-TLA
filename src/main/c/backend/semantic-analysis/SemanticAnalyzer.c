@@ -4,7 +4,6 @@
 
 static Logger *_logger = NULL;
 
-// PREGUNTAR
 int amountOfColors = 0;
 
 void initializeSemanticAnalyzerModule()
@@ -74,67 +73,43 @@ static bool validateConfiguration(Configuration *configuration)
     return validateConfigurationRec(configuration);
 }
 
-static bool validateConfigurationRec(Configuration *configuration)
+static bool validateConfigurationAux(Option *option)
 {
     // Vemos que WIDTH y HEIGHT sean validas
-    if (configuration->option == WIDTH_OPTION || configuration->option == HEIGHT_OPTION)
+    if (option == WIDTH_OPTION || option == HEIGHT_OPTION)
     {
-        if (configuration->option->value <= 0)
+        if (option->value <= 0)
         {
             logError(_logger, "Configuration option %s must be greater than 0.",
-                     configuration->option->type == WIDTH_OPTION ? "Width" : "Height");
+                     option->type == WIDTH_OPTION ? "Width" : "Height");
             return false;
         }
         else
         {
             logDebugging(_logger, "Configuration option %s is valid with value %d.",
-                         configuration->option->type == WIDTH_OPTION ? "Width" : "Height",
-                         configuration->option->value);
-
-            if (configuration->isLast)
-            {
-                logDebugging(_logger, "Configuration is last.");
-                return true;
-            }
-            else
-            {
-                return validateConfigurationRec(configuration->next);
-            }
+                         option->type == WIDTH_OPTION ? "Width" : "Height",
+                         option->value);
         }
     }
-
-    // Vemos que el FRONTIER_OPTION sea valido
-    if (configuration->option == FRONTIER_OPTION)
+    else if (option == FRONTIER_OPTION) // Vemos que el FRONTIER_OPTION sea valido
     {
-        if (configuration->option->frontierType == PERIODIC ||
-            configuration->option->frontierType == OPEN ||
-            configuration->option->frontierType == MIRROR)
+        if (option->frontierType == PERIODIC ||
+            option->frontierType == OPEN ||
+            option->frontierType == MIRROR)
         {
             logDebugging(_logger, "Configuration option Frontier is valid with type");
-
-            if (configuration->isLast)
-            {
-                logDebugging(_logger, "Configuration is last.");
-                return true;
-            }
-            else
-            {
-                return validateConfigurationRec(configuration->next);
-            }
         }
     }
-
-    // Vemos que los COLORS sean validos
-    if (configuration->option == COLORS_OPTION)
+    else if (option == COLORS_OPTION) // Vemos que los COLORS sean validos
     {
-        if (configuration->option->colors == NULL)
+        if (option->colors == NULL)
         {
             logError(_logger, "Configuration option COLORS is NULL.");
             return false;
         }
         else
         {
-            IntArray *colors = configuration->option->colors;
+            IntArray *colors = option->colors;
             do
             {
                 amountOfColors++;
@@ -166,14 +141,11 @@ static bool validateConfigurationRec(Configuration *configuration)
                 }
             } while (!colors->isLast);
         }
-        return validateConfigurationRec(configuration->next);
     }
-
-    // Vemos que los STATES sean validos
-    if (configuration->option == STATES_OPTION)
+    else if (option == STATES_OPTION) // Vemos que los STATES sean validos
     {
         int amountOfStates = 0;
-        StringArray *states = configuration->option->states;
+        StringArray *states = option->states;
         if (states == NULL)
         {
             logError(_logger, "Configuration option STATES is NULL.");
@@ -221,27 +193,37 @@ static bool validateConfigurationRec(Configuration *configuration)
             }
         }
     }
+    // else if (option == NEIGHBORHOOD_OPTION) // Vemos que el NEIGHBORHOOD_OPTION sea valido
+    // {
+    //     if (option->neighborhoodEnum == CUSTOM ||
+    //         option->neighborhoodEnum == MOORE ||
+    //         option->neighborhoodEnum == VON_NEUMANN ||
+    //         option->neighborhoodEnum == K_NEIGHBORHOOD)
+    //     {
+    //         logDebugging(_logger, "Configuration option Frontier is valid with type");
+    //     }
+    // }
+}
 
-    // Vemos que el NEIGHBORHOOD_OPTION sea valido
-    if (configuration->option == NEIGHBORHOOD_OPTION)
+static bool validateConfigurationRec(Configuration *configuration)
+{
+    if (configuration->isLast)
     {
-        if (configuration->option->neighborhoodEnum == CUSTOM ||
-            configuration->option->neighborhoodEnum == MOORE ||
-            configuration->option->neighborhoodEnum == VON_NEUMANN ||
-            configuration->option->neighborhoodEnum == K_NEIGHBORHOOD)
-        {
-            logDebugging(_logger, "Configuration option Frontier is valid with type");
+        validateConfigurationAux(configuration->lastOption);
+    }
+    else
+    {
+        validateConfigurationAux(configuration->option);
+    }
 
-            if (configuration->isLast)
-            {
-                logDebugging(_logger, "Configuration is last.");
-                return true;
-            }
-            else
-            {
-                return validateConfigurationRec(configuration->next);
-            }
-        }
+    if (configuration->isLast)
+    {
+        logDebugging(_logger, "Configuration is last.");
+        return true;
+    }
+    else
+    {
+        return validateConfigurationRec(configuration->next);
     }
 }
 
