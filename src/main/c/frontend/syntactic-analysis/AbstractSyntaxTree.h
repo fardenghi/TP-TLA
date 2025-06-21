@@ -165,8 +165,8 @@ struct Evolution {
 	union {
 		EvolutionEnum evolutionTypes;
 		struct {
-			IntArray * array;
-			int value;
+			IntArray * surviveArray;
+			IntArray * birthArray;
 		};
 	};
 };
