@@ -73,6 +73,35 @@ static bool validateConfiguration(Configuration *configuration)
     return validateConfigurationRec(configuration);
 }
 
+static bool validateConfigurationRec(Configuration *configuration)
+{
+    bool validConfig = true;
+    if (configuration->isLast)
+    {
+        validConfig = validateConfigurationAux(configuration->lastOption);
+    }
+    else
+    {
+        validConfig = validateConfigurationAux(configuration->option);
+    }
+
+    if (!validConfig)
+    {
+        return false;
+    }
+
+    if (configuration->isLast)
+    {
+        logDebugging(_logger, "Configuration is last.");
+        return true;
+    }
+    else
+    {
+
+        return validateConfigurationRec(configuration->next);
+    }
+}
+
 static bool validateConfigurationAux(Option *option)
 {
     // Vemos que WIDTH y HEIGHT sean validas
@@ -99,6 +128,10 @@ static bool validateConfigurationAux(Option *option)
         {
             logDebugging(_logger, "Configuration option Frontier is valid with type");
         }
+        else
+        {
+            logError(_logger, "Frontier configuration is not valid");
+        }
     }
     else if (option == COLORS_OPTION) // Vemos que los COLORS sean validos
     {
@@ -123,7 +156,6 @@ static bool validateConfigurationAux(Option *option)
                     else
                     {
                         logDebugging(_logger, "Configuration option COLORS is valid");
-                        return true;
                     }
                 }
                 else
@@ -158,7 +190,7 @@ static bool validateConfigurationAux(Option *option)
                 amountOfStates++;
                 if (states->isLast)
                 {
-                    if (states->lastValue == NULL || states->lastValue == "")
+                    if (states->lastValue == NULL || states->lastValue == " ")
                     {
                         logError(_logger, "A value in the States Array is NULL or empty String");
                         return false;
@@ -170,7 +202,7 @@ static bool validateConfigurationAux(Option *option)
                 }
                 else
                 {
-                    if (states->value == NULL || states->value == "")
+                    if (states->value == NULL || states->value == " ")
                     {
                         logError(_logger, "A value in the States Array is NULL or empty String");
                         return false;
@@ -187,10 +219,6 @@ static bool validateConfigurationAux(Option *option)
                 logError(_logger, "The amount of colors differ from the amount of states.");
                 return false;
             }
-            else
-            {
-                return true;
-            }
         }
     }
     // else if (option == NEIGHBORHOOD_OPTION) // Vemos que el NEIGHBORHOOD_OPTION sea valido
@@ -203,28 +231,17 @@ static bool validateConfigurationAux(Option *option)
     //         logDebugging(_logger, "Configuration option Frontier is valid with type");
     //     }
     // }
+    return true;
 }
 
-static bool validateConfigurationRec(Configuration *configuration)
+static bool validateDefaultConfiguration(Configuration *configuration)
 {
-    if (configuration->isLast)
-    {
-        validateConfigurationAux(configuration->lastOption);
-    }
-    else
-    {
-        validateConfigurationAux(configuration->option);
-    }
-
-    if (configuration->isLast)
-    {
-        logDebugging(_logger, "Configuration is last.");
-        return true;
-    }
-    else
-    {
-        return validateConfigurationRec(configuration->next);
-    }
+}
+static bool validateTransitionConfiguration(Configuration *configuration)
+{
+}
+static bool validateNeighborhoodConfiguration(Configuration *configuration)
+{
 }
 
 SemanticAnalysisStatus checkSemantic(Program *program, Logger *logger)
