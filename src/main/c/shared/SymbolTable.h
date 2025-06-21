@@ -1,6 +1,8 @@
+#ifndef SYMBOL_TABLE_HEADER
+#define SYMBOL_TABLE_HEADER
+
 typedef struct {
     char * name;
-    char type;
     int value;
     int scope; // Nuevo campo para el scope
 } Symbol;
@@ -19,8 +21,10 @@ typedef struct {
 
 SymbolTable * createSymbolTable();
 void destroySymbolTable(SymbolTable * symbolTable);
-Symbol* insertSymbol(SymbolTable * symbolTable, const char * name, const char type, const int value);
-Symbol * lookupSymbol(SymbolTable * symbolTable, const char * name);
+Symbol* insertSymbol(SymbolTable * symbolTable, const char * name, const int value);
+Symbol * lookupSymbol(const SymbolTable * symbolTable, const char * name);
 void pushScope(SymbolTable * symbolTable);
 void popScope(SymbolTable * symbolTable);
 int getCurrentScope(SymbolTable * symbolTable);
+
+#endif

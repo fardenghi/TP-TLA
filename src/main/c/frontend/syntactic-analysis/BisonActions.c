@@ -226,6 +226,17 @@ Option * StringArrayValuedOptionSemanticAction(StringArray * value) {
 	Option * option = calloc(1, sizeof(Option));
 	option->type = STATES_OPTION;
 	option->states = value;
+	const CompilerState * compilerState = currentCompilerState();
+	int i = 0;
+	for (const StringArray * current = value; current != NULL; current = current->next) {
+		if (current->isLast) break;
+		if (current->value == NULL) {
+			logError(_logger, "StringArrayValuedOptionSemanticAction: A string in the array is NULL.");
+			free(option);
+			return NULL;
+		}
+		insertSymbol(compilerState->symbolTable, current->value, i++);
+	}
 	return option;
 }
 Option * FrontierOptionSemanticAction(const FrontierEnum value) {
