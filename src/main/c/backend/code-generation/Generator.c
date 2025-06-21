@@ -434,9 +434,13 @@ static void _generateOption(const Option * option) {
 				
 			} else {
 				_output(0,"EVOLUTION_MODE='SB'\n");
+				_output(0,"SURVIVE_RULES=");
 				_generateIntArray(option->evolution->array);
+				_output(0,"\n");
 				//@todo: cambiar para que sea un array tambien
+				_output(0,"BIRTH_RULES=");
 				_output(0,"[%d]", option->evolution->value);
+				_output(0,"\n");
 			}
 			break;
 		default:
