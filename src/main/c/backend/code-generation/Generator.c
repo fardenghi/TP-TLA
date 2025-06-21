@@ -104,6 +104,101 @@ static char * _arithmeticExpressionTypeToString(const ArithmeticExpressionType t
 	return operand;
 }
 
+static void _generateTransitionExpression(const TransitionExpression * transitionExpression) {
+	switch (transitionExpression->type)
+	{
+		case TRANSITION_ASSIGNMENT:
+			_generateArithmeticExpression(transitionExpression->assignment);
+			break;
+		case TRANSITION_FOR_LOOP:
+			_output(0, "for %s in ", transitionExpression->forVariable);
+			_generateRange(transitionExpression->range);
+			_output(0, ":\n");
+			_generateTransitionExpression(transitionExpression->forBody);
+			break;
+		case TRANSITION_IF:
+			_output(0, "if ");
+			_generateArithmeticExpression(transitionExpression->ifCondition);
+			_output(0, ":\n");
+			_generateTransitionExpression(transitionExpression->ifBody); // Esto es un transition sequence, llamo a transition secuence en vez de expression 
+			break;
+		case TRANSITION_IF_ELSE:
+			_output(0, "if ");
+			_generateArithmeticExpression(transitionExpression->ifElseCondition);
+			_output(0, ":\n");
+			_generateTransitionExpression(transitionExpression->ifElseIfBody);
+			_output(0, "\nelse:\n");
+			_generateTransitionExpression(transitionExpression->ifElseElseBody);
+			break;
+		case RETURN_VALUE:
+			_output(0, "return ");
+			_generateArithmeticExpression(transitionExpression->returnValue);
+			break;
+	default:
+		break;
+	}
+}
+
+static void _generateNeighborhoodExpression(const NeighborhoodExpression * neighborhoodExpression) {
+	switch (neighborhoodExpression->type)
+	{
+		case NEIGHBORHOOD_ASSIGNMENT:
+			_generateArithmeticExpression(neighborhoodExpression->assignment);
+			break;
+		case NEIGHBORHOOD_FOR_LOOP:
+			_output(0, "for %s in ", neighborhoodExpression->forVariable);
+			_generateRange(neighborhoodExpression->range);
+			_output(0, ":\n");
+			_generateNeighborhoodSequence(neighborhoodExpression->forBody);
+			break;
+		case NEIGHBORHOOD_IF:
+			_output(0, "if ");
+			_generateArithmeticExpression(neighborhoodExpression->ifCondition);
+			_output(0, ":\n");
+			_generateNeighborhoodSequence(neighborhoodExpression->ifBody);
+			break;
+		case NEIGHBORHOOD_IF_ELSE:
+			_output(0, "if ");
+			_generateArithmeticExpression(neighborhoodExpression->ifElseCondition);
+			_output(0, ":\n");
+			_generateNeighborhoodExpression(neighborhoodExpression->ifElseIfBody);
+			_output(0, "\nelse:\n");
+			_generateNeighborhoodSequence(neighborhoodExpression->ifElseElseBody);
+			break;
+		case ADD_CELL_EXP:
+			_output(0, "neighbors.update(\n");
+			_generateCellList(neighborhoodExpression->toAddList);
+			_output(0, ")");
+		case REMOVE_CELL_EXP:
+			_output(0, "neighbors.difference_update(\n");
+			_generateCellList(neighborhoodExpression->toRemoveList);
+			_output(0, ")");
+		break;
+	default:
+		break;
+	}
+}
+
+
+
+static void _generateTransitionSequence(const TransitionSequence * transitionSequence) {
+	_generateTransitionExpression(transitionSequence->expression);
+	if (transitionSequence->sequence != NULL) {
+		_generateTransitionSequence(transitionSequence->sequence);
+	} else {
+		_output(0, "\n");
+	}
+}
+
+static void _generateNeighborSequence(const NeighborSequence * neighborSequence) {
+	_generateNeighborExpression(neighborSequence->expression);
+	if (neighborSequence->sequence != NULL) {
+		_generateNeighborSequence(neighborSequence->sequence);
+	} else {
+		_output(0, "return neighbors\n");
+	}
+}
+
 /**
  * Generates the output of a constant.
  */

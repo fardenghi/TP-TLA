@@ -6,35 +6,28 @@ CELL_SIZE = 20
 
 ### INICIO SECCION GENERADA POR COMPILADOR ###
 
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-FRONTIER_MODE = 'Open'     
-EVOLUTION_MODE = 'Transition'
+SCREEN_WIDTH = 1000
+SCREEN_HEIGHT = 800
+FRONTIER_MODE = 'Periodic' 
+EVOLUTION_MODE = 'SB'      
 
-STATES = {'a': 0, 'b': 1, 'c': 2}
+STATES = {'dead': 0, 'alive': 1}
+
 STATE_COLORS = {
-    0: (255, 0, 0),    
-    1: (0, 0, 0),      
-    2: (0, 255, 0)     
+    0: (10, 10, 10),    
+    1: (255, 255, 255)  
 }
 
-def transition_function(cells, row, col):
-    neighbor_above = get_cell_value(cells, row - 1, col)
-    neighbor_right = get_cell_value(cells, row, col + 1)
+BIRTH_RULES = [3]
+SURVIVE_RULES = [2, 3]
+
+def neighborhood_function(row, col):
+    neighbors = set()
     
-    state_a = STATES['a']
-    state_b = STATES['b']
-    state_c = STATES['c']
+    for i in [-3, 3]:
+        neighbors.update([(i, 0), (0, i)])
 
-    neighbor_below = get_cell_value(cells, row + 1, col)
-
-    if get_cell_value(cells, row, col + 1) == state_a:
-        return state_b
-    else:
-        if get_cell_value(cells, row + 1, col) == state_b:
-            return state_c
-        else:
-            return state_a
+    return neighbors
 
 ### FIN SECCION GENERADA POR COMPILADOR ###
 
@@ -68,7 +61,7 @@ def update(screen, cells):
         
         if EVOLUTION_MODE == 'SB':
             alive_neighbors = 0
-            for dr, dc in NEIGHBORHOOD:
+            for dr, dc in neighborhood_function(row, col):
                 if get_cell_value(cells, row + dr, col + dc) == 1:
                     alive_neighbors += 1
             

@@ -262,25 +262,13 @@ struct Range {
 };
 
 struct TransitionSequence {
-	boolean binary;
-	union {
-		TransitionExpression * expression;
-		struct {
-			TransitionSequence * sequence;
-			TransitionExpression *rightExpression;
-		};
-	};
+	TransitionSequence * sequence;
+	TransitionExpression *rightExpression;
 };
 
 struct NeighborhoodSequence {
-	boolean binary;
-	union {
-		NeighborhoodExpression * expression;
-		struct {
-			NeighborhoodSequence * sequence;
-			NeighborhoodExpression * rightExpression;
-		};
-	};
+	NeighborhoodSequence * sequence;
+	NeighborhoodExpression * rightExpression;
 };
 
 struct TransitionExpression {

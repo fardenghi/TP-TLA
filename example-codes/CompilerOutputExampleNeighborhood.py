@@ -13,8 +13,11 @@ STATE_COLORS = {
 BIRTH_RULES = [3]
 SURVIVE_RULES = [2, 3]
 
-NEIGHBORHOOD = [
-    (-1, -1), (-1, 0), (-1, 1),
-    (0, -1),          (0, 1),
-    (1, -1),  (1, 0),  (1, 1)
-]
+def neighborhood_function(row, col):
+    neighbors = set()
+    
+    for i in [-3, 3]:
+        neighbors.update([(i, 0), (0, i)])
+
+
+    return neighbors
