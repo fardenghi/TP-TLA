@@ -434,14 +434,14 @@ static void _generateOption(const Option * option) {
 							"        (-1, -1), (-1, 0), (-1, 1),\n"
 							"        (0, -1),          (0, 1),\n"
 							"        (1, -1),  (1, 0),  (1, 1)\n"
-							"    }\n")
-						}
+							"    }\n");
+			}
 			else if (option->neighborhoodEnum == VON_NEUMANN) {
 				_output(0, "%s",
 							"def neighborhood_function(row, col):\n"
 							"    return {\n"
 							"        (-1, 0), (1, 0), (0, -1), (0, 1)\n"
-							"    }\n")		
+							"    }\n");
 			}
 		case EVOLUTION_OPTION:
 			_output(0,"EVOLUTION_MODE='SB'\n");
@@ -461,7 +461,7 @@ static void _generateOption(const Option * option) {
 			} else {
 				_generateIntArray(option->evolution->surviveArray);
 				_output(0,"BIRTH_RULES = ");
-				_generateIntArray(0,"[%d]", option->evolution->birthArray);
+				_generateIntArray(option->evolution->birthArray);
 			}
 			break;
 		default:
