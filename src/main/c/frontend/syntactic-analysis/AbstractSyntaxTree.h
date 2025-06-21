@@ -50,13 +50,15 @@ typedef struct Range Range;
  * Node types for the Abstract Syntax Tree (AST).
  */
 
-enum ProgramType {
+enum ProgramType
+{
 	DEFAULT,
 	TRANSITION,
 	NEIGHBORHOOD_PROGRAM
 };
 
-enum ArithmeticExpressionType {
+enum ArithmeticExpressionType
+{
 	ADDITION,
 	DIVISION,
 	MULTIPLICATION,
@@ -78,18 +80,21 @@ enum ArithmeticExpressionType {
 	CONSTANT
 };
 
-enum RangeType {
+enum RangeType
+{
 	ARRAY,
 	INTERVAL
 };
 
-enum ConstantType {
+enum ConstantType
+{
 	INTEGER_C,
 	STRING_C,
 	CELL_C
 };
 
-enum TransitionExpressionType {
+enum TransitionExpressionType
+{
 	TRANSITION_ASSIGNMENT,
 	TRANSITION_FOR_LOOP,
 	TRANSITION_IF,
@@ -97,7 +102,8 @@ enum TransitionExpressionType {
 	RETURN_VALUE
 };
 
-enum NeighborhoodExpressionType {
+enum NeighborhoodExpressionType
+{
 	NEIGHBORHOOD_ASSIGNMENT,
 	NEIGHBORHOOD_FOR_LOOP,
 	NEIGHBORHOOD_IF,
@@ -106,251 +112,305 @@ enum NeighborhoodExpressionType {
 	REMOVE_CELL_EXP
 };
 
-enum OptionType {
-    HEIGHT_OPTION,       
-    WIDTH_OPTION,                 
-    FRONTIER_OPTION,               
-    COLORS_OPTION,                 
-    STATES_OPTION,                 
-    NEIGHBORHOOD_OPTION,           
-    EVOLUTION_OPTION               
+enum OptionType
+{
+	HEIGHT_OPTION,
+	WIDTH_OPTION,
+	FRONTIER_OPTION,
+	COLORS_OPTION,
+	STATES_OPTION,
+	NEIGHBORHOOD_OPTION,
+	EVOLUTION_OPTION
 };
 
-struct Program {
-	union {
-		Configuration * justConfiguration;
-		struct {
-			Configuration * configuration;
-			union {
-				TransitionSequence * transitionSequence;
-				NeighborhoodSequence * neighborhoodSequence;
+struct Program
+{
+	union
+	{
+		Configuration *justConfiguration;
+		struct
+		{
+			Configuration *configuration;
+			union
+			{
+				TransitionSequence *transitionSequence;
+				NeighborhoodSequence *neighborhoodSequence;
 			};
 		};
 	};
 	ProgramType type;
 };
 
-struct ArithmeticExpression {
+struct ArithmeticExpression
+{
 	ArithmeticExpressionType type;
-	union {
-		ArithmeticExpression * expression;
-		struct {
-			ArithmeticExpression * leftExpression;
-			ArithmeticExpression * rightExpression;
+	union
+	{
+		ArithmeticExpression *expression;
+		struct
+		{
+			ArithmeticExpression *leftExpression;
+			ArithmeticExpression *rightExpression;
 		};
-		struct {
-			CellList * cellList;
+		struct
+		{
+			CellList *cellList;
 			int count;
 		};
-		Constant * constant;
+		Constant *constant;
 	};
 };
 
-struct Option {
+struct Option
+{
 	OptionType type;
-	union {
-		int value;
-		FrontierEnum frontierType;
-		IntArray * colors;
-		StringArray * states;
-		NeighborhoodEnum neighborhoodEnum;
-		Evolution * evolution;
-	};
-};
-
-struct Evolution {
-	boolean isDefault;
-	union {
-		EvolutionEnum evolutionTypes;
-		struct {
-			IntArray * array;
-			int value;
-		};
-	};
-};
-
-struct Configuration {
-	boolean isLast;
-	union {
-		Option * lastOption;
-		struct {
-			Option * option;
-			Configuration * next;
-		};
-		
-	};	
-};
-
-struct Constant {
-	ConstantType type;
-	union 
+	union
 	{
 		int value;
-		char * string;
-		Cell * cell;
+		FrontierEnum frontierType;
+		IntArray *colors;
+		StringArray *states;
+		NeighborhoodEnum neighborhoodEnum;
+		Evolution *evolution;
 	};
 };
 
-struct IntArray {
-	boolean isLast;
-	union {
-		int lastValue;
-		struct {
+struct Evolution
+{
+	boolean isDefault;
+	union
+	{
+		EvolutionEnum evolutionTypes;
+		struct
+		{
+			IntArray *array;
 			int value;
-			IntArray * next;
 		};
 	};
 };
 
-struct StringArray {
+struct Configuration
+{
 	boolean isLast;
-	union {
-		char * lastValue;
-		struct {
-			char * value;
-			StringArray * next;
+	union
+	{
+		Option *lastOption;
+		struct
+		{
+			Option *option;
+			Configuration *next;
 		};
 	};
 };
 
-struct ConstantArray {
+struct Constant
+{
+	ConstantType type;
+	union
+	{
+		int value;
+		char *string;
+		Cell *cell;
+	};
+};
+
+struct IntArray
+{
 	boolean isLast;
-	union {
-		Constant * lastValue;
-		struct {
-			Constant * value;
-			ConstantArray * next;
+	union
+	{
+		int lastValue;
+		struct
+		{
+			int value;
+			IntArray *next;
 		};
 	};
 };
 
-struct Cell {
+struct StringArray
+{
+	boolean isLast;
+	union
+	{
+		char *lastValue;
+		struct
+		{
+			char *value;
+			StringArray *next;
+		};
+	};
+};
+
+struct ConstantArray
+{
+	boolean isLast;
+	union
+	{
+		Constant *lastValue;
+		struct
+		{
+			Constant *value;
+			ConstantArray *next;
+		};
+	};
+};
+
+struct Cell
+{
 	boolean isSingleCoordenate;
-	union {
-		struct {
-			Constant * displacement;
+	union
+	{
+		struct
+		{
+			Constant *displacement;
 			DisplacementType displacementType;
 		};
-		struct {
-			Constant * x;
-			Constant * y;
+		struct
+		{
+			Constant *x;
+			Constant *y;
 		};
 	};
 };
 
-struct CellList {
+struct CellList
+{
 	boolean isLast;
-	union {
-		Cell * last;
-		struct {
-			Cell * cell;
-			CellList * next;
+	union
+	{
+		Cell *last;
+		struct
+		{
+			Cell *cell;
+			CellList *next;
 		};
 	};
 };
 
-struct Range {
+struct Range
+{
 	RangeType type;
-	union {
-		ConstantArray * array;
-		struct {
-			Constant * start;
-			Constant * end;
+	union
+	{
+		ConstantArray *array;
+		struct
+		{
+			Constant *start;
+			Constant *end;
 		};
 	};
 };
 
-struct TransitionSequence {
+struct TransitionSequence
+{
 	boolean binary;
-	union {
-		TransitionExpression * expression;
-		struct {
-			TransitionSequence * sequence;
+	union
+	{
+		TransitionExpression *expression;
+		struct
+		{
+			TransitionSequence *sequence;
 			TransitionExpression *rightExpression;
 		};
 	};
 };
 
-struct NeighborhoodSequence {
+struct NeighborhoodSequence
+{
 	boolean binary;
-	union {
-		NeighborhoodExpression * expression;
-		struct {
-			NeighborhoodSequence * sequence;
-			NeighborhoodExpression * rightExpression;
+	union
+	{
+		NeighborhoodExpression *expression;
+		struct
+		{
+			NeighborhoodSequence *sequence;
+			NeighborhoodExpression *rightExpression;
 		};
 	};
 };
 
-struct TransitionExpression {
+struct TransitionExpression
+{
 	TransitionExpressionType type;
-	union {
-		struct {
-			ArithmeticExpression * assignment;
-			char * variable;
+	union
+	{
+		struct
+		{
+			ArithmeticExpression *assignment;
+			char *variable;
 		};
-		struct {
-			char * forVariable;
-			Range * range;
-			TransitionSequence * forBody;
+		struct
+		{
+			char *forVariable;
+			Range *range;
+			TransitionSequence *forBody;
 		};
-		struct {
-			ArithmeticExpression * ifCondition;
-			TransitionSequence * ifBody;
+		struct
+		{
+			ArithmeticExpression *ifCondition;
+			TransitionSequence *ifBody;
 		};
-		struct {
-			ArithmeticExpression * ifElseCondition;
-			TransitionSequence * ifElseIfBody;
-			TransitionSequence * ifElseElseBody;
+		struct
+		{
+			ArithmeticExpression *ifElseCondition;
+			TransitionSequence *ifElseIfBody;
+			TransitionSequence *ifElseElseBody;
 		};
-		ArithmeticExpression * returnValue;
+		ArithmeticExpression *returnValue;
 	};
 };
 
-struct NeighborhoodExpression {
+struct NeighborhoodExpression
+{
 	NeighborhoodExpressionType type;
-	union {
-		struct {
-			ArithmeticExpression * assignment;
-			char * variable;
+	union
+	{
+		struct
+		{
+			ArithmeticExpression *assignment;
+			char *variable;
 		};
-		struct {
-			char * forVariable;
-			Range * range;
-			NeighborhoodSequence * forBody;
+		struct
+		{
+			char *forVariable;
+			Range *range;
+			NeighborhoodSequence *forBody;
 		};
-		struct {
-			ArithmeticExpression * ifCondition;
-			NeighborhoodSequence * ifBody;
+		struct
+		{
+			ArithmeticExpression *ifCondition;
+			NeighborhoodSequence *ifBody;
 		};
-		struct {
-			ArithmeticExpression * ifElseCondition;
-			NeighborhoodSequence * ifElseIfBody;
-			NeighborhoodSequence * ifElseElseBody;
+		struct
+		{
+			ArithmeticExpression *ifElseCondition;
+			NeighborhoodSequence *ifElseIfBody;
+			NeighborhoodSequence *ifElseElseBody;
 		};
-		CellList * toAddList;
-		CellList * toRemoveList;
+		CellList *toAddList;
+		CellList *toRemoveList;
 	};
 };
 
 /**
  * Node recursive destructors.
  */
-void releaseConstant(Constant * constant);
-void releaseArithmeticExpression(ArithmeticExpression * expression);
-void releaseProgram(Program * program);
-void releaseTransitionSequence(TransitionSequence * transitionSequence);
-void releaseNeighborhoodSequence(NeighborhoodSequence * neighborhoodSequence);
-void releaseTransitionExpression(TransitionExpression * transitionExpression);
-void releaseNeighborhoodExpression(NeighborhoodExpression * neighborhoodExpression);
-void releaseOption(Option * option);
-void releaseEvolution(Evolution * evolution);
-void releaseConfiguration(Configuration * configuration);
-void releaseIntArray(IntArray * array);
-void releaseStringArray(StringArray * array);
-void releaseConstantArray(ConstantArray * array);
-void releaseCell(Cell * cell);
-void releaseCellList(CellList * list);
-void releaseRange(Range * range);
+void releaseConstant(Constant *constant);
+void releaseArithmeticExpression(ArithmeticExpression *expression);
+void releaseProgram(Program *program);
+void releaseTransitionSequence(TransitionSequence *transitionSequence);
+void releaseNeighborhoodSequence(NeighborhoodSequence *neighborhoodSequence);
+void releaseTransitionExpression(TransitionExpression *transitionExpression);
+void releaseNeighborhoodExpression(NeighborhoodExpression *neighborhoodExpression);
+void releaseOption(Option *option);
+void releaseEvolution(Evolution *evolution);
+void releaseConfiguration(Configuration *configuration);
+void releaseIntArray(IntArray *array);
+void releaseStringArray(StringArray *array);
+void releaseConstantArray(ConstantArray *array);
+void releaseCell(Cell *cell);
+void releaseCellList(CellList *list);
+void releaseRange(Range *range);
 
 #endif
