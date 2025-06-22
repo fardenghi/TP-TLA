@@ -53,7 +53,7 @@
  * @see https://www.gnu.org/software/bison/manual/html_node/Destructor-Decl.html
  */
 
-%destructor { releaseProgram($$); } <program>
+/* %destructor { releaseProgram($$); } <program> */
 %destructor { releaseTransitionSequence($$); } <transition_sequence>
 %destructor { releaseNeighborhoodSequence($$); } <neighborhood_sequence>
 %destructor { releaseTransitionExpression($$); } <transition_expression>

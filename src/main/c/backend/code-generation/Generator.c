@@ -317,7 +317,7 @@ static void _generateCellListRec(const CellList * cellList) {
 	}
 	_generateCell(cellList->cell);
 	_output(0,",");
-	_generateCellListRec(cellList);
+	_generateCellListRec(cellList->next);
 }
 static void _generateCellList(const CellList * cellList) {
 	_output(0, "[");
@@ -332,7 +332,7 @@ static void _generateConstantArrayRec(const ConstantArray * arr) {
 	}
 	_generateConstant(arr->value);
 	_output(0,",");
-	_generateConstantArrayRec(arr);
+	_generateConstantArrayRec(arr->next);
 }
 
 static void _generateConstantArray(const ConstantArray * arr) {
@@ -348,7 +348,7 @@ static void _generateIntArrayRec(const IntArray * arr) {
 		return;
 	}
 	_output(0,"%d,", arr->value);
-	_generateIntArrayRec(arr);
+	_generateIntArrayRec(arr->next);
 }
 
 static void _generateIntArray(const IntArray * arr) {
@@ -362,8 +362,8 @@ static void _generateStringArrayRec(unsigned int depth, const StringArray * arr)
 		_output(0,"'%s': %d", arr->value, depth);
 		return;
 	}
-	_output(0,"'%s': %d", arr->value, depth);
-	_generateStringArrayRec(depth + 1, arr);
+	_output(0,"'%s': %d, ", arr->value, depth);
+	_generateStringArrayRec(depth + 1, arr->next);
 }
 
 static void _generateStringArray(const StringArray * arr) {
@@ -413,22 +413,14 @@ static void _generateArithmeticExpression(const ArithmeticExpression * arithmeti
 
 static char MAX_FRONTIER_TYPE_LENGTH = 16;
 
-static char * _getStringFromFrontierType(const FrontierEnum type) {
-	char * operand = calloc(MAX_FRONTIER_TYPE_LENGTH, sizeof(char));
-	switch (type) {
-		case PERIODIC:
-			strcpy(operand, "Periodic");
-			break;
-		case OPEN:
-			strcpy(operand, "Open");
-			break;
-		case MIRROR:
-			strcpy(operand, "Mirror");
-			break;
-		default:
-			logError(_logger, "The specified frontier type is not valid: %d", type);
-			break;
-	}
+static const char * _getStringFromFrontierType(const FrontierEnum type) {
+    switch (type) {
+        case PERIODIC: return "Periodic";
+        case OPEN: return "Open";
+        case MIRROR: return "Mirror";
+        default:
+            logError(_logger, "The specified frontier type is not valid: %d", type);
+    }
 }
 
 static char * _getStringFromEvolutionType(const EvolutionEnum type) {
@@ -656,10 +648,10 @@ static void _generateEpilogue(const int value) {
  */
 static void _generatePrologue(void) {
 	_output(0, "%s",
-		"\\import time\n"
-		"\\import pygame\n"
-		"\\import numpy as np\n\n"
-		"\\CELL_SIZE = 20\n"
+		"import time\n"
+		"import pygame\n"
+		"import numpy as np\n\n"
+		"CELL_SIZE = 20\n"
 	);
 }
 

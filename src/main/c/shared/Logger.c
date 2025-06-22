@@ -11,6 +11,7 @@ static const char * _toContextString(const LoggingLevel loggingLevel);
  * Logs a new message at the specified level, using a format string.
  */
 static void _log(const Logger * logger, const LoggingLevel loggingLevel, const char * const format, va_list arguments) {
+	if (logger == NULL) return; //@TODO: Ver porque llega en null. Sin esto crashea
 	if (logger->loggingLevel <= loggingLevel) {
 		const char * context = _toContextString(loggingLevel);
 		char * effectiveFormat = concatenate(6, context, "[", logger->name, "] ", format, "\n");
