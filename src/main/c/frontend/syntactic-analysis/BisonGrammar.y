@@ -200,7 +200,7 @@ option: HEIGHT COLON INTEGER SEMICOLON														{ $$ = IntValuedOptionSemant
     | EVOLUTION COLON evolution[ev] SEMICOLON														{ $$ = EvolutionOptionSemanticAction($ev); }
 	;
 
-evolution: EVOLUTION_ENUM																{ $$ = EvolutionSemanticAction(NULL, 0, $1); }
+evolution: EVOLUTION_ENUM																{ $$ = EvolutionSemanticAction(NULL, NULL, $1); }
 	| int_array DIV int_array															{ $$ = EvolutionSemanticAction($1, $3, 0); }
 
 int_array: INTEGER																		{ $$ = IntArraySemanticAction($1, NULL); }
@@ -264,9 +264,9 @@ arithmetic_expression: arithmetic_expression[left] ADD arithmetic_expression[rig
 	| arithmetic_expression[left] LTE arithmetic_expression[right]									{ $$ = BinaryArithmeticExpressionSemanticAction($left, $right, LOWER_THAN_OR_EQUAL); }
 	| arithmetic_expression[left] GT arithmetic_expression[right]									{ $$ = BinaryArithmeticExpressionSemanticAction($left, $right, GREATER_THAN); }
 	| arithmetic_expression[left] GTE arithmetic_expression[right]									{ $$ = BinaryArithmeticExpressionSemanticAction($left, $right, GREATER_THAN_OR_EQUAL); }
-	| ALL_OPERAND OPEN_BRACE cell_list[single] CLOSE_BRACE ARE STRING[string]						{ $$ = CellListArithmeticExpressionSemanticAction($single, ALL_ARE, -1,$string); }
-	| ANY OPEN_BRACE cell_list[single] CLOSE_BRACE ARE STRING[string]								{ $$ = CellListArithmeticExpressionSemanticAction($single, ANY_ARE, 1,$string); }
-	| AT_LEAST INTEGER OPEN_BRACE cell_list[single] CLOSE_BRACE ARE STRING[string]					{ $$ = CellListArithmeticExpressionSemanticAction($single, AT_LEAST_ARE, $2,$string); }
+	| ALL_OPERAND OPEN_BRACE cell_list[single] CLOSE_BRACE ARE STRING[string]						{ $$ = CellListArithmeticExpressionSemanticAction($single, ALL_ARE, -1, $string); }
+	| ANY OPEN_BRACE cell_list[single] CLOSE_BRACE ARE STRING[string]								{ $$ = CellListArithmeticExpressionSemanticAction($single, ANY_ARE, 1, $string); }
+	| AT_LEAST INTEGER OPEN_BRACE cell_list[single] CLOSE_BRACE ARE STRING[string]					{ $$ = CellListArithmeticExpressionSemanticAction($single, AT_LEAST_ARE, $2, $string); }
 	| OPEN_PARENTHESIS arithmetic_expression[single] CLOSE_PARENTHESIS								{ $$ = UnaryArithmeticExpressionSemanticAction($single, FACTOR); }
 	| constant[single]																				{ $$ = ConstantArithmeticExpressionSemanticAction($single); }
 	| cell																				 			{ $$ = CellArithmeticExpressionSemanticAction($1); }
