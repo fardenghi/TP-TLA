@@ -30,7 +30,9 @@ static void _generateNeighborhoodExpression(unsigned int indentation, const Neig
 
 static void _generateArithmeticExpression(const ArithmeticExpression * arithmeticExpression);
 static void _generateConfiguration(Configuration * config);
-static void _generateCellList(const CellList * cellList);
+
+static void _generateNeighbourhoodCellList(const CellList * cellList);
+static void _generateTransitionCellList(const CellList * cellList);
 static void _generateRange(const Range * range);
 
 static void _generateConstantArrayRec(const ConstantArray * arr);
@@ -51,14 +53,16 @@ void _generateProgram(Program * program) {
 	_generateConfiguration(program->configuration);
 	switch (program->type)
 	{
+		//@todo: si el usuario no pone return al final se puede crashear (ponemos por default que retorne el estado actual de la celda?)
 	case TRANSITION:
+		_output(0, "EVOLUTION_MODE='Transition'\n");
 		_output(0,"def transition_function(cells, row, col):\n");
 		_generateTransitionSequence(1, program->transitionSequence);
 		break;
 	case NEIGHBORHOOD_PROGRAM:
 		_output(0,"def neighborhood_function(row, col):\n");
 		_output(1,"neighbors = set()\n");
-		_generateTransitionSequence(1, program->transitionSequence);
+		_generateNeighborhoodSequence(1, program->neighborhoodSequence);
 		_output(1,"return  neighbors\n");
 		break;
 	default:
@@ -78,62 +82,83 @@ void _generateConfiguration(Configuration * config) {
 
 static char * _arithmeticExpressionTypeToString(const ArithmeticExpressionType type) {
 	char * operand = calloc(MAX_OPERAND_LENGTH, sizeof(char));
+	operand[0] = ' ';
+	operand++;
 	switch (type) {
 		case ADDITION: 
 			operand[0] = '+';
+			operand[1] = ' ';
 			break;
 		case DIVISION: 
 			operand[0] = '/';
+			operand[1] = '/';
+			operand[2] = ' ';
 			break;
 		case MULTIPLICATION: 	
 			operand[0] = '*';
+			operand[1] = ' ';
 			break;
 		case SUBTRACTION: 
 			operand[0] = '-';
+			operand[1] = ' ';
 			break;
 		case MODULE: 
 			operand[0] = '%';
+			operand[1] = ' ';
 			break;
 		case LOGIC_AND: 
-			operand[0] = '&';
-			operand[1] = '&';
+			operand[0] = 'a';
+			operand[1] = 'n';
+			operand[2] = 'd';
+			operand[3] = ' ';
 			break;
 		case LOGIC_OR:
-			operand[0] = '|';
-			operand[1] = '|';
+			operand[0] = 'o';
+			operand[1] = 'r';
+			operand[2] = ' ';
 			break;
 		case EQUALS:
 			operand[0] = '=';
+			operand[1] = '=';
+			operand[2] = ' ';
 			break;
 		case NOT_EQUALS:
 			operand[0] = '!';
 			operand[1] = '=';
+			operand[2] = ' ';
 			break;
 		case LOWER_THAN:
 			operand[0] = '<';
+			operand[1] = ' ';
 			break;
 		case LOWER_THAN_OR_EQUAL:
 			operand[0] = '<';
 			operand[1] = '=';
+			operand[2] = ' ';
 			break;
 		case GREATER_THAN:
 			operand[0] = '>';
+			operand[1] = ' ';
 			break;
 		case GREATER_THAN_OR_EQUAL:
 			operand[0] = '>';
 			operand[1] = '=';
+			operand[2] = ' ';
 			break;
 		case LOGIC_NOT:
-			operand[0] = '!';
+			operand[0] = 'n';
+			operand[1] = 'o';
+			operand[2] = 't';
+			operand[3] = ' ';
 			break;
 		case ALL_ARE:
-			strcpy(operand, "all(");
+			strcpy(operand, " all(");
 			break;
 		case ANY_ARE:
-			strcpy(operand, "any(");
+			strcpy(operand, " any(");
 			break;
 		case AT_LEAST_ARE:
-			strcpy(operand, "sum(");
+			strcpy(operand, " sum(");
 			break;
 		case FACTOR:
 		case CONSTANT:
@@ -143,7 +168,7 @@ static char * _arithmeticExpressionTypeToString(const ArithmeticExpressionType t
 			logError(_logger, "The specified expression type cannot be converted into character: %d", type);
 			return NULL;
 	}
-	return operand;
+	return operand - 1;
 }
 
 static void _generateTransitionExpression(unsigned int indentation, const TransitionExpression * transitionExpression) {
@@ -152,6 +177,7 @@ static void _generateTransitionExpression(unsigned int indentation, const Transi
 		case TRANSITION_ASSIGNMENT:
 			_output(indentation,"%s=", transitionExpression->variable);
 			_generateArithmeticExpression(transitionExpression->assignment);
+			_output(0,"\n");
 			break;
 		case TRANSITION_FOR_LOOP:
 			_output(indentation, "for %s in ", transitionExpression->forVariable);
@@ -170,7 +196,7 @@ static void _generateTransitionExpression(unsigned int indentation, const Transi
 			_generateArithmeticExpression(transitionExpression->ifElseCondition);
 			_output(0, ":\n");
 			_generateTransitionSequence(indentation + 1, transitionExpression->ifElseIfBody);
-			_output(indentation, "\nelse:\n");
+			_output(indentation, "else:\n");
 			_generateTransitionSequence(indentation + 1, transitionExpression->ifElseElseBody);
 			break;
 		case RETURN_VALUE:
@@ -210,13 +236,13 @@ static void _generateNeighborhoodExpression(unsigned int indentation, const Neig
 			_generateNeighborhoodSequence(indentation + 1, neighborhoodExpression->ifElseElseBody);
 			break;
 		case ADD_CELL_EXP:
-			_output(indentation, "neighbors.update(\n");
-			_generateCellList(neighborhoodExpression->toAddList);
-			_output(0, ")");
+			_output(indentation, "neighbors.update(");
+			_generateNeighbourhoodCellList(neighborhoodExpression->toAddList);
+			_output(0, ")\n");
 		case REMOVE_CELL_EXP:
-			_output(indentation, "neighbors.difference_update(\n");
-			_generateCellList(neighborhoodExpression->toRemoveList);
-			_output(0, ")");
+			_output(indentation, "neighbors.difference_update(");
+			_generateNeighbourhoodCellList(neighborhoodExpression->toRemoveList);
+			_output(0, ")\n");
 		break;
 	default:
 		break;
@@ -292,7 +318,7 @@ static void _outputDisplacement(const DisplacementType displacementType, Constan
 
 static char * GET_CELL_VALUE_FUN = "get_cell_value(cells,";
 
-static void _generateCell(const Cell * cell) {
+static void _generateTransitionCell(const Cell * cell) {
 	if (cell->isSingleCoordenate) {
 		_output(0, GET_CELL_VALUE_FUN);
 		_outputDisplacement(cell->displacementType, cell->displacement);
@@ -306,18 +332,48 @@ static void _generateCell(const Cell * cell) {
 	}
 }
 
-static void _generateCellListRec(const CellList * cellList) {
+static void _generateNeighbourhoodCell(const Cell * cell) {
+	if (cell->isSingleCoordenate) {
+		_output(0, "()");
+		_outputDisplacement(cell->displacementType, cell->displacement);
+		_output(0,")");
+	} else {
+		_output(0,"(row+");
+		_generateConstant(cell->x);
+		_output(0,",col+");
+		_generateConstant(cell->y);
+		_output(0,")");
+	}
+}
+
+static void _generateTransitionCellListRec(const CellList * cellList) {
 	if (cellList->isLast) {
-		_generateCell(cellList->cell);
+		_generateTransitionCell(cellList->cell);
 		return;
 	}
-	_generateCell(cellList->cell);
+	_generateTransitionCell(cellList->cell);
 	_output(0,",");
-	_generateCellListRec(cellList->next);
+	_generateTransitionCellListRec(cellList->next);
 }
-static void _generateCellList(const CellList * cellList) {
+static void _generateTransitionCellList(const CellList * cellList) {
 	_output(0, "[");
-	_generateCellListRec(cellList);
+	_generateTransitionCellListRec(cellList);
+	_output(0, "]");
+}
+
+static void _generateNeighbourhoodCellListRec(const CellList * cellList) {
+	if (cellList->isLast) {
+		_generateNeighbourhoodCell(cellList->cell);
+		return;
+	}
+	_generateNeighbourhoodCell(cellList->cell);
+	_output(0,",");
+	_generateNeighbourhoodCellListRec(cellList->next);
+}
+
+static void _generateNeighbourhoodCellList(const CellList * cellList) {
+	_output(0, "[");
+	_generateNeighbourhoodCellListRec(cellList);
 	_output(0, "]");
 }
 
@@ -395,11 +451,11 @@ static void _generateArithmeticExpression(const ArithmeticExpression * arithmeti
 	} else if (arithmeticExpression->type == CONSTANT) {
 		_generateConstant(arithmeticExpression->constant);
 	} else if (arithmeticExpression->type == CELL_ARITHETIC_EXPRESSION) {
-		_generateCell(arithmeticExpression->cell);
+		_generateTransitionCell(arithmeticExpression->cell);
 	} else {
 		_output(0, _arithmeticExpressionTypeToString(arithmeticExpression->type));
 		_output(0, "x == %s for x in ", arithmeticExpression->state);
-		_generateCellList(arithmeticExpression->cellList);
+		_generateTransitionCellList(arithmeticExpression->cellList);
 		_output(0, ")");
 		if (arithmeticExpression->type == AT_LEAST_ARE) {
 			_output(0," >= %d", arithmeticExpression->count);
@@ -441,17 +497,30 @@ static char * _getStringFromEvolutionType(const EvolutionEnum type) {
 			return NULL;
 	}
 }
+static void _generateStateVariablesRec(unsigned int value, StringArray * states) {
+	if (states->isLast) {
+		_output(0,"%s=%d\n", states->lastValue, value);
+		return;
+	}
+	_output(0,"%s=%d\n", states->value, value);
+	_generateStateVariablesRec(value + 1, states->next);
+}
+
+static void _generateStateVariables(StringArray * states) {
+	_generateStateVariablesRec(0, states);
+}
 
 static void _generateOption(const Option * option) {
 	switch (option->type){
 		case HEIGHT_OPTION:
-			_output(0,"SCREEN_HEIGHT=%d\n", option->value);
+		//@todo: aca deberia ir la cantidad de celdas, no el tamaño de la pantalla
+			_output(0,"N_CELLS_Y=%d\n", option->value);
 			break; 
 		case WIDTH_OPTION:   
-			_output(0,"SCREEN_WIDTH=%d\n", option->value);
+			_output(0,"N_CELLS_X=%d\n", option->value);
 			break;          
 		case FRONTIER_OPTION:   
-			_output(0,"FRONTIER_MODE=%s\n", _getStringFromFrontierType(option->frontierType));
+			_output(0,"FRONTIER_MODE='%s'\n", _getStringFromFrontierType(option->frontierType));
 			break;          
 		case COLORS_OPTION:
 			_output(0,"STATE_COLORS=");
@@ -459,7 +528,8 @@ static void _generateOption(const Option * option) {
 			_output(0,"\n");
 			break;                
 		case STATES_OPTION: 
-			_output(0,"STATE=");
+			_generateStateVariables(option->states);
+			_output(0,"STATES=");
 			_generateStringArray(option->states);
 			_output(0,"\n");  
 			break;            
@@ -516,8 +586,8 @@ static void _generateOption(const Option * option) {
 static void _generateEpilogue(const int value) {
 	_output(0, "%s",
 		
-		"N_CELLS_X = SCREEN_WIDTH // CELL_SIZE\n"
-		"N_CELLS_Y = SCREEN_HEIGHT // CELL_SIZE\n\n"
+		"SCREEN_WIDTH = N_CELLS_X * CELL_SIZE\n"
+		"SCREEN_HEIGHT = N_CELLS_Y * CELL_SIZE\n\n"
 		"def get_cell_value(cells, row, col):\n"
 		"    \n"
 		"    if FRONTIER_MODE == 'Periodic':\n"
@@ -545,7 +615,7 @@ static void _generateEpilogue(const int value) {
 		"        \n"
 		"        if EVOLUTION_MODE == 'SB':\n"
 		"            alive_neighbors = 0\n"
-		"            for dr, dc in NEIGHBORHOOD:\n"
+		"            for dr, dc in neighborhood_function(row, col):\n"
 		"                if get_cell_value(cells, row + dr, col + dc) == 1:\n"
 		"                    alive_neighbors += 1\n"
 		"            \n"

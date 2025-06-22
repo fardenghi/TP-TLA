@@ -10,7 +10,7 @@ transition:
       ->INFECTADO
    else 
       if ((0,0)==INFECTADO)&&((1,0) == SANO || (1,0) == RECUPERADO ) && ((-1,0) == SANO || (-1,0) == RECUPERADO ) && ((0,1) == SANO || (0,1) == RECUPERADO ) && ((0,-1) == SANO || (0,-1) == RECUPERADO ) then 
-         -> RECUEPERADO
+         -> RECUPERADO
       else 
          ->SANO
       end

@@ -15,6 +15,7 @@
 .env*
 *.csproj.user
 *~
+compiled.py
 
 # Application specific.
 /program
