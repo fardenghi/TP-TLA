@@ -45,9 +45,6 @@ const int main(const int count, const char **arguments)
 	{
 		// ----------------------------------------------------------------------------------------
 		// Beginning of the Backend... ------------------------------------------------------------
-		logDebugging(logger, "Computing expression value...");
-		Program *program = compilerState.abstractSyntaxtTree;
-
 		SemanticAnalysisStatus semanticAnalysisStatus = checkSemantic(program, logger);
 		if (semanticAnalysisStatus == SEMANTIC_FAILURE)
 		{
@@ -56,23 +53,15 @@ const int main(const int count, const char **arguments)
 		}
 		else
 		{
-			logDebugging(logger, "Type-checking succeeded: the program is valid.");
-			ComputationResult computationResult = computeExpression(program->expression);
-			if (computationResult.succeed)
-			{
-				compilerState.value = computationResult.value;
-				generate(&compilerState);
-			}
-			else
-			{
-				logError(logger, "The computation phase rejects the input program.");
-				compilationStatus = FAILED;
-			}
-		}
+		logDebugging(logger, "Computing expression value...");
+		Program * program = compilerState.abstractSyntaxtTree;
+		//@TODO: meter nuestro backend
 		// ...end of the Backend. -----------------------------------------------------------------
 		// ----------------------------------------------------------------------------------------
+		generate(&compilerState);
 		logDebugging(logger, "Releasing AST resources...");
 		releaseProgram(program);
+		}
 	}
 	else
 	{

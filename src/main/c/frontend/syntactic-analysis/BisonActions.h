@@ -32,7 +32,7 @@ Option * FrontierOptionSemanticAction(const FrontierEnum value);
 Option * NeighborhoodOptionSemanticAction(const NeighborhoodEnum value);
 Option * EvolutionOptionSemanticAction(Evolution * value);
 
-Evolution * EvolutionSemanticAction(IntArray * array, const int value, const EvolutionEnum type);
+Evolution * EvolutionSemanticAction(IntArray * surviveArray, IntArray * birthArray, const EvolutionEnum type);
 
 TransitionSequence * TransitionUnarySequenceSemanticAction(TransitionExpression * expression);
 TransitionSequence * TransitionBinarySequenceSemanticAction(TransitionSequence * sequence, TransitionExpression * expression);

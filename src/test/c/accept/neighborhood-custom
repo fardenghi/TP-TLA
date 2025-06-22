@@ -4,7 +4,7 @@ configuration:
    Frontier: Mirror;
    States: {on, off};
    Colors: {1, 2};
-   Evolution: -10,9,8,7,6,5,4/6;
+   Evolution: 10,9,8,7,6,5,4/6;
    Neighborhood: CUSTOM;
 
 neighborhood:

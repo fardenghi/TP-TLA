@@ -21,9 +21,22 @@ void shutdownGeneratorModule() {
 static char * _arithmeticExpressionTypeToString(const ArithmeticExpressionType type);
 static void _generateConstant(const Constant * constant);
 static void _generateEpilogue(const int value);
-static void _generateExpression(const unsigned int indentationLevel, Expression * expression);
-static void _generateFactor(const unsigned int indentationLevel, Factor * factor);
+static void _generateOption(const Option * option);
 static void _generateProgram(Program * program);
+static void _generateNeighborhoodSequence(unsigned int indentation, const NeighborhoodSequence * neighborSequence);
+static void _generateTransitionSequence(unsigned int indentation, const TransitionSequence * transitionSequence);
+static void _generateTransitionExpression(unsigned int indentation, const TransitionExpression * transitionExpression);
+static void _generateNeighborhoodExpression(unsigned int indentation, const NeighborhoodExpression * neighborhoodExpression);
+
+static void _generateArithmeticExpression(const ArithmeticExpression * arithmeticExpression);
+static void _generateConfiguration(Configuration * config);
+static void _generateCellList(const CellList * cellList);
+static void _generateRange(const Range * range);
+
+static void _generateConstantArrayRec(const ConstantArray * arr);
+static void _generateStringArray(const StringArray * arr);
+static void _generateIntArray(const IntArray * arr);
+
 static void _generatePrologue(void);
 static char * _indentation(const unsigned int indentationLevel);
 static void _output(const unsigned int indentationLevel, const char * const format, ...);
@@ -33,6 +46,35 @@ static void _output(const unsigned int indentationLevel, const char * const form
  * involved, or returns '\0' if that's not possible.
  */
 static char MAX_OPERAND_LENGTH = 16; 
+
+void _generateProgram(Program * program) {
+	_generateConfiguration(program->configuration);
+	switch (program->type)
+	{
+	case TRANSITION:
+		_output(0,"def transition_function(cells, row, col):\n");
+		_generateTransitionSequence(1, program->transitionSequence);
+		break;
+	case NEIGHBORHOOD_PROGRAM:
+		_output(0,"def neighborhood_function(row, col):\n");
+		_output(1,"neighbors = set()\n");
+		_generateTransitionSequence(1, program->transitionSequence);
+		_output(1,"return  neighbors\n");
+		break;
+	default:
+		break;
+	}
+	
+}
+
+void _generateConfiguration(Configuration * config) {
+	if (config->isLast) {
+		_generateOption(config->lastOption);
+	} else {
+		_generateOption(config->option);
+		_generateConfiguration(config->next);
+	}
+}
 
 static char * _arithmeticExpressionTypeToString(const ArithmeticExpressionType type) {
 	char * operand = calloc(MAX_OPERAND_LENGTH, sizeof(char));
@@ -99,7 +141,7 @@ static char * _arithmeticExpressionTypeToString(const ArithmeticExpressionType t
 			break;
 		default:
 			logError(_logger, "The specified expression type cannot be converted into character: %d", type);
-			return '\0';
+			return NULL;
 	}
 	return operand;
 }
@@ -115,21 +157,21 @@ static void _generateTransitionExpression(unsigned int indentation, const Transi
 			_output(indentation, "for %s in ", transitionExpression->forVariable);
 			_generateRange(transitionExpression->range);
 			_output(0, ":\n");
-			_generateTransitionExpression(indentation + 1, transitionExpression->forBody);
+			_generateTransitionSequence(indentation + 1, transitionExpression->forBody);
 			break;
 		case TRANSITION_IF:
 			_output(indentation, "if ");
 			_generateArithmeticExpression(transitionExpression->ifCondition);
 			_output(0, ":\n");
-			_generateTransitionExpression(indentation + 1, transitionExpression->ifBody); // Esto es un transition sequence, llamo a transition secuence en vez de expression 
+			_generateTransitionSequence(indentation + 1, transitionExpression->ifBody);
 			break;
 		case TRANSITION_IF_ELSE:
 			_output(indentation, "if ");
 			_generateArithmeticExpression(transitionExpression->ifElseCondition);
 			_output(0, ":\n");
-			_generateTransitionExpression(indentation + 1, transitionExpression->ifElseIfBody);
+			_generateTransitionSequence(indentation + 1, transitionExpression->ifElseIfBody);
 			_output(indentation, "\nelse:\n");
-			_generateTransitionExpression(indentation + 1, transitionExpression->ifElseElseBody);
+			_generateTransitionSequence(indentation + 1, transitionExpression->ifElseElseBody);
 			break;
 		case RETURN_VALUE:
 			_output(indentation, "return ");
@@ -163,7 +205,7 @@ static void _generateNeighborhoodExpression(unsigned int indentation, const Neig
 			_output(indentation, "if ");
 			_generateArithmeticExpression(neighborhoodExpression->ifElseCondition);
 			_output(0, ":\n");
-			_generateNeighborhoodExpression(indentation + 1, neighborhoodExpression->ifElseIfBody);
+			_generateNeighborhoodSequence(indentation + 1, neighborhoodExpression->ifElseIfBody);
 			_output(indentation, "\nelse:\n");
 			_generateNeighborhoodSequence(indentation + 1, neighborhoodExpression->ifElseElseBody);
 			break;
@@ -196,8 +238,6 @@ static void _generateNeighborhoodSequence(unsigned int indentation, const Neighb
 	_generateNeighborhoodExpression(indentation, neighborSequence->rightExpression);
 	if (neighborSequence->sequence != NULL) {
 		_generateNeighborhoodSequence(indentation, neighborSequence->sequence);
-	} else {
-		_output(indentation, "return neighbors\n");
 	}
 }
 
@@ -217,9 +257,7 @@ static void _generateConstant(const Constant * constant) {
 	}
 }
 
-static char MAX_DISPLACEMENT_TAG_LENGTH = 256;
-
-static char * _displacementTypeToString(const DisplacementType displacementType, Constant * value) {
+static void _outputDisplacement(const DisplacementType displacementType, Constant * value) {
 	switch (displacementType)
 	{
 	case HORIZONTAL_D:
@@ -249,7 +287,6 @@ static char * _displacementTypeToString(const DisplacementType displacementType,
 		break;
 	default:
 		logError(_logger, "The specified displacement type is not valid: %d", displacementType);
-		return '\0';
 	}
 }
 
@@ -269,12 +306,6 @@ static void _generateCell(const Cell * cell) {
 	}
 }
 
-static void _generateCellList(const CellList * cellList) {
-	_output(0, "[");
-	_generateCellListRec(cellList);
-	_output(0, "]");
-}
-
 static void _generateCellListRec(const CellList * cellList) {
 	if (cellList->isLast) {
 		_generateCell(cellList->cell);
@@ -282,7 +313,22 @@ static void _generateCellListRec(const CellList * cellList) {
 	}
 	_generateCell(cellList->cell);
 	_output(0,",");
+	_generateCellListRec(cellList->next);
+}
+static void _generateCellList(const CellList * cellList) {
+	_output(0, "[");
 	_generateCellListRec(cellList);
+	_output(0, "]");
+}
+
+static void _generateConstantArrayRec(const ConstantArray * arr) {
+	if (arr->isLast) {
+		_generateConstant(arr->value);
+		return;
+	}
+	_generateConstant(arr->value);
+	_output(0,",");
+	_generateConstantArrayRec(arr->next);
 }
 
 static void _generateConstantArray(const ConstantArray * arr) {
@@ -292,14 +338,13 @@ static void _generateConstantArray(const ConstantArray * arr) {
 
 }
 
-static void _generateConstantArrayRec(const ConstantArray * arr) {
+static void _generateIntArrayRec(const IntArray * arr) {
 	if (arr->isLast) {
-		_generateCell(arr->value);
+		_output(0,"%d", arr->value);
 		return;
 	}
-	_generateConstant(arr->value);
-	_output(0,",");
-	_generateConstantArrayRec(arr);
+	_output(0,"%d,", arr->value);
+	_generateIntArrayRec(arr->next);
 }
 
 static void _generateIntArray(const IntArray * arr) {
@@ -308,28 +353,19 @@ static void _generateIntArray(const IntArray * arr) {
 	_output(0, "]");
 }
 
-static void _generateIntArrayRec(const IntArray * arr) {
+static void _generateStringArrayRec(unsigned int depth, const StringArray * arr) {
 	if (arr->isLast) {
-		_output(0,"%d", arr->value);
+		_output(0,"'%s': %d", arr->value, depth);
 		return;
 	}
-	_output(0,"%d,", arr->value);
-	_generateIntArrayRec(arr);
+	_output(0,"'%s': %d, ", arr->value, depth);
+	_generateStringArrayRec(depth + 1, arr->next);
 }
 
 static void _generateStringArray(const StringArray * arr) {
 	_output(0, "{");
 	_generateStringArrayRec(0, arr);
 	_output(0, "}");
-}
-
-static void _generateStringArrayRec(unsigned int depth, const StringArray * arr) {
-	if (arr->isLast) {
-		_output(0,"'%s': %d", arr->value, depth);
-		return;
-	}
-	_output(0,"'%s': %d", arr->value, depth);
-	_generateStringArrayRec(depth + 1, arr);
 }
 
 static void _generateRange(const Range * range) {
@@ -373,22 +409,22 @@ static void _generateArithmeticExpression(const ArithmeticExpression * arithmeti
 
 static char MAX_FRONTIER_TYPE_LENGTH = 16;
 
-static char * _getStringFromFrontierType(const FrontierEnum type) {
+static const char * _getStringFromFrontierType(const FrontierEnum type) {
 	char * operand = calloc(MAX_FRONTIER_TYPE_LENGTH, sizeof(char));
-	switch (type) {
-		case PERIODIC:
+    switch (type) {
+        case PERIODIC: 
 			strcpy(operand, "Periodic");
-			break;
-		case OPEN:
+			return operand;
+        case OPEN: 
 			strcpy(operand, "Open");
-			break;
-		case MIRROR:
+			return operand;
+        case MIRROR: 
 			strcpy(operand, "Mirror");
-			break;
-		default:
-			logError(_logger, "The specified frontier type is not valid: %d", type);
-			break;
-	}
+			return operand;
+        default:
+            logError(_logger, "The specified frontier type is not valid: %d", type);
+			return NULL;
+    }
 }
 
 static char * _getStringFromEvolutionType(const EvolutionEnum type) {
@@ -396,12 +432,13 @@ static char * _getStringFromEvolutionType(const EvolutionEnum type) {
 	switch (type) {
 		case CONWAY:
 			strcpy(operand, "Conway");
-			break;
+			return operand;
 		case SEEDS:
 			strcpy(operand, "Seeds");
-			break;
+			return operand;
+		default:
 			logError(_logger, "The specified evolution type is not valid: %d", type);
-			break;
+			return NULL;
 	}
 }
 
@@ -427,16 +464,43 @@ static void _generateOption(const Option * option) {
 			_output(0,"\n");  
 			break;            
 		case NEIGHBORHOOD_OPTION:
-			break;      
+			if (option->neighborhoodEnum == MOORE) {
+				_output(0, "%s",
+							"def neighborhood_function(row, col):\n"
+							"    return {\n"
+							"        (-1, -1), (-1, 0), (-1, 1),\n"
+							"        (0, -1),          (0, 1),\n"
+							"        (1, -1),  (1, 0),  (1, 1)\n"
+							"    }\n");
+			}
+			else if (option->neighborhoodEnum == VON_NEUMANN) {
+				_output(0, "%s",
+							"def neighborhood_function(row, col):\n"
+							"    return {\n"
+							"        (-1, 0), (1, 0), (0, -1), (0, 1)\n"
+							"    }\n");
+			}
+			break;
 		case EVOLUTION_OPTION:
+			_output(0,"EVOLUTION_MODE='SB'\n");
+			_output(0,"SURVIVE_RULES = ");
 			if(option->evolution->isDefault) {
-				_output(0,"EVOLUTION_MODE=%s\n", _getStringFromEvolutionType(option->value));
-				
+					if (option->evolution->evolutionTypes == CONWAY)
+					{
+						_output(0,"[2,3]\n");
+						_output(0,"BIRTH_RULES = [3]\n");
+					} else if (option->evolution->evolutionTypes == SEEDS) {
+						_output(0,"[2]\n");
+						_output(0,"BIRTH_RULES = []\n");
+					} 
+					else {
+						logError(_logger, "The specified evolution type is not valid: %d", option->evolution->evolutionTypes);
+					}
 			} else {
-				_output(0,"EVOLUTION_MODE='SB'\n");
-				_generateIntArray(option->evolution->array);
-				//@todo: cambiar para que sea un array tambien
-				_output(0,"[%d]", option->evolution->value);
+				_generateIntArray(option->evolution->surviveArray);
+				_output(0,"\nBIRTH_RULES = ");
+				_generateIntArray(option->evolution->birthArray);
+				_output(0,"\n");
 			}
 			break;
 		default:
@@ -590,10 +654,10 @@ static void _generateEpilogue(const int value) {
  */
 static void _generatePrologue(void) {
 	_output(0, "%s",
-		"\\import time\n"
-		"\\import pygame\n"
-		"\\import numpy as np\n\n"
-		"\\CELL_SIZE = 20\n"
+		"import time\n"
+		"import pygame\n"
+		"import numpy as np\n\n"
+		"CELL_SIZE = 20\n"
 	);
 }
 

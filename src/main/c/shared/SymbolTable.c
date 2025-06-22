@@ -84,10 +84,12 @@ int getCurrentScope(const SymbolTable* symbolTable) {
     return symbolTable->currentScope;
 }
 
-Symbol* insertSymbol(SymbolTable* symbolTable, const char* name, const int value) {
+
+static Symbol * privateInsertSymbol(SymbolTable *symbolTable, const char *name, const boolean readOnly) {
     if (symbolTable == NULL || name == NULL) {
         return NULL;
     }
+
     // Permitir símbolos con el mismo nombre en distintos scopes
     for (int i = 0; i < symbolTable->size; i++) {
         if (strcmp(symbolTable->symbols[i].name, name) == 0 && symbolTable->symbols[i].scope == symbolTable->currentScope) {
@@ -108,10 +110,20 @@ Symbol* insertSymbol(SymbolTable* symbolTable, const char* name, const int value
     if (newSymbol->name == NULL) {
         return NULL;
     }
-    newSymbol->value = value;
+    newSymbol->readOnly = readOnly;
     newSymbol->scope = symbolTable->currentScope;
     symbolTable->size++;
     return newSymbol;
+}
+
+Symbol * insertReadOnlySymbol(SymbolTable *symbolTable, const char *name) {
+    return privateInsertSymbol(symbolTable, name, true);
+}
+
+
+
+Symbol* insertSymbol(SymbolTable* symbolTable, const char* name) {
+    return privateInsertSymbol(symbolTable, name, false);
 }
 
 Symbol* lookupSymbol(const SymbolTable* symbolTable, const char* name) {

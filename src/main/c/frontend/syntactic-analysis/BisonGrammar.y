@@ -1,6 +1,9 @@
 %{
 
 #include "BisonActions.h"
+#include "../../shared/SymbolTable.h"
+#include "../../shared/CompilerState.h"
+#include "SyntacticAnalyzer.h"
 
 %}
 
@@ -50,7 +53,7 @@
  * @see https://www.gnu.org/software/bison/manual/html_node/Destructor-Decl.html
  */
 
-%destructor { releaseProgram($$); } <program>
+/* %destructor { releaseProgram($$); } <program> */
 %destructor { releaseTransitionSequence($$); } <transition_sequence>
 %destructor { releaseNeighborhoodSequence($$); } <neighborhood_sequence>
 %destructor { releaseTransitionExpression($$); } <transition_expression>
@@ -197,8 +200,8 @@ option: HEIGHT COLON INTEGER SEMICOLON														{ $$ = IntValuedOptionSemant
     | EVOLUTION COLON evolution[ev] SEMICOLON														{ $$ = EvolutionOptionSemanticAction($ev); }
 	;
 
-evolution: EVOLUTION_ENUM																{ $$ = EvolutionSemanticAction(NULL, 0, $1); }
-	| int_array DIV INTEGER																{ $$ = EvolutionSemanticAction($1, $3, 0); }
+evolution: EVOLUTION_ENUM																{ $$ = EvolutionSemanticAction(NULL, NULL, $1); }
+	| int_array DIV int_array															{ $$ = EvolutionSemanticAction($1, $3, 0); }
 
 int_array: INTEGER																		{ $$ = IntArraySemanticAction($1, NULL); }
 	| INTEGER COMMA int_array[arr]														{ $$ = IntArraySemanticAction($1, $arr); }
@@ -217,9 +220,9 @@ transition_sequence: transition_expression	transition_sequence 						{ $$ = Tran
 	;
 
 transition_expression: STRING ASSIGNMENT arithmetic_expression SEMICOLON						{ $$ = TransitionAssignmentExpressionSemanticAction($1, $3); }
-	| FOR STRING IN range DO transition_sequence END									{ $$ = TransitionForLoopExpressionSemanticAction($2, $4, $6); }
-	| IF arithmetic_expression THEN transition_sequence END								{ $$ = TransitionIfExpressionSemanticAction($2, $4); }
-	| IF arithmetic_expression THEN transition_sequence ELSE transition_sequence END 	{ $$ = TransitionIfElseExpressionSemanticAction($2, $4, $6); }
+	| FOR scope_entry STRING IN range DO transition_sequence scope_exit END									{ $$ = TransitionForLoopExpressionSemanticAction($3, $5, $7); }
+	| IF scope_entry arithmetic_expression THEN transition_sequence scope_exit END								{ $$ = TransitionIfExpressionSemanticAction($3, $5); }
+	| IF scope_entry arithmetic_expression THEN transition_sequence scope_exit ELSE scope_entry transition_sequence scope_exit END 	{ $$ = TransitionIfElseExpressionSemanticAction($3, $5, $9); }
 	| RETURN arithmetic_expression														{ $$ = TransitionReturnExpressionSemanticAction($2); }
 	;
 
@@ -228,9 +231,9 @@ neighborhood_sequence: neighborhood_expression neighborhood_sequence					{ $$ = 
 	;
 
 neighborhood_expression: STRING ASSIGNMENT arithmetic_expression SEMICOLON						{ $$ = NeighborhoodAssignmentExpressionSemanticAction($1, $3); }
-	| FOR STRING IN range DO neighborhood_sequence END								{ $$ = NeighborhoodForLoopExpressionSemanticAction($2, $4, $6); }
-	| IF arithmetic_expression THEN neighborhood_sequence END							{ $$ = NeighborhoodIfExpressionSemanticAction($2, $4); }
-	| IF arithmetic_expression THEN neighborhood_sequence ELSE neighborhood_sequence END { $$ = NeighborhoodIfElseExpressionSemanticAction($2, $4, $6); }
+	| FOR scope_entry STRING IN range DO neighborhood_sequence scope_exit END								{ $$ = NeighborhoodForLoopExpressionSemanticAction($3, $5, $7); }
+	| IF scope_entry arithmetic_expression THEN neighborhood_sequence scope_exit END							{ $$ = NeighborhoodIfExpressionSemanticAction($3, $5); }
+	| IF scope_entry arithmetic_expression THEN neighborhood_sequence scope_exit ELSE scope_entry neighborhood_sequence END scope_exit { $$ = NeighborhoodIfElseExpressionSemanticAction($3, $5, $9); }
 	| ADD_CELL OPEN_PARENTHESIS cell_list CLOSE_PARENTHESIS	SEMICOLON					{ $$ = NeighborhoodCellExpressionSemanticAction(true, $3); }
 	| REMOVE_CELL OPEN_PARENTHESIS cell_list CLOSE_PARENTHESIS	SEMICOLON				{ $$ = NeighborhoodCellExpressionSemanticAction(false, $3); }
 	;
@@ -261,9 +264,9 @@ arithmetic_expression: arithmetic_expression[left] ADD arithmetic_expression[rig
 	| arithmetic_expression[left] LTE arithmetic_expression[right]									{ $$ = BinaryArithmeticExpressionSemanticAction($left, $right, LOWER_THAN_OR_EQUAL); }
 	| arithmetic_expression[left] GT arithmetic_expression[right]									{ $$ = BinaryArithmeticExpressionSemanticAction($left, $right, GREATER_THAN); }
 	| arithmetic_expression[left] GTE arithmetic_expression[right]									{ $$ = BinaryArithmeticExpressionSemanticAction($left, $right, GREATER_THAN_OR_EQUAL); }
-	| ALL_OPERAND OPEN_BRACE cell_list[single] CLOSE_BRACE ARE STRING[string]						{ $$ = CellListArithmeticExpressionSemanticAction($single, ALL_ARE, -1); }
-	| ANY OPEN_BRACE cell_list[single] CLOSE_BRACE ARE STRING[string]								{ $$ = CellListArithmeticExpressionSemanticAction($single, ANY_ARE, 1); }
-	| AT_LEAST INTEGER OPEN_BRACE cell_list[single] CLOSE_BRACE ARE STRING[string]					{ $$ = CellListArithmeticExpressionSemanticAction($single, AT_LEAST_ARE, $2); }
+	| ALL_OPERAND OPEN_BRACE cell_list[single] CLOSE_BRACE ARE STRING[string]						{ $$ = CellListArithmeticExpressionSemanticAction($single, ALL_ARE, -1, $string); }
+	| ANY OPEN_BRACE cell_list[single] CLOSE_BRACE ARE STRING[string]								{ $$ = CellListArithmeticExpressionSemanticAction($single, ANY_ARE, 1, $string); }
+	| AT_LEAST INTEGER OPEN_BRACE cell_list[single] CLOSE_BRACE ARE STRING[string]					{ $$ = CellListArithmeticExpressionSemanticAction($single, AT_LEAST_ARE, $2, $string); }
 	| OPEN_PARENTHESIS arithmetic_expression[single] CLOSE_PARENTHESIS								{ $$ = UnaryArithmeticExpressionSemanticAction($single, FACTOR); }
 	| constant[single]																				{ $$ = ConstantArithmeticExpressionSemanticAction($single); }
 	| cell																				 			{ $$ = CellArithmeticExpressionSemanticAction($1); }
@@ -273,5 +276,9 @@ constant: INTEGER																					{ $$ = IntegerConstantSemanticAction($1); 
 	| STRING																						{ $$ = StringConstantSemanticAction($1); }
 	;
 
+scope_entry:
+    %empty { pushScope(currentCompilerState()->symbolTable); }
 
+scope_exit:
+    %empty { popScope(currentCompilerState()->symbolTable); }
 %%

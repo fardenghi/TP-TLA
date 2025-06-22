@@ -28,8 +28,7 @@ typedef enum
 {
 	CUSTOM = 0,
 	MOORE = 1,
-	VON_NEUMANN = 2,
-	K_NEIGHBORHOOD = 3
+	VON_NEUMANN = 2
 } NeighborhoodEnum;
 
 typedef enum

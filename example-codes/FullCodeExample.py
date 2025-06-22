@@ -18,16 +18,15 @@ STATE_COLORS = [
     (255, 255, 255)  
 ]
 
-BIRTH_RULES = [3]
-SURVIVE_RULES = [2, 3]
+SURVIVE_RULES = [4,5,6,7,8]
+BIRTH_RULES = [2,5,6,7,8]
 
 def neighborhood_function(row, col):
-    neighbors = set()
-    
-    for i in [-3, 3]:
-        neighbors.update([(i, 0), (0, i)])
-
-    return neighbors
+    return {
+        (-1, -1), (-1, 0), (-1, 1),
+        (0, -1),         (0, 1),
+        (1, -1),  (1, 0),  (1, 1)
+    }
 
 ### FIN SECCION GENERADA POR COMPILADOR ###
 
@@ -155,7 +154,7 @@ def main():
                 pygame.draw.rect(screen, color, (col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1))
 
         pygame.display.update()
-        time.sleep(0.01)
+        time.sleep(0.001)
 
 if __name__ == '__main__':
     main()
