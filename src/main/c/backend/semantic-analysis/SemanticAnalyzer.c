@@ -202,7 +202,7 @@ static bool validateConfigurationAux(Option *option)
                 }
                 else
                 {
-                    if (states->value == NULL || states->value == " ")
+                    if (states->value == NULL || strcmp(states->value, " ") == 0)
                     {
                         logError(_logger, "A value in the States Array is NULL or empty String");
                         return false;
@@ -234,14 +234,82 @@ static bool validateConfigurationAux(Option *option)
     return true;
 }
 
+static Option *getOption(Configuration *configuration, OptionType type)
+{
+    if(configuration == NULL)
+    {
+        return NULL;
+    }
+
+    if (configuration->isLast)
+    {
+        if(configuration->lastOption->type == type)
+        {
+            return configuration->lastOption;
+        }
+        else
+        {
+            return NULL;
+
+        }
+    }
+    else
+    {
+        if(configuration->option->type == type)
+        {
+            return configuration->option;
+        }
+        else
+        {
+            return getOption(configuration->next, type);
+        }
+    }
+}
+
 static bool validateDefaultConfiguration(Configuration *configuration)
 {
+    Option* neigh = getOption(configuration, NEIGHBORHOOD_OPTION);
+    Option* evol = getOption(configuration, EVOLUTION_OPTION); 
+
+    if(neigh == NULL || evol == NULL)
+    {
+        logError(_logger, "Default configuration is missing NEIGHBORHOOD or EVOLUTION option.");
+        return false;
+    }
+
+    if (neigh->neighborhoodEnum == CUSTOM)
+    {
+        logError(_logger, "Default configuration cannot have a CUSTOM neighborhood.");
+        return false;
+    }
+    return true;
 }
 static bool validateTransitionConfiguration(Configuration *configuration)
 {
+    Option* neigh = getOption(configuration, NEIGHBORHOOD_OPTION);
+    Option* evol = getOption(configuration, EVOLUTION_OPTION);
+
+    if(neigh != NULL || evol!=NULL){
+        logError(_logger, "Transition configuration cannot have NEIGHBORHOOD or EVOLUTION option.");
+        return false;
+    }
+    return true;
+
 }
+
 static bool validateNeighborhoodConfiguration(Configuration *configuration)
 {
+    Option* neigh = getOption(configuration,NEIGHBORHOOD_OPTION);
+
+    if(neigh == NULL)
+    {
+        logError(_logger, "Neighborhood configuration is missing NEIGHBORHOOD option.");
+        return false;
+    }else if(neigh->neighborhoodEnum != CUSTOM){
+        logError(_logger, "Neighborhood configuration must have a CUSTOM neighborhood.");
+        return false;
+    }
+    return true;
 }
 
 SemanticAnalysisStatus checkSemantic(Program *program, Logger *logger)
