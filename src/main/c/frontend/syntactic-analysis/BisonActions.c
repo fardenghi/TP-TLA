@@ -257,6 +257,8 @@ Option * StringArrayValuedOptionSemanticAction(StringArray * value) {
 				logError(_logger, "StringArrayValuedOptionSemanticAction: String '%s' already exists in the current scope.", current->lastValue);
 				free(option);
 				currentCompilerState()->symbolTable->failure = true;
+				printScopeStack(currentCompilerState()->symbolTable);
+				printSymbolTable(currentCompilerState()->symbolTable);
 				return NULL;
 			}
 			logDebugging(_logger, "StringArrayValuedOptionSemanticAction: String '%s' added to the symbol table.", current->lastValue);
@@ -266,6 +268,8 @@ Option * StringArrayValuedOptionSemanticAction(StringArray * value) {
 				logError(_logger, "StringArrayValuedOptionSemanticAction: String '%s' already exists in the current scope.", current->value);
 				free(option);
 				currentCompilerState()->symbolTable->failure = true;
+				printScopeStack(currentCompilerState()->symbolTable);
+				printSymbolTable(currentCompilerState()->symbolTable);
 				return NULL;
 			}
 			logDebugging(_logger, "StringArrayValuedOptionSemanticAction: String '%s' added to the symbol table.", current->value);
@@ -363,6 +367,8 @@ Constant * StringConstantSemanticAction(char * value) {
 	constant->type = STRING_C;
 	if (lookupSymbol(currentCompilerState()->symbolTable, constant->string) == NULL) {
 		logError(_logger, "ConstantArithmeticExpressionSemanticAction: String '%s' is not defined in the current scope. %d", constant->string, currentCompilerState()->symbolTable->currentScope);
+		printScopeStack(currentCompilerState()->symbolTable);
+		printSymbolTable(currentCompilerState()->symbolTable);
 		currentCompilerState()->symbolTable->failure = true;
 		free(constant);
 		return NULL;

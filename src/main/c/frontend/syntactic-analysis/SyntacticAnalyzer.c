@@ -37,8 +37,6 @@ extern int yyparse(void);
 void yyerror(const char * string) {
 	LexicalAnalyzerContext * lexicalAnalyzerContext = createLexicalAnalyzerContext();
 	logError(_logger, "Syntax error (on line %d).", lexicalAnalyzerContext->line);
-	printScopeStack(currentCompilerState()->symbolTable);
-	printSymbolTable(currentCompilerState()->symbolTable);
 }
 
 /* PUBLIC FUNCTIONS */
