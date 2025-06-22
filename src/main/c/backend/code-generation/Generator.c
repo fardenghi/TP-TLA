@@ -257,10 +257,7 @@ static void _generateConstant(const Constant * constant) {
 	}
 }
 
-//@TODO: Esto para que es?
-static int MAX_DISPLACEMENT_TAG_LENGTH = 256;
-
-static char * _displacementTypeToString(const DisplacementType displacementType, Constant * value) {
+static void _outputDisplacement(const DisplacementType displacementType, Constant * value) {
 	switch (displacementType)
 	{
 	case HORIZONTAL_D:
@@ -290,7 +287,6 @@ static char * _displacementTypeToString(const DisplacementType displacementType,
 		break;
 	default:
 		logError(_logger, "The specified displacement type is not valid: %d", displacementType);
-		return '\0';
 	}
 }
 
@@ -299,7 +295,7 @@ static char * GET_CELL_VALUE_FUN = "get_cell_value(cells,";
 static void _generateCell(const Cell * cell) {
 	if (cell->isSingleCoordenate) {
 		_output(0, GET_CELL_VALUE_FUN);
-		_output(0, "%s", _displacementTypeToString(cell->displacementType, cell->displacement));
+		_outputDisplacement(cell->displacementType, cell->displacement);
 		_output(0,")");
 	} else {
 		_output(0,"%s%s", GET_CELL_VALUE_FUN, "row+");
@@ -414,12 +410,20 @@ static void _generateArithmeticExpression(const ArithmeticExpression * arithmeti
 static char MAX_FRONTIER_TYPE_LENGTH = 16;
 
 static const char * _getStringFromFrontierType(const FrontierEnum type) {
+	char * operand = calloc(MAX_FRONTIER_TYPE_LENGTH, sizeof(char));
     switch (type) {
-        case PERIODIC: return "Periodic";
-        case OPEN: return "Open";
-        case MIRROR: return "Mirror";
+        case PERIODIC: 
+			strcpy(operand, "Periodic");
+			return operand;
+        case OPEN: 
+			strcpy(operand, "Open");
+			return operand;
+        case MIRROR: 
+			strcpy(operand, "Mirror");
+			return operand;
         default:
             logError(_logger, "The specified frontier type is not valid: %d", type);
+			return NULL;
     }
 }
 
@@ -428,12 +432,13 @@ static char * _getStringFromEvolutionType(const EvolutionEnum type) {
 	switch (type) {
 		case CONWAY:
 			strcpy(operand, "Conway");
-			break;
+			return operand;
 		case SEEDS:
 			strcpy(operand, "Seeds");
-			break;
+			return operand;
+		default:
 			logError(_logger, "The specified evolution type is not valid: %d", type);
-			break;
+			return NULL;
 	}
 }
 
@@ -475,6 +480,7 @@ static void _generateOption(const Option * option) {
 							"        (-1, 0), (1, 0), (0, -1), (0, 1)\n"
 							"    }\n");
 			}
+			break;
 		case EVOLUTION_OPTION:
 			_output(0,"EVOLUTION_MODE='SB'\n");
 			_output(0,"SURVIVE_RULES = ");

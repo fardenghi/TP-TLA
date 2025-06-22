@@ -44,6 +44,8 @@ elseif (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
 else ()
 	message(NOTICE "The C compiler is unknown.")
 	message(NOTICE "Add an 'elseif' statement to handle this compiler in a more specific way.")
+	add_compile_options(-fsanitize=address -g)
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
 
 	# Compiles the scanner with Flex.
 	add_custom_command(
