@@ -18,6 +18,7 @@ typedef struct {
     int scopeDepth;         // Profundidad actual del stack
     int capacityScopes;     // Capacidad del stack de scopes
     int currentScope;       // Scope actual
+    boolean failure;
 } SymbolTable;
 
 SymbolTable * createSymbolTable();

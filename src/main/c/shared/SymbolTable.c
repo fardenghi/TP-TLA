@@ -130,7 +130,7 @@ Symbol* lookupSymbol(const SymbolTable* symbolTable, const char* name) {
     if (symbolTable == NULL || name == NULL) {
         return NULL;
     }
-    // Buscar desde el scope más interno al más externo
+
     for (int s = symbolTable->scopeDepth - 1; s >= 0; s--) {
         const int scope = symbolTable->scopes[s];
         for (int i = symbolTable->size - 1; i >= 0; i--) {

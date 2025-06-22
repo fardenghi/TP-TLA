@@ -110,18 +110,11 @@ TransitionExpression * TransitionAssignmentExpressionSemanticAction(char * varia
 	expression->assignment = arithmeticExpression;
 	return expression;
 }
-TransitionExpression * TransitionForLoopExpressionSemanticAction(char * variable, Range * range, TransitionSequence * transitionExpression) {
+TransitionExpression * TransitionForLoopExpressionSemanticAction(ForVariableDeclaration * forVariable, TransitionSequence * transitionExpression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	TransitionExpression * expression = calloc(1, sizeof(TransitionExpression));
 	expression->type = TRANSITION_FOR_LOOP;
-	expression->forVariable = variable;
-	if (insertSymbol(currentCompilerState()->symbolTable, variable) == NULL) {
-		// Only for the loop variable, we don't allow redefinition
-		logError(_logger, "variable '%s' is already defined in the current scope", variable);
-		free(expression);
-		return NULL;
-	}
-	expression->range = range;
+	expression->forVariable = forVariable;
 	expression->forBody = transitionExpression;
 	return expression;
 }
@@ -150,6 +143,21 @@ TransitionExpression * TransitionReturnExpressionSemanticAction(ArithmeticExpres
 	return expression;
 }
 
+ForVariableDeclaration * ForVariableDeclarationSemanticAction(char * variable, Range * range) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	ForVariableDeclaration * rta = calloc(1, sizeof(ForVariableDeclaration));
+	rta->range = range;
+	rta->variable = variable;
+	if ( insertSymbol(currentCompilerState()->symbolTable, variable) == NULL) {
+		// Only for the loop variable, we don't allow redefinition
+		logError(_logger, "variable '%s' is already defined in the current scope", variable);
+		free(rta);
+		currentCompilerState()->symbolTable->failure = true;
+		return NULL;
+	}
+	return rta;
+}
+
 NeighborhoodSequence * NeighborhoodBinarySequenceSemanticAction(NeighborhoodSequence * sequence, NeighborhoodExpression * expression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	NeighborhoodSequence * rta = calloc(1, sizeof(NeighborhoodSequence));
@@ -168,6 +176,7 @@ NeighborhoodExpression * NeighborhoodAssignmentExpressionSemanticAction(char * v
 		if (symbol->readOnly) {
 			logError(_logger,"variable '%s' is read-only", variable);
 			free(expression);
+			currentCompilerState()->symbolTable->failure = true;
 			return NULL;
 		}
 		logDebugging(_logger,"updating symbol '%s'", variable);
@@ -175,18 +184,11 @@ NeighborhoodExpression * NeighborhoodAssignmentExpressionSemanticAction(char * v
 	expression->assignment = arithmeticExpression;
 	return expression;
 }
-NeighborhoodExpression * NeighborhoodForLoopExpressionSemanticAction(char * variable, Range * range, NeighborhoodSequence * neighborhoodExpression) {
+NeighborhoodExpression * NeighborhoodForLoopExpressionSemanticAction(ForVariableDeclaration * forVariable, NeighborhoodSequence * neighborhoodExpression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	NeighborhoodExpression * expression = calloc(1, sizeof(NeighborhoodExpression));
 	expression->type = NEIGHBORHOOD_FOR_LOOP;
-	expression->forVariable = variable;
-	if (insertSymbol(currentCompilerState()->symbolTable, variable) == NULL) {
-		// Only for the loop variable, we don't allow redefinition
-		logError(_logger, "variable '%s' is already defined in the current scope", variable);
-		free(expression);
-		return NULL;
-	}
-	expression->range = range;
+	expression->forVariable = forVariable;
 	expression->forBody = neighborhoodExpression;
 	return expression;
 }
@@ -245,6 +247,7 @@ Option * StringArrayValuedOptionSemanticAction(StringArray * value) {
 	if (current == NULL) {
 		logError(_logger, "StringArrayValuedOptionSemanticAction: The string array is NULL.");
 		free(option);
+		currentCompilerState()->symbolTable->failure = true;
 		return NULL;
 	}
 	while (current != NULL) {
@@ -252,6 +255,7 @@ Option * StringArrayValuedOptionSemanticAction(StringArray * value) {
 			if (insertReadOnlySymbol(compilerState->symbolTable, current->lastValue) == NULL) {
 				logError(_logger, "StringArrayValuedOptionSemanticAction: String '%s' already exists in the current scope.", current->lastValue);
 				free(option);
+				currentCompilerState()->symbolTable->failure = true;
 				return NULL;
 			}
 			logDebugging(_logger, "StringArrayValuedOptionSemanticAction: String '%s' added to the symbol table.", current->lastValue);
@@ -260,6 +264,7 @@ Option * StringArrayValuedOptionSemanticAction(StringArray * value) {
 			if (insertReadOnlySymbol(compilerState->symbolTable, current->value) == NULL) {
 				logError(_logger, "StringArrayValuedOptionSemanticAction: String '%s' already exists in the current scope.", current->value);
 				free(option);
+				currentCompilerState()->symbolTable->failure = true;
 				return NULL;
 			}
 			logDebugging(_logger, "StringArrayValuedOptionSemanticAction: String '%s' added to the symbol table.", current->value);
@@ -355,6 +360,12 @@ Constant * StringConstantSemanticAction(char * value) {
 	strcpy(string, value);
 	constant->string = string;
 	constant->type = STRING_C;
+	if (lookupSymbol(currentCompilerState()->symbolTable, constant->string) == NULL) {
+		logError(_logger, "ConstantArithmeticExpressionSemanticAction: String '%s' is not defined in the current scope. %d", constant->string, currentCompilerState()->symbolTable->currentScope);
+		currentCompilerState()->symbolTable->failure = true;
+		free(constant);
+		return NULL;
+	}
 	return constant;
 }
 
@@ -388,13 +399,6 @@ ArithmeticExpression * CellListArithmeticExpressionSemanticAction(CellList * cel
 ArithmeticExpression * ConstantArithmeticExpressionSemanticAction(Constant * constant) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	ArithmeticExpression * expression = calloc(1, sizeof(ArithmeticExpression));
-	if (constant->type == STRING_C) {
-		if (lookupSymbol(currentCompilerState()->symbolTable, constant->string) == NULL) {
-			logError(_logger, "ConstantArithmeticExpressionSemanticAction: String '%s' is not defined in the current scope.", constant->string);
-			free(expression);
-			return NULL;
-		}
-	}
 	expression->constant = constant;
 	expression->type = CONSTANT;
 	return expression;

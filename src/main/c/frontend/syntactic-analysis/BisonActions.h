@@ -34,20 +34,20 @@ Option * EvolutionOptionSemanticAction(Evolution * value);
 
 Evolution * EvolutionSemanticAction(IntArray * surviveArray, IntArray * birthArray, const EvolutionEnum type);
 
-TransitionSequence * TransitionUnarySequenceSemanticAction(TransitionExpression * expression);
+ForVariableDeclaration * ForVariableDeclarationSemanticAction(char * variable, Range * range);
+
 TransitionSequence * TransitionBinarySequenceSemanticAction(TransitionSequence * sequence, TransitionExpression * expression);
 
 TransitionExpression * TransitionAssignmentExpressionSemanticAction(char * variable, ArithmeticExpression * arithmeticExpression);
-TransitionExpression * TransitionForLoopExpressionSemanticAction(char * variable, Range * range, TransitionSequence * transitionExpression);
+TransitionExpression * TransitionForLoopExpressionSemanticAction(ForVariableDeclaration * forVariable, TransitionSequence * transitionExpression);
 TransitionExpression * TransitionIfExpressionSemanticAction(ArithmeticExpression * arithmeticExpression, TransitionSequence * transitionExpression);
 TransitionExpression * TransitionIfElseExpressionSemanticAction(ArithmeticExpression * arithmeticExpression, TransitionSequence * ifTransitionExpression, TransitionSequence * elseTransitionExpression);
 TransitionExpression * TransitionReturnExpressionSemanticAction(ArithmeticExpression * arithmeticExpression);
 
-NeighborhoodSequence * NeighborhoodUnarySequenceSemanticAction(NeighborhoodExpression * expression);
 NeighborhoodSequence * NeighborhoodBinarySequenceSemanticAction(NeighborhoodSequence * sequence, NeighborhoodExpression * expression);
 
 NeighborhoodExpression * NeighborhoodAssignmentExpressionSemanticAction(char * variable, ArithmeticExpression * arithmeticExpression);
-NeighborhoodExpression * NeighborhoodForLoopExpressionSemanticAction(char * variable, Range * range, NeighborhoodSequence * neighborhoodExpression);
+NeighborhoodExpression * NeighborhoodForLoopExpressionSemanticAction(ForVariableDeclaration * forVariable, NeighborhoodSequence * neighborhoodExpression);
 NeighborhoodExpression * NeighborhoodIfExpressionSemanticAction(ArithmeticExpression * arithmeticExpression, NeighborhoodSequence * neighborhoodExpression);
 NeighborhoodExpression * NeighborhoodIfElseExpressionSemanticAction(ArithmeticExpression * arithmeticExpression, NeighborhoodSequence * ifNeighborhoodExpression, NeighborhoodSequence * elseNeighborhoodExpression);
 NeighborhoodExpression * NeighborhoodCellExpressionSemanticAction(boolean add, CellList * cellList);

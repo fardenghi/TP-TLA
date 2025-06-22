@@ -2,16 +2,25 @@ configuration:
    Height: 100;
    Width: 100;
    Frontier: Open;
-   States: {SANO, INFECTADO, RECUPERADO};
-   Colors: { #800080, #008000, #800000};
+   States: {SANO, INFECTADO, RECUPERADO, VACUNADO};
+   Colors: { #008000, #800000, #800080,#0284a4};
 
 transition:
-   if ((0,0)==SANO||(0,0)==RECUPERADO)&&((1,0) == INFECTADO || (-1,0) == INFECTADO || (0,1) == INFECTADO || (0,-1) == INFECTADO) then 
+   if (0,0) == SANO && at_least 3 { (1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1), (1,-1), (-1,1) } are INFECTADO then 
       ->INFECTADO
    else 
-      if ((0,0)==INFECTADO)&&((1,0) == SANO || (1,0) == RECUPERADO ) && ((-1,0) == SANO || (-1,0) == RECUPERADO ) && ((0,1) == SANO || (0,1) == RECUPERADO ) && ((0,-1) == SANO || (0,-1) == RECUPERADO ) then 
+      neigh = INFECTADO;
+      for i in [0,26] do
+         if i != 12 then
+            neigh = (i % 5 - 2, 2 - i / 5);
+            if neigh != INFECTADO then
+               -> RECUPERADO
+            end
+         end
+      end
+      if (0,0) == SANO && all { (1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1), (1,-1), (-1,1) } are RECUPERADO then 
          -> RECUPERADO
       else 
-         ->SANO
+         ->(0,0)
       end
    end

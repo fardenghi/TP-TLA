@@ -57,9 +57,6 @@ SyntacticAnalysisStatus parse(CompilerState * compilerState) {
 			if (compilerState->succeed == true) {
 				return ACCEPT;
 			}
-			else {
-				syntacticAnalysisStatus = REJECT;
-			}
 		case 1:
 			syntacticAnalysisStatus = REJECT;
 			break;

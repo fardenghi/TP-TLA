@@ -23,6 +23,7 @@
 
 	/** Non-terminals. */
 
+	ForVariableDeclaration * for_variable_declaration;
 	Constant * constant;
 	Expression * expression;
 	TransitionSequence * transition_sequence;
@@ -53,7 +54,6 @@
  * @see https://www.gnu.org/software/bison/manual/html_node/Destructor-Decl.html
  */
 
-/* %destructor { releaseProgram($$); } <program> */
 %destructor { releaseTransitionSequence($$); } <transition_sequence>
 %destructor { releaseNeighborhoodSequence($$); } <neighborhood_sequence>
 %destructor { releaseTransitionExpression($$); } <transition_expression>
@@ -145,6 +145,7 @@
 
 /** Non-terminals. */
 %type <program> program
+%type <for_variable_declaration> for_variable_declaration
 %type <transition_sequence> transition_sequence
 %type <neighborhood_sequence> neighborhood_sequence
 %type <transition_expression> transition_expression
@@ -220,7 +221,7 @@ transition_sequence: transition_expression	transition_sequence 						{ $$ = Tran
 	;
 
 transition_expression: STRING ASSIGNMENT arithmetic_expression SEMICOLON						{ $$ = TransitionAssignmentExpressionSemanticAction($1, $3); }
-	| FOR scope_entry STRING IN range DO transition_sequence scope_exit END									{ $$ = TransitionForLoopExpressionSemanticAction($3, $5, $7); }
+	| FOR scope_entry for_variable_declaration DO transition_sequence scope_exit END									{ $$ = TransitionForLoopExpressionSemanticAction($3, $5); }
 	| IF scope_entry arithmetic_expression THEN transition_sequence scope_exit END								{ $$ = TransitionIfExpressionSemanticAction($3, $5); }
 	| IF scope_entry arithmetic_expression THEN transition_sequence scope_exit ELSE scope_entry transition_sequence scope_exit END 	{ $$ = TransitionIfElseExpressionSemanticAction($3, $5, $9); }
 	| RETURN arithmetic_expression														{ $$ = TransitionReturnExpressionSemanticAction($2); }
@@ -231,12 +232,14 @@ neighborhood_sequence: neighborhood_expression neighborhood_sequence					{ $$ = 
 	;
 
 neighborhood_expression: STRING ASSIGNMENT arithmetic_expression SEMICOLON						{ $$ = NeighborhoodAssignmentExpressionSemanticAction($1, $3); }
-	| FOR scope_entry STRING IN range DO neighborhood_sequence scope_exit END								{ $$ = NeighborhoodForLoopExpressionSemanticAction($3, $5, $7); }
+	| FOR scope_entry for_variable_declaration DO neighborhood_sequence scope_exit END								{ $$ = NeighborhoodForLoopExpressionSemanticAction($3, $5); }
 	| IF scope_entry arithmetic_expression THEN neighborhood_sequence scope_exit END							{ $$ = NeighborhoodIfExpressionSemanticAction($3, $5); }
 	| IF scope_entry arithmetic_expression THEN neighborhood_sequence scope_exit ELSE scope_entry neighborhood_sequence END scope_exit { $$ = NeighborhoodIfElseExpressionSemanticAction($3, $5, $9); }
 	| ADD_CELL OPEN_PARENTHESIS cell_list CLOSE_PARENTHESIS	SEMICOLON					{ $$ = NeighborhoodCellExpressionSemanticAction(true, $3); }
 	| REMOVE_CELL OPEN_PARENTHESIS cell_list CLOSE_PARENTHESIS	SEMICOLON				{ $$ = NeighborhoodCellExpressionSemanticAction(false, $3); }
 	;
+
+for_variable_declaration: STRING IN range												{ $$ = ForVariableDeclarationSemanticAction($1, $3); }
 
 cell: OPEN_PARENTHESIS constant[x] COMMA constant[y] CLOSE_PARENTHESIS									{ $$ = DoubleCoordinateCellSemanticAction($x, $y); }
 	| DISPLACEMENT_TYPE OPEN_PARENTHESIS constant CLOSE_PARENTHESIS										{ $$ = SingleCoordinateCellSemanticAction($3, $1); }

@@ -212,12 +212,22 @@ void releaseTransitionSequence(TransitionSequence * sequence) {
 	}
 }
 
+void releaseForVariable(ForVariableDeclaration * forVariable) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (forVariable != NULL)
+	{
+		releaseRange(forVariable->range);
+		free(forVariable->variable);
+		free(forVariable);
+	}
+}
+
 void releaseNeighborhoodExpression(NeighborhoodExpression * expression) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (expression != NULL) {
 		switch (expression->type) {
 			case NEIGHBORHOOD_FOR_LOOP:
-				releaseRange(expression->range);
+				releaseForVariable(expression->forVariable);
 				releaseNeighborhoodSequence(expression->forBody);
 				break;
 			case NEIGHBORHOOD_IF:
@@ -249,7 +259,7 @@ void releaseTransitionExpression(TransitionExpression * expression) {
 	if (expression != NULL) {
 		switch (expression->type) {
 			case TRANSITION_FOR_LOOP:
-				releaseRange(expression->range);
+				releaseForVariable(expression->forVariable);
 				releaseTransitionSequence(expression->forBody);
 				break;
 			case TRANSITION_IF:

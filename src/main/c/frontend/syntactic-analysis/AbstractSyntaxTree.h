@@ -24,6 +24,7 @@ typedef enum TransitionExpressionType TransitionExpressionType;
 typedef enum NeighborhoodExpressionType NeighborhoodExpressionType;
 typedef enum OptionType OptionType;
 
+typedef struct ForVariableDeclaration ForVariableDeclaration;
 typedef struct Constant Constant;
 typedef struct Expression Expression;
 typedef struct ArithmeticExpression ArithmeticExpression;
@@ -139,6 +140,12 @@ struct Program
 		};
 	};
 	ProgramType type;
+};
+
+struct ForVariableDeclaration 
+{
+	char * variable;
+	Range * range;
 };
 
 struct ArithmeticExpression
@@ -326,8 +333,7 @@ struct TransitionExpression
 		};
 		struct
 		{
-			char *forVariable;
-			Range *range;
+			ForVariableDeclaration * forVariable;
 			TransitionSequence *forBody;
 		};
 		struct
@@ -357,8 +363,7 @@ struct NeighborhoodExpression
 		};
 		struct
 		{
-			char *forVariable;
-			Range *range;
+			ForVariableDeclaration * forVariable;
 			NeighborhoodSequence *forBody;
 		};
 		struct

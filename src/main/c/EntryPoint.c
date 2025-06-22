@@ -24,8 +24,6 @@ const int main(const int count, const char **arguments)
 	initializeSyntacticAnalyzerModule();
 	initializeAbstractSyntaxTreeModule();
 	initializeSemanticAnalyzerModule();
-	// initializeCalculatorModule();
-	// initializeGeneratorModule();
 
 	// Logs the arguments of the application.
 	for (int k = 0; k < count; ++k)
@@ -37,31 +35,33 @@ const int main(const int count, const char **arguments)
 	CompilerState compilerState = {
 		.abstractSyntaxtTree = NULL,
 		.succeed = false,
-		.value = 0,
 		.symbolTable = createSymbolTable()};
 	const SyntacticAnalysisStatus syntacticAnalysisStatus = parse(&compilerState);
 	CompilationStatus compilationStatus = SUCCEED;
 	if (syntacticAnalysisStatus == ACCEPT)
-	{
+	{	
 		// ----------------------------------------------------------------------------------------
 		// Beginning of the Backend... ------------------------------------------------------------
 		Program * program = compilerState.abstractSyntaxtTree;
-		SemanticAnalysisStatus semanticAnalysisStatus = checkSemantic(program, logger);
-		if (semanticAnalysisStatus == SEMANTIC_FAILURE)
+		if (compilerState.symbolTable->failure == true)
 		{
-			logError(logger, "Type-checking failed: incompatinle types in the program.");
+			logError(logger, "Symbol check failed.");
 			compilationStatus = FAILED;
-		}
+		} else {
+			SemanticAnalysisStatus semanticAnalysisStatus = checkSemantic(program, logger);
+			if (semanticAnalysisStatus == SEMANTIC_FAILURE)
+			{
+				logError(logger, "Type-checking failed: incompatible types in the program.");
+				compilationStatus = FAILED;
+			}
 		else
-		{
-		//@TODO: meter nuestro backend
-		// ...end of the Backend. -----------------------------------------------------------------
-		// ----------------------------------------------------------------------------------------
-		generate(&compilerState);
-		logDebugging(logger, "Releasing AST resources...");
+			{
+				generate(&compilerState);
+				logDebugging(logger, "Releasing AST resources...");
+				
+			}
+		} 
 		releaseProgram(program);
-		destroySymbolTable(compilerState.symbolTable);
-	}
 	}
 	else {
 		logError(logger, "The syntactic-analysis phase rejects the input program.");
@@ -71,6 +71,7 @@ const int main(const int count, const char **arguments)
 	logDebugging(logger, "Releasing modules resources...");
 	// shutdownGeneratorModule();
 	// shutdownCalculatorModule();
+	destroySymbolTable(compilerState.symbolTable);
 	shutdownSemanticAnalyzerModule();
 	shutdownAbstractSyntaxTreeModule();
 	shutdownSyntacticAnalyzerModule();

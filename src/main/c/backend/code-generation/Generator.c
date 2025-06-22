@@ -20,7 +20,7 @@ void shutdownGeneratorModule() {
 
 static char * _arithmeticExpressionTypeToString(const ArithmeticExpressionType type);
 static void _generateConstant(const Constant * constant);
-static void _generateEpilogue(const int value);
+static void _generateEpilogue();
 static void _generateOption(const Option * option);
 static void _generateProgram(Program * program);
 static void _generateNeighborhoodSequence(unsigned int indentation, const NeighborhoodSequence * neighborSequence);
@@ -126,6 +126,11 @@ static char * _arithmeticExpressionTypeToString(const ArithmeticExpressionType t
 	}
 }
 
+static void _generateForVariable(const ForVariableDeclaration * forVariable) {
+	_output(0, "%s in ", forVariable->variable);
+	_generateRange(forVariable->range);
+}
+
 static void _generateTransitionExpression(unsigned int indentation, const TransitionExpression * transitionExpression) {
 	switch (transitionExpression->type)
 	{
@@ -135,8 +140,8 @@ static void _generateTransitionExpression(unsigned int indentation, const Transi
 			_output(0,"\n");
 			break;
 		case TRANSITION_FOR_LOOP:
-			_output(indentation, "for %s in ", transitionExpression->forVariable);
-			_generateRange(transitionExpression->range);
+			_output(indentation, "for");
+			_generateForVariable(transitionExpression->forVariable);
 			_output(0, ":\n");
 			_generateTransitionSequence(indentation + 1, transitionExpression->forBody);
 			break;
@@ -171,8 +176,8 @@ static void _generateNeighborhoodExpression(unsigned int indentation, const Neig
 			_generateArithmeticExpression(neighborhoodExpression->assignment);
 			break;
 		case NEIGHBORHOOD_FOR_LOOP:
-			_output(indentation, "for %s in ", neighborhoodExpression->forVariable);
-			_generateRange(neighborhoodExpression->range);
+			_output(indentation, "for");
+			_generateForVariable(neighborhoodExpression->forVariable);
 			_output(0, ":\n");
 			_generateNeighborhoodSequence(indentation + 1, neighborhoodExpression->forBody);
 			break;
@@ -534,7 +539,7 @@ static void _generateOption(const Option * option) {
  * Creates the epilogue of the generated output, that is, the final lines that
  * completes a valid Latex document.
  */
-static void _generateEpilogue(const int value) {
+static void _generateEpilogue() {
 	_output(0, "%s",
 		
 		"cell_size_w = MAX_SCREEN_WIDTH // N_CELLS_X\n"
@@ -720,6 +725,6 @@ void generate(CompilerState * compilerState) {
 	logDebugging(_logger, "Generating final output...");
 	_generatePrologue();
 	_generateProgram(compilerState->abstractSyntaxtTree);
-	_generateEpilogue(compilerState->value);
+	_generateEpilogue();
 	logDebugging(_logger, "Generation is done.");
 }
