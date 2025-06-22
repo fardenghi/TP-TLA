@@ -99,9 +99,13 @@ TransitionExpression * TransitionAssignmentExpressionSemanticAction(char * varia
 	expression->type = TRANSITION_ASSIGNMENT;
 	expression->variable = variable;
 	if (insertSymbol(currentCompilerState()->symbolTable, variable) == NULL) {
-		logError(_logger, "TransitionAssignmentExpressionSemanticAction: Variable '%s' already exists in the current scope.", variable);
-		free(expression);
-		return NULL;
+		const Symbol* symbol = lookupSymbol(currentCompilerState()->symbolTable, variable);
+		if (symbol->readOnly) {
+			logError("variable '%s' is read-only", variable);
+			free(expression);
+			return NULL;
+		}
+		logDebugging("updating symbol '%s'", variable);
 	}
 	expression->assignment = arithmeticExpression;
 	return expression;
@@ -111,6 +115,12 @@ TransitionExpression * TransitionForLoopExpressionSemanticAction(char * variable
 	TransitionExpression * expression = calloc(1, sizeof(TransitionExpression));
 	expression->type = TRANSITION_FOR_LOOP;
 	expression->forVariable = variable;
+	if (insertSymbol(currentCompilerState()->symbolTable, variable) == NULL) {
+		// Only for the loop variable, we don't allow redefinition
+		logError(_logger, "variable '%s' is already defined in the current scope", variable);
+		free(expression);
+		return NULL;
+	}
 	expression->range = range;
 	expression->forBody = transitionExpression;
 	return expression;
@@ -153,6 +163,15 @@ NeighborhoodExpression * NeighborhoodAssignmentExpressionSemanticAction(char * v
 	NeighborhoodExpression * expression = calloc(1, sizeof(NeighborhoodExpression));
 	expression->type = NEIGHBORHOOD_ASSIGNMENT;
 	expression->variable = variable;
+	if (insertSymbol(currentCompilerState()->symbolTable, variable) == NULL) {
+		const Symbol* symbol = lookupSymbol(currentCompilerState()->symbolTable, variable);
+		if (symbol->readOnly) {
+			logError("variable '%s' is read-only", variable);
+			free(expression);
+			return NULL;
+		}
+		logDebugging("updating symbol '%s'", variable);
+	}
 	expression->assignment = arithmeticExpression;
 	return expression;
 }
@@ -161,6 +180,12 @@ NeighborhoodExpression * NeighborhoodForLoopExpressionSemanticAction(char * vari
 	NeighborhoodExpression * expression = calloc(1, sizeof(NeighborhoodExpression));
 	expression->type = NEIGHBORHOOD_FOR_LOOP;
 	expression->forVariable = variable;
+	if (insertSymbol(currentCompilerState()->symbolTable, variable) == NULL) {
+		// Only for the loop variable, we don't allow redefinition
+		logError(_logger, "variable '%s' is already defined in the current scope", variable);
+		free(expression);
+		return NULL;
+	}
 	expression->range = range;
 	expression->forBody = neighborhoodExpression;
 	return expression;
@@ -350,6 +375,13 @@ ArithmeticExpression * CellListArithmeticExpressionSemanticAction(CellList * cel
 ArithmeticExpression * ConstantArithmeticExpressionSemanticAction(Constant * constant) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	ArithmeticExpression * expression = calloc(1, sizeof(ArithmeticExpression));
+	if (constant->type == STRING_C) {
+		if (lookupSymbol(currentCompilerState()->symbolTable, constant->string) == NULL) {
+			logError(_logger, "ConstantArithmeticExpressionSemanticAction: String '%s' is not defined in the current scope.", constant->string);
+			free(expression);
+			return NULL;
+		}
+	}
 	expression->constant = constant;
 	expression->type = CONSTANT;
 	return expression;
