@@ -142,24 +142,24 @@ Symbol* lookupSymbol(const SymbolTable* symbolTable, const char* name) {
     return NULL;
 }
 
-void printScopeStack(const SymbolTable* symbolTable) {
-    printf("Scope Stack (innermost last): [ ");
+void printScopeStack(const SymbolTable* symbolTable, Logger * logger) {
+    logInformation(logger, "Scope Stack (innermost last): [ ");
     for (int i = 0; i < symbolTable->scopeDepth; i++) {
-        printf("%d", symbolTable->scopes[i]);
-        if (i < symbolTable->scopeDepth - 1) printf(", ");
+        logInformation(logger, "%d", symbolTable->scopes[i]);
+        if (i < symbolTable->scopeDepth - 1) logInformation(logger, ", ");
     }
-    printf(" ]\n");
+    logInformation(logger, " ]\n");
 }
 
-void printSymbolTable(const SymbolTable* symbolTable) {
-    printf("Symbol Table:\n");
-    printf("%-20s %-10s %-10s\n", "Name", "Scope", "ReadOnly");
-    printf("---------------------------------------------\n");
+void printSymbolTable(const SymbolTable* symbolTable, Logger * logger) {
+    logInformation(logger, "Symbol Table:");
+    logInformation(logger, "%-20s %-10s %-10s\n", "Name", "Scope", "ReadOnly");
+    logInformation(logger, "---------------------------------------------\n");
     for (int i = 0; i < symbolTable->size; i++) {
-        printf("%-20s %-10d %-10s\n",
+        logInformation(logger, "%-20s %-10d %-10s\n",
             symbolTable->symbols[i].name,
             symbolTable->symbols[i].scope,
             symbolTable->symbols[i].readOnly ? "true" : "false");
     }
-    printf("\n");
+    logInformation(logger, "\n");
 }

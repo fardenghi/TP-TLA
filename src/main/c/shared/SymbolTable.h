@@ -2,6 +2,7 @@
 #define SYMBOL_TABLE_HEADER
 #include "Type.h"
 #include <stdio.h>
+#include "Logger.h"
 
 typedef struct {
     char * name;
@@ -30,8 +31,8 @@ Symbol * lookupSymbol(const SymbolTable * symbolTable, const char * name);
 void pushScope(SymbolTable * symbolTable);
 void popScope(SymbolTable * symbolTable);
 int getCurrentScope(const SymbolTable * symbolTable);
-void printScopeStack(const SymbolTable* symbolTable);
-void printSymbolTable(const SymbolTable* symbolTable);
+void printScopeStack(const SymbolTable* symbolTable, Logger * logger);
+void printSymbolTable(const SymbolTable* symbolTable, Logger * logger);
 
 
 #endif
