@@ -22,4 +22,3 @@ compiled.py
 BisonParser.c
 BisonParser.h
 FlexScanner.c
-CMakeLists.txt
