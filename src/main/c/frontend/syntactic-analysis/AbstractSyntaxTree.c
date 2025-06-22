@@ -156,10 +156,10 @@ void releaseCell(Cell * cell) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (cell != NULL) {
 		if (cell->isSingleCoordenate) {
-			releaseConstant(cell->displacement);
+			releaseArithmeticExpression(cell->displacement);
 		} else {
-			releaseConstant(cell->x);
-			releaseConstant(cell->y);
+			releaseArithmeticExpression(cell->x);
+			releaseArithmeticExpression(cell->y);
 		}
 		free(cell);
 	}

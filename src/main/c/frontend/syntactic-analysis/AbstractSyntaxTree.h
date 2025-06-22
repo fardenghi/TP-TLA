@@ -270,13 +270,13 @@ struct Cell
 	{
 		struct
 		{
-			Constant *displacement;
+			ArithmeticExpression *displacement;
 			DisplacementType displacementType;
 		};
 		struct
 		{
-			Constant *x;
-			Constant *y;
+			ArithmeticExpression *x;
+			ArithmeticExpression *y;
 		};
 	};
 };

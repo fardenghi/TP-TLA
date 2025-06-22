@@ -148,7 +148,8 @@ ForVariableDeclaration * ForVariableDeclarationSemanticAction(char * variable, R
 	ForVariableDeclaration * rta = calloc(1, sizeof(ForVariableDeclaration));
 	rta->range = range;
 	rta->variable = variable;
-	if ( insertSymbol(currentCompilerState()->symbolTable, variable) == NULL) {
+	Symbol * p;
+	if ( (p = insertSymbol(currentCompilerState()->symbolTable, variable)) == NULL) {
 		// Only for the loop variable, we don't allow redefinition
 		logError(_logger, "variable '%s' is already defined in the current scope", variable);
 		free(rta);
@@ -312,7 +313,7 @@ Evolution * EvolutionSemanticAction(IntArray * surviveArray, IntArray * birthArr
 
 
 
-Cell * SingleCoordinateCellSemanticAction(Constant * c, DisplacementType type) {
+Cell * SingleCoordinateCellSemanticAction(ArithmeticExpression * c, DisplacementType type) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Cell * cell = calloc(1, sizeof(Cell));
 	cell->isSingleCoordenate = true;
@@ -321,7 +322,7 @@ Cell * SingleCoordinateCellSemanticAction(Constant * c, DisplacementType type) {
 	return cell;
 }
 
-Cell * DoubleCoordinateCellSemanticAction(Constant * x, Constant * y) {
+Cell * DoubleCoordinateCellSemanticAction(ArithmeticExpression * x, ArithmeticExpression * y) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Cell * cell = calloc(1, sizeof(Cell));
 	cell->isSingleCoordenate = false;

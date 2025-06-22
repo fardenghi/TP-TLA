@@ -243,33 +243,33 @@ static void _generateConstant(const Constant * constant) {
 	}
 }
 
-static void _outputDisplacement(const DisplacementType displacementType, Constant * value) {
+static void _outputDisplacement(const DisplacementType displacementType, ArithmeticExpression * value) {
 	switch (displacementType)
 	{
 	case HORIZONTAL_D:
 		_output(0, "row+");
-		_generateConstant(value);
+		_generateArithmeticExpression(value);
 		_output(0, ",col");
 		break;
 	case VERTICAL_D:
 		_output(0, "row,");
 		_output(0, "col+");
-		_generateConstant(value);
+		_generateArithmeticExpression(value);
 		break;
 	case DIAGONAL_ASC_D:
 	//@todo: ver para donde crecen las columnas (si es positivo para abajp para arriba)
 		_output(0, "row+");
-		_generateConstant(value);		
+		_generateArithmeticExpression(value);		
 		_output(0, ",");
 		_output(0, "col+");
-		_generateConstant(value);		
+		_generateArithmeticExpression(value);
 		break;
 	case DIAGONAL_DESC_D:
 		_output(0, "row+");
-		_generateConstant(value);		
+		_generateArithmeticExpression(value);
 		_output(0, ",");
 		_output(0, "col-");
-		_generateConstant(value);
+		_generateArithmeticExpression(value);
 		break;
 	default:
 		logError(_logger, "The specified displacement type is not valid: %d", displacementType);
@@ -285,9 +285,9 @@ static void _generateTransitionCell(const Cell * cell) {
 		_output(0,")");
 	} else {
 		_output(0,"%s%s", GET_CELL_VALUE_FUN, "row+");
-		_generateConstant(cell->x);
+		_generateArithmeticExpression(cell->x);
 		_output(0,",col+");
-		_generateConstant(cell->y);
+		_generateArithmeticExpression(cell->y);
 		_output(0,")");
 	}
 }
@@ -299,9 +299,9 @@ static void _generateNeighbourhoodCell(const Cell * cell) {
 		_output(0,")");
 	} else {
 		_output(0,"(row+");
-		_generateConstant(cell->x);
+		_generateArithmeticExpression(cell->x);
 		_output(0,",col+");
-		_generateConstant(cell->y);
+		_generateArithmeticExpression(cell->y);
 		_output(0,")");
 	}
 }

@@ -53,8 +53,8 @@ NeighborhoodExpression * NeighborhoodIfElseExpressionSemanticAction(ArithmeticEx
 NeighborhoodExpression * NeighborhoodCellExpressionSemanticAction(boolean add, CellList * cellList);
 
 
-Cell * SingleCoordinateCellSemanticAction(Constant * c, DisplacementType type);
-Cell * DoubleCoordinateCellSemanticAction(Constant * x, Constant * y);
+Cell * SingleCoordinateCellSemanticAction(ArithmeticExpression * c, DisplacementType type);
+Cell * DoubleCoordinateCellSemanticAction(ArithmeticExpression * x, ArithmeticExpression * y);
 CellList * CellListSemanticAction(Cell * cell, CellList * list);
 
 ArithmeticExpression * BinaryArithmeticExpressionSemanticAction(ArithmeticExpression * leftExpression, ArithmeticExpression * rightExpression, ArithmeticExpressionType type);

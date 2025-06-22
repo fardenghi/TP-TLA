@@ -241,8 +241,8 @@ neighborhood_expression: STRING ASSIGNMENT arithmetic_expression SEMICOLON						
 
 for_variable_declaration: STRING IN range												{ $$ = ForVariableDeclarationSemanticAction($1, $3); }
 
-cell: OPEN_PARENTHESIS constant[x] COMMA constant[y] CLOSE_PARENTHESIS									{ $$ = DoubleCoordinateCellSemanticAction($x, $y); }
-	| DISPLACEMENT_TYPE OPEN_PARENTHESIS constant CLOSE_PARENTHESIS										{ $$ = SingleCoordinateCellSemanticAction($3, $1); }
+cell: OPEN_PARENTHESIS arithmetic_expression[x] COMMA arithmetic_expression[y] CLOSE_PARENTHESIS									{ $$ = DoubleCoordinateCellSemanticAction($x, $y); }
+	| DISPLACEMENT_TYPE OPEN_PARENTHESIS arithmetic_expression CLOSE_PARENTHESIS										{ $$ = SingleCoordinateCellSemanticAction($3, $1); }
 	;
 
 cell_list: cell																						{ $$ = CellListSemanticAction($1, NULL); }

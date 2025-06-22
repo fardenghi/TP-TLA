@@ -1,6 +1,7 @@
 #ifndef SYMBOL_TABLE_HEADER
 #define SYMBOL_TABLE_HEADER
 #include "Type.h"
+#include <stdio.h>
 
 typedef struct {
     char * name;
