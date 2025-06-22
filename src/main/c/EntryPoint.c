@@ -46,6 +46,7 @@ const int main(const int count, const char ** arguments) {
 		//@TODO: meter nuestro backend
 		// ...end of the Backend. -----------------------------------------------------------------
 		// ----------------------------------------------------------------------------------------
+		generate(&compilerState);
 		logDebugging(logger, "Releasing AST resources...");
 		releaseProgram(program);
 	}
