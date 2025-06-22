@@ -2,9 +2,17 @@ import time
 import pygame
 import numpy as np
 
-CELL_SIZE = 20
-N_CELLS_Y=50
-N_CELLS_X=50
+pygame.init()
+
+display_info = pygame.display.Info()
+MAX_SCREEN_WIDTH = display_info.current_w - 100
+MAX_SCREEN_HEIGHT = display_info.current_h - 100
+
+###
+
+N_CELLS_X = 100
+N_CELLS_Y = 70
+
 FRONTIER_MODE='Periodic'
 alive=0
 dead=1
@@ -19,6 +27,14 @@ def neighborhood_function(row, col):
 EVOLUTION_MODE='SB'
 SURVIVE_RULES = [2,3]
 BIRTH_RULES = [3]
+
+###
+
+cell_size_w = MAX_SCREEN_WIDTH // N_CELLS_X
+cell_size_h = MAX_SCREEN_HEIGHT // N_CELLS_Y
+
+CELL_SIZE = min(cell_size_w, cell_size_h)
+
 SCREEN_WIDTH = N_CELLS_X * CELL_SIZE
 SCREEN_HEIGHT = N_CELLS_Y * CELL_SIZE
 
@@ -75,7 +91,6 @@ def update(screen, cells):
     return updated_cells
 
 def main():
-    pygame.init()
     pygame.display.set_caption("Cellular Automata")
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 

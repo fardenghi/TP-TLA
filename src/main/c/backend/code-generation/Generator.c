@@ -537,6 +537,11 @@ static void _generateOption(const Option * option) {
 static void _generateEpilogue(const int value) {
 	_output(0, "%s",
 		
+		"cell_size_w = MAX_SCREEN_WIDTH // N_CELLS_X\n"
+		"cell_size_h = MAX_SCREEN_HEIGHT // N_CELLS_Y\n"
+		"\n"
+		"CELL_SIZE = min(cell_size_w, cell_size_h)\n"
+		"\n"
 		"SCREEN_WIDTH = N_CELLS_X * CELL_SIZE\n"
 		"SCREEN_HEIGHT = N_CELLS_Y * CELL_SIZE\n\n"
 		"def get_cell_value(cells, row, col):\n"
@@ -678,7 +683,10 @@ static void _generatePrologue(void) {
 		"import time\n"
 		"import pygame\n"
 		"import numpy as np\n\n"
-		"CELL_SIZE = 20\n"
+		"pygame.init()\n"
+		"display_info = pygame.display.Info()\n"
+		"MAX_SCREEN_WIDTH = display_info.current_w - 100\n"
+		"MAX_SCREEN_HEIGHT = display_info.current_h - 100\n"
 	);
 }
 
