@@ -21,15 +21,12 @@ void shutdownSemanticAnalyzerModule()
 
 static bool validateConfiguration(Configuration *configuration)
 {
-
-    // Vemos que la lista de configuraciones no sea NULL
     if (configuration == NULL)
     {
-        logError(_logger, "Configuration is NULL.");
+        logError(_logger, "Semantic Error: The configuration is NULL. A valid configuration is required.");
         return false;
     }
 
-    // Chequeamos que no se repitan los tipos obligatorios de configuracion
     int obligatoryTypes[5] = {0};
     int i = 0;
     Configuration *current = configuration;
@@ -44,7 +41,7 @@ static bool validateConfiguration(Configuration *configuration)
             }
             else
             {
-                logError(_logger, "A configuration is repeated");
+                logError(_logger, "Semantic Error: A configuration option is repeated. Each option must be unique.");
                 return false;
             }
         }
@@ -56,17 +53,16 @@ static bool validateConfiguration(Configuration *configuration)
             }
             else
             {
-                logError(_logger, "A configuration is repeated");
+                logError(_logger, "Semantic Error: A configuration option is repeated. Each option must be unique.");
                 return false;
             }
         }
         i++;
     } while (!current->isLast);
 
-    // Vemos que esten todos los tipos obligatorios
     if (i < 5)
     {
-        logError(_logger, "Configuration is missing some obligatory options.");
+        logError(_logger, "Semantic Error: The configuration is missing obligatory options. Ensure all required options are defined.");
         return false;
     }
 
@@ -92,52 +88,51 @@ static bool validateConfigurationRec(Configuration *configuration)
 
     if (configuration->isLast)
     {
-        logDebugging(_logger, "Configuration is last.");
+        logDebugging(_logger, "Semantic Info: Configuration validation reached the last option.");
         return true;
     }
     else
     {
-
         return validateConfigurationRec(configuration->next);
     }
 }
 
 static bool validateConfigurationAux(Option *option)
 {
-    // Vemos que WIDTH y HEIGHT sean validas
     if (option == WIDTH_OPTION || option == HEIGHT_OPTION)
     {
         if (option->value <= 0)
         {
-            logError(_logger, "Configuration option %s must be greater than 0.",
+            logError(_logger, "Semantic Error: The %s option must have a value greater than 0.",
                      option->type == WIDTH_OPTION ? "Width" : "Height");
             return false;
         }
         else
         {
-            logDebugging(_logger, "Configuration option %s is valid with value %d.",
+            logDebugging(_logger, "Semantic Info: The %s option is valid with value %d.",
                          option->type == WIDTH_OPTION ? "Width" : "Height",
                          option->value);
         }
     }
-    else if (option == FRONTIER_OPTION) // Vemos que el FRONTIER_OPTION sea valido
+    else if (option == FRONTIER_OPTION)
     {
         if (option->frontierType == PERIODIC ||
             option->frontierType == OPEN ||
             option->frontierType == MIRROR)
         {
-            logDebugging(_logger, "Configuration option Frontier is valid with type");
+            logDebugging(_logger, "Semantic Info: The Frontier option is valid with type %d.", option->frontierType);
         }
         else
         {
-            logError(_logger, "Frontier configuration is not valid");
+            logError(_logger, "Semantic Error: The Frontier option has an invalid type. Valid types are PERIODIC, OPEN, or MIRROR.");
+            return false;
         }
     }
-    else if (option == COLORS_OPTION) // Vemos que los COLORS sean validos
+    else if (option == COLORS_OPTION)
     {
         if (option->colors == NULL)
         {
-            logError(_logger, "Configuration option COLORS is NULL.");
+            logError(_logger, "Semantic Error: The COLORS option is NULL. A valid list of colors is required.");
             return false;
         }
         else
@@ -150,37 +145,37 @@ static bool validateConfigurationAux(Option *option)
                 {
                     if (colors->lastValue < 0)
                     {
-                        logError(_logger, "Configuration option COLORS contains a negative value");
+                        logError(_logger, "Semantic Error: The COLORS option contains a negative value. All values must be non-negative.");
                         return false;
                     }
                     else
                     {
-                        logDebugging(_logger, "Configuration option COLORS is valid");
+                        logDebugging(_logger, "Semantic Info: The COLORS option is valid.");
                     }
                 }
                 else
                 {
                     if (colors->value < 0)
                     {
-                        logError(_logger, "Configuration option COLORS contains a negative value");
+                        logError(_logger, "Semantic Error: The COLORS option contains a negative value. All values must be non-negative.");
                         return false;
                     }
                     else
                     {
-                        logDebugging(_logger, "Configuration option COLORS is valid");
+                        logDebugging(_logger, "Semantic Info: The COLORS option is valid.");
                         colors = colors->next;
                     }
                 }
             } while (!colors->isLast);
         }
     }
-    else if (option == STATES_OPTION) // Vemos que los STATES sean validos
+    else if (option == STATES_OPTION)
     {
         int amountOfStates = 0;
         StringArray *states = option->states;
         if (states == NULL)
         {
-            logError(_logger, "Configuration option STATES is NULL.");
+            logError(_logger, "Semantic Error: The STATES option is NULL. A valid list of states is required.");
             return false;
         }
         else
@@ -190,72 +185,61 @@ static bool validateConfigurationAux(Option *option)
                 amountOfStates++;
                 if (states->isLast)
                 {
-                    if (states->lastValue == NULL || states->lastValue == " ")
+                    if (states->lastValue == NULL || strcmp(states->lastValue, " ") == 0)
                     {
-                        logError(_logger, "A value in the States Array is NULL or empty String");
+                        logError(_logger, "Semantic Error: A value in the STATES array is NULL or an empty string. All states must be valid.");
                         return false;
                     }
                     else
                     {
-                        logDebugging(_logger, "States Array is correct");
+                        logDebugging(_logger, "Semantic Info: The STATES array is valid.");
                     }
                 }
                 else
                 {
                     if (states->value == NULL || strcmp(states->value, " ") == 0)
                     {
-                        logError(_logger, "A value in the States Array is NULL or empty String");
+                        logError(_logger, "Semantic Error: A value in the STATES array is NULL or an empty string. All states must be valid.");
                         return false;
                     }
                     else
                     {
-                        logDebugging(_logger, "States Array is is correct");
+                        logDebugging(_logger, "Semantic Info: The STATES array is valid.");
                         states = states->next;
                     }
                 }
             } while (!states->isLast);
             if (amountOfStates != amountOfColors)
             {
-                logError(_logger, "The amount of colors differ from the amount of states.");
+                logError(_logger, "Semantic Error: The number of states does not match the number of colors. Ensure both lists are consistent.");
                 return false;
             }
         }
     }
-    // else if (option == NEIGHBORHOOD_OPTION) // Vemos que el NEIGHBORHOOD_OPTION sea valido
-    // {
-    //     if (option->neighborhoodEnum == CUSTOM ||
-    //         option->neighborhoodEnum == MOORE ||
-    //         option->neighborhoodEnum == VON_NEUMANN ||
-    //         option->neighborhoodEnum == K_NEIGHBORHOOD)
-    //     {
-    //         logDebugging(_logger, "Configuration option Frontier is valid with type");
-    //     }
-    // }
     return true;
 }
 
 static Option *getOption(Configuration *configuration, OptionType type)
 {
-    if(configuration == NULL)
+    if (configuration == NULL)
     {
         return NULL;
     }
 
     if (configuration->isLast)
     {
-        if(configuration->lastOption->type == type)
+        if (configuration->lastOption->type == type)
         {
             return configuration->lastOption;
         }
         else
         {
             return NULL;
-
         }
     }
     else
     {
-        if(configuration->option->type == type)
+        if (configuration->option->type == type)
         {
             return configuration->option;
         }
@@ -268,45 +252,48 @@ static Option *getOption(Configuration *configuration, OptionType type)
 
 static bool validateDefaultConfiguration(Configuration *configuration)
 {
-    Option* neigh = getOption(configuration, NEIGHBORHOOD_OPTION);
-    Option* evol = getOption(configuration, EVOLUTION_OPTION); 
+    Option *neigh = getOption(configuration, NEIGHBORHOOD_OPTION);
+    Option *evol = getOption(configuration, EVOLUTION_OPTION);
 
-    if(neigh == NULL || evol == NULL)
+    if (neigh == NULL || evol == NULL)
     {
-        logError(_logger, "Default configuration is missing NEIGHBORHOOD or EVOLUTION option.");
+        logError(_logger, "Semantic Error: Default configuration is missing NEIGHBORHOOD or EVOLUTION options.");
         return false;
     }
 
     if (neigh->neighborhoodEnum == CUSTOM)
     {
-        logError(_logger, "Default configuration cannot have a CUSTOM neighborhood.");
+        logError(_logger, "Semantic Error: Default configuration cannot use a CUSTOM neighborhood.");
         return false;
     }
     return true;
 }
+
 static bool validateTransitionConfiguration(Configuration *configuration)
 {
-    Option* neigh = getOption(configuration, NEIGHBORHOOD_OPTION);
-    Option* evol = getOption(configuration, EVOLUTION_OPTION);
+    Option *neigh = getOption(configuration, NEIGHBORHOOD_OPTION);
+    Option *evol = getOption(configuration, EVOLUTION_OPTION);
 
-    if(neigh != NULL || evol!=NULL){
-        logError(_logger, "Transition configuration cannot have NEIGHBORHOOD or EVOLUTION option.");
+    if (neigh != NULL || evol != NULL)
+    {
+        logError(_logger, "Semantic Error: Transition configuration cannot include NEIGHBORHOOD or EVOLUTION options.");
         return false;
     }
     return true;
-
 }
 
 static bool validateNeighborhoodConfiguration(Configuration *configuration)
 {
-    Option* neigh = getOption(configuration,NEIGHBORHOOD_OPTION);
+    Option *neigh = getOption(configuration, NEIGHBORHOOD_OPTION);
 
-    if(neigh == NULL)
+    if (neigh == NULL)
     {
-        logError(_logger, "Neighborhood configuration is missing NEIGHBORHOOD option.");
+        logError(_logger, "Semantic Error: Neighborhood configuration is missing the NEIGHBORHOOD option.");
         return false;
-    }else if(neigh->neighborhoodEnum != CUSTOM){
-        logError(_logger, "Neighborhood configuration must have a CUSTOM neighborhood.");
+    }
+    else if (neigh->neighborhoodEnum != CUSTOM)
+    {
+        logError(_logger, "Semantic Error: Neighborhood configuration must use a CUSTOM neighborhood.");
         return false;
     }
     return true;
