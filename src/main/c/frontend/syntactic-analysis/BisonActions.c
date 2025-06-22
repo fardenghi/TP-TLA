@@ -98,6 +98,11 @@ TransitionExpression * TransitionAssignmentExpressionSemanticAction(char * varia
 	TransitionExpression * expression = calloc(1, sizeof(TransitionExpression));
 	expression->type = TRANSITION_ASSIGNMENT;
 	expression->variable = variable;
+	if (insertSymbol(currentCompilerState()->symbolTable, variable) == NULL) {
+		logError(_logger, "TransitionAssignmentExpressionSemanticAction: Variable '%s' already exists in the current scope.", variable);
+		free(expression);
+		return NULL;
+	}
 	expression->assignment = arithmeticExpression;
 	return expression;
 }
@@ -218,7 +223,11 @@ Option * StringArrayValuedOptionSemanticAction(StringArray * value) {
 			free(option);
 			return NULL;
 		}
-		insertReadOnlySymbol(compilerState->symbolTable, current->value);
+		if (insertReadOnlySymbol(compilerState->symbolTable, current->value) == NULL) {
+			logError(_logger, "StringArrayValuedOptionSemanticAction: String '%s' already exists in the current scope.", current->value);
+			free(option);
+			return NULL;
+		}
 	}
 	return option;
 }
