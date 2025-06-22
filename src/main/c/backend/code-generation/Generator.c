@@ -140,7 +140,7 @@ static void _generateTransitionExpression(unsigned int indentation, const Transi
 			_output(0,"\n");
 			break;
 		case TRANSITION_FOR_LOOP:
-			_output(indentation, "for");
+			_output(indentation, "for ");
 			_generateForVariable(transitionExpression->forVariable);
 			_output(0, ":\n");
 			_generateTransitionSequence(indentation + 1, transitionExpression->forBody);
