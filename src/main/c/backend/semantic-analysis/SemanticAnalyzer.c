@@ -15,8 +15,8 @@ static Option *getOption(Configuration *configuration, OptionType type);
 static bool validateDefaultConfiguration(Configuration *configuration);
 static bool validateTransitionConfiguration(Configuration *configuration);
 static bool validateNeighborhoodConfiguration(Configuration *configuration);
+static int getBiggerNumber(IntArray *intArray);
 SemanticAnalysisStatus checkSemantic(Program *program, Logger *logger);
-
 
 void initializeSemanticAnalyzerModule()
 {
@@ -29,6 +29,32 @@ void shutdownSemanticAnalyzerModule()
     {
         destroyLogger(_logger);
     }
+}
+
+static int getBiggerNumber(IntArray *array)
+{
+    if (array == NULL)
+    {
+        return 0;
+    }
+
+    int maxValue = array->isLast ? array->lastValue : array->value;
+
+    while (!array->isLast)
+    {
+        if (array->value > maxValue)
+        {
+            maxValue = array->value;
+        }
+        array = array->next;
+    }
+
+    if (array->isLast && array->lastValue > maxValue)
+    {
+        maxValue = array->lastValue;
+    }
+
+    return maxValue;
 }
 
 static bool validateConfiguration(Configuration *configuration)
@@ -49,9 +75,9 @@ static bool validateConfiguration(Configuration *configuration)
         {
             current = current->next;
         }
-        
+
         if ((!current->isLast && current->option->type < 5) || current->lastOption->type < 5)
-        {        
+        {
             if (!current->isLast)
             {
                 if (!obligatoryTypes[current->option->type])
@@ -89,7 +115,7 @@ static bool validateConfiguration(Configuration *configuration)
     bool rta = validateConfigurationRec(configuration);
     if (amountOfStates != amountOfColors)
     {
-        logCritical(_logger,"%d,%d", amountOfColors, amountOfStates);
+        logCritical(_logger, "%d,%d", amountOfColors, amountOfStates);
         logError(_logger, "Semantic Error: The number of states does not match the number of colors. Ensure both lists are consistent.");
         return false;
     }
@@ -287,6 +313,25 @@ static bool validateDefaultConfiguration(Configuration *configuration)
         logError(_logger, "Semantic Error: Default configuration cannot use a CUSTOM neighborhood.");
         return false;
     }
+
+    if (neigh->neighborhoodEnum == VON_NEUMANN)
+    {
+
+        if (getBiggerNumber(evol->evolution->birthArray) > 4 && getBiggerNumber(evol->evolution->surviveArray) > 4)
+        {
+            logError(_logger, "Semantic Error: Evolution states exceed Neighborhood capacity.");
+            return false;
+        }
+    }
+    else if (neigh->neighborhoodEnum == MOORE)
+    {
+        if (getBiggerNumber(evol->evolution->birthArray) > 8 && getBiggerNumber(evol->evolution->surviveArray) > 8)
+        {
+            logError(_logger, "Semantic Error: Evolution states exceed Neighborhood capacity.");
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -318,6 +363,7 @@ static bool validateNeighborhoodConfiguration(Configuration *configuration)
         logError(_logger, "Semantic Error: Neighborhood configuration must use a CUSTOM neighborhood.");
         return false;
     }
+
     return true;
 }
 
