@@ -88,10 +88,10 @@ static char * _arithmeticExpressionTypeToString(const ArithmeticExpressionType t
 			return " // ";
 		case MULTIPLICATION: 	
 			return " * ";
-		case SUBTRACTION: 
+		case SUBTRACTION:
 			return " - ";
-		case MODULE: 
-			return " % ";
+		case MODULE:
+			return " %% ";
 		case LOGIC_AND: 
 			return " and ";
 		case LOGIC_OR:
