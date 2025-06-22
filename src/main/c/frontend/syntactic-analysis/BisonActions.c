@@ -241,21 +241,34 @@ Option * StringArrayValuedOptionSemanticAction(StringArray * value) {
 	option->type = STATES_OPTION;
 	option->states = value;
 	const CompilerState * compilerState = currentCompilerState();
-	for (const StringArray * current = value; current != NULL; current = current->next) {
-		if (current->isLast) break;
-		if (current->value == NULL) {
-			logError(_logger, "StringArrayValuedOptionSemanticAction: A string in the array is NULL.");
-			free(option);
-			return NULL;
+	const StringArray * current = value;
+	if (current == NULL) {
+		logError(_logger, "StringArrayValuedOptionSemanticAction: The string array is NULL.");
+		free(option);
+		return NULL;
+	}
+	while (current != NULL) {
+		if (current->isLast) {
+			if (insertReadOnlySymbol(compilerState->symbolTable, current->lastValue) == NULL) {
+				logError(_logger, "StringArrayValuedOptionSemanticAction: String '%s' already exists in the current scope.", current->lastValue);
+				free(option);
+				return NULL;
+			}
+			logDebugging(_logger, "StringArrayValuedOptionSemanticAction: String '%s' added to the symbol table.", current->lastValue);
 		}
-		if (insertReadOnlySymbol(compilerState->symbolTable, current->value) == NULL) {
-			logError(_logger, "StringArrayValuedOptionSemanticAction: String '%s' already exists in the current scope.", current->value);
-			free(option);
-			return NULL;
+		else {
+			if (insertReadOnlySymbol(compilerState->symbolTable, current->value) == NULL) {
+				logError(_logger, "StringArrayValuedOptionSemanticAction: String '%s' already exists in the current scope.", current->value);
+				free(option);
+				return NULL;
+			}
+			logDebugging(_logger, "StringArrayValuedOptionSemanticAction: String '%s' added to the symbol table.", current->value);
 		}
+		current = current->next;
 	}
 	return option;
 }
+
 Option * FrontierOptionSemanticAction(const FrontierEnum value) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Option * option = calloc(1, sizeof(Option));
