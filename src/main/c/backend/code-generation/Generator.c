@@ -205,7 +205,7 @@ static void _generateNeighborhoodExpression(unsigned int indentation, const Neig
 			_output(indentation, "if ");
 			_generateArithmeticExpression(neighborhoodExpression->ifElseCondition);
 			_output(0, ":\n");
-			_generateNeighborhoodExpression(indentation + 1, neighborhoodExpression->ifElseIfBody);
+			_generateNeighborhoodSequence(indentation + 1, neighborhoodExpression->ifElseIfBody);
 			_output(indentation, "\nelse:\n");
 			_generateNeighborhoodSequence(indentation + 1, neighborhoodExpression->ifElseElseBody);
 			break;
@@ -257,7 +257,8 @@ static void _generateConstant(const Constant * constant) {
 	}
 }
 
-static char MAX_DISPLACEMENT_TAG_LENGTH = 256;
+//@TODO: Esto para que es?
+static int MAX_DISPLACEMENT_TAG_LENGTH = 256;
 
 static char * _displacementTypeToString(const DisplacementType displacementType, Constant * value) {
 	switch (displacementType)
@@ -326,7 +327,7 @@ static void _generateCellList(const CellList * cellList) {
 
 static void _generateConstantArrayRec(const ConstantArray * arr) {
 	if (arr->isLast) {
-		_generateCell(arr->value);
+		_generateConstant(arr->value);
 		return;
 	}
 	_generateConstant(arr->value);
