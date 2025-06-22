@@ -27,6 +27,6 @@ Symbol* insertSymbol(SymbolTable * symbolTable, const char * name);
 Symbol * lookupSymbol(const SymbolTable * symbolTable, const char * name);
 void pushScope(SymbolTable * symbolTable);
 void popScope(SymbolTable * symbolTable);
-int getCurrentScope(SymbolTable * symbolTable);
+int getCurrentScope(const SymbolTable * symbolTable);
 
 #endif
