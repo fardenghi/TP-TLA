@@ -511,8 +511,8 @@ static void _generateOption(const Option * option) {
 						_output(0,"[2,3]\n");
 						_output(0,"BIRTH_RULES = [3]\n");
 					} else if (option->evolution->evolutionTypes == SEEDS) {
-						_output(0,"[2]\n");
-						_output(0,"BIRTH_RULES = []\n");
+						_output(0,"[]\n");
+						_output(0,"BIRTH_RULES = [2]\n");
 					} 
 					else {
 						logError(_logger, "The specified evolution type is not valid: %d", option->evolution->evolutionTypes);

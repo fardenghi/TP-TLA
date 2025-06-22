@@ -1,8 +1,8 @@
 configuration:
    Height: 50;
    Width: 50;
-   Frontier: Mirror;
+   Frontier: Periodic;
    States: {alive, dead};
    Colors: { #FFFFFF, #000000};
-   Neighborhood: VON_NEUMANN;
+   Neighborhood: MOORE;
    Evolution: SEEDS;
