@@ -16,6 +16,7 @@ static bool validateDefaultConfiguration(Configuration *configuration);
 static bool validateTransitionConfiguration(Configuration *configuration);
 static bool validateNeighborhoodConfiguration(Configuration *configuration);
 static int getBiggerNumber(IntArray *intArray);
+static int getAmountElems(IntArray *option);
 SemanticAnalysisStatus checkSemantic(Program *program, Logger *logger);
 
 void initializeSemanticAnalyzerModule()
@@ -332,7 +333,29 @@ static bool validateDefaultConfiguration(Configuration *configuration)
         }
     }
 
+    if (evol->evolution->isDefault && getAmountElems(getOption(configuration, COLORS_OPTION)->colors) > 2)
+    {
+        logError(_logger, "Semantic Error: Evolution states exceed Neighborhood capacity.");
+        return false;
+    }
     return true;
+}
+
+static int getAmountElems(IntArray *array)
+{
+    if (array == NULL)
+    {
+        return 0;
+    }
+    IntArray *current = array;
+    int i = 0;
+    while (!current->isLast)
+    {
+        i++;
+        current = current->next;
+    }
+    i++;
+    return i;
 }
 
 static bool validateTransitionConfiguration(Configuration *configuration)
