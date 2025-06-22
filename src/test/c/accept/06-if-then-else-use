@@ -2,7 +2,7 @@ configuration : Height : 75;
 Width : 200;
 Frontier : Mirror;
 States : {a, b};
-Colors : { #FF00FF, #00008B, #FF0000};
+Colors : { #FF00FF, #FF0000};
 
 transition : 
     if (1, 0) == b then
