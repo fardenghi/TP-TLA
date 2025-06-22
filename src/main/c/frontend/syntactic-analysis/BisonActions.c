@@ -101,11 +101,11 @@ TransitionExpression * TransitionAssignmentExpressionSemanticAction(char * varia
 	if (insertSymbol(currentCompilerState()->symbolTable, variable) == NULL) {
 		const Symbol* symbol = lookupSymbol(currentCompilerState()->symbolTable, variable);
 		if (symbol->readOnly) {
-			logError("variable '%s' is read-only", variable);
+			logError(_logger,"variable '%s' is read-only", variable);
 			free(expression);
 			return NULL;
 		}
-		logDebugging("updating symbol '%s'", variable);
+		logDebugging(_logger,"updating symbol '%s'", variable);
 	}
 	expression->assignment = arithmeticExpression;
 	return expression;
@@ -166,11 +166,11 @@ NeighborhoodExpression * NeighborhoodAssignmentExpressionSemanticAction(char * v
 	if (insertSymbol(currentCompilerState()->symbolTable, variable) == NULL) {
 		const Symbol* symbol = lookupSymbol(currentCompilerState()->symbolTable, variable);
 		if (symbol->readOnly) {
-			logError("variable '%s' is read-only", variable);
+			logError(_logger,"variable '%s' is read-only", variable);
 			free(expression);
 			return NULL;
 		}
-		logDebugging("updating symbol '%s'", variable);
+		logDebugging(_logger,"updating symbol '%s'", variable);
 	}
 	expression->assignment = arithmeticExpression;
 	return expression;
