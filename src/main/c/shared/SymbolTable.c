@@ -143,23 +143,23 @@ Symbol* lookupSymbol(const SymbolTable* symbolTable, const char* name) {
 }
 
 void printScopeStack(const SymbolTable* symbolTable, Logger * logger) {
-    logInformation(logger, "Scope Stack (innermost last): [ ");
+    logDebugging(logger, "Scope Stack (innermost last): [ ");
     for (int i = 0; i < symbolTable->scopeDepth; i++) {
-        logInformation(logger, "%d", symbolTable->scopes[i]);
-        if (i < symbolTable->scopeDepth - 1) logInformation(logger, ", ");
+        logDebugging(logger, "%d", symbolTable->scopes[i]);
+        if (i < symbolTable->scopeDepth - 1) logDebugging(logger, ", ");
     }
-    logInformation(logger, " ]\n");
+    logDebugging(logger, " ]\n");
 }
 
 void printSymbolTable(const SymbolTable* symbolTable, Logger * logger) {
-    logInformation(logger, "Symbol Table:");
-    logInformation(logger, "%-20s %-10s %-10s\n", "Name", "Scope", "ReadOnly");
-    logInformation(logger, "---------------------------------------------\n");
+    logDebugging(logger, "Symbol Table:");
+    logDebugging(logger, "%-20s %-10s %-10s\n", "Name", "Scope", "ReadOnly");
+    logDebugging(logger, "---------------------------------------------\n");
     for (int i = 0; i < symbolTable->size; i++) {
-        logInformation(logger, "%-20s %-10d %-10s\n",
+        logDebugging(logger, "%-20s %-10d %-10s\n",
             symbolTable->symbols[i].name,
             symbolTable->symbols[i].scope,
             symbolTable->symbols[i].readOnly ? "true" : "false");
     }
-    logInformation(logger, "\n");
+    logDebugging(logger, "\n");
 }
