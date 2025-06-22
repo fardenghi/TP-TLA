@@ -3,8 +3,20 @@
 #include <stdbool.h>
 
 static Logger *_logger = NULL;
-
 int amountOfColors = 0;
+int amountOfStates = 0;
+
+void initializeSemanticAnalyzerModule();
+void shutdownSemanticAnalyzerModule();
+static bool validateConfiguration(Configuration *configuration);
+static bool validateConfigurationRec(Configuration *configuration);
+static bool validateConfigurationAux(Option *option);
+static Option *getOption(Configuration *configuration, OptionType type);
+static bool validateDefaultConfiguration(Configuration *configuration);
+static bool validateTransitionConfiguration(Configuration *configuration);
+static bool validateNeighborhoodConfiguration(Configuration *configuration);
+SemanticAnalysisStatus checkSemantic(Program *program, Logger *logger);
+
 
 void initializeSemanticAnalyzerModule()
 {
@@ -33,28 +45,36 @@ static bool validateConfiguration(Configuration *configuration)
 
     do
     {
-        if (!current->isLast)
+        if (i > 0)
         {
-            if (!obligatoryTypes[current->option->type])
-            {
-                obligatoryTypes[current->option->type] = 1;
-            }
-            else
-            {
-                logError(_logger, "Semantic Error: A configuration option is repeated. Each option must be unique.");
-                return false;
-            }
+            current = current->next;
         }
-        else
-        {
-            if (!obligatoryTypes[current->lastOption->type])
+        
+        if ((!current->isLast && current->option->type < 5) || current->lastOption->type < 5)
+        {        
+            if (!current->isLast)
             {
-                obligatoryTypes[current->lastOption->type] = 1;
+                if (!obligatoryTypes[current->option->type])
+                {
+                    obligatoryTypes[current->option->type] = 1;
+                }
+                else
+                {
+                    logError(_logger, "Semantic Error: A configuration option is repeated. Each option must be unique.");
+                    return false;
+                }
             }
             else
             {
-                logError(_logger, "Semantic Error: A configuration option is repeated. Each option must be unique.");
-                return false;
+                if (!obligatoryTypes[current->lastOption->type])
+                {
+                    obligatoryTypes[current->lastOption->type] = 1;
+                }
+                else
+                {
+                    logError(_logger, "Semantic Error: A configuration option is repeated. Each option must be unique.");
+                    return false;
+                }
             }
         }
         i++;
@@ -66,7 +86,14 @@ static bool validateConfiguration(Configuration *configuration)
         return false;
     }
 
-    return validateConfigurationRec(configuration);
+    bool rta = validateConfigurationRec(configuration);
+    if (amountOfStates != amountOfColors)
+    {
+        logCritical(_logger,"%d,%d", amountOfColors, amountOfStates);
+        logError(_logger, "Semantic Error: The number of states does not match the number of colors. Ensure both lists are consistent.");
+        return false;
+    }
+    return rta;
 }
 
 static bool validateConfigurationRec(Configuration *configuration)
@@ -99,7 +126,7 @@ static bool validateConfigurationRec(Configuration *configuration)
 
 static bool validateConfigurationAux(Option *option)
 {
-    if (option == WIDTH_OPTION || option == HEIGHT_OPTION)
+    if (option->type == WIDTH_OPTION || option->type == HEIGHT_OPTION)
     {
         if (option->value <= 0)
         {
@@ -114,7 +141,7 @@ static bool validateConfigurationAux(Option *option)
                          option->value);
         }
     }
-    else if (option == FRONTIER_OPTION)
+    else if (option->type == FRONTIER_OPTION)
     {
         if (option->frontierType == PERIODIC ||
             option->frontierType == OPEN ||
@@ -128,7 +155,7 @@ static bool validateConfigurationAux(Option *option)
             return false;
         }
     }
-    else if (option == COLORS_OPTION)
+    else if (option->type == COLORS_OPTION)
     {
         if (option->colors == NULL)
         {
@@ -169,9 +196,8 @@ static bool validateConfigurationAux(Option *option)
             } while (!colors->isLast);
         }
     }
-    else if (option == STATES_OPTION)
+    else if (option->type == STATES_OPTION)
     {
-        int amountOfStates = 0;
         StringArray *states = option->states;
         if (states == NULL)
         {
@@ -209,11 +235,6 @@ static bool validateConfigurationAux(Option *option)
                     }
                 }
             } while (!states->isLast);
-            if (amountOfStates != amountOfColors)
-            {
-                logError(_logger, "Semantic Error: The number of states does not match the number of colors. Ensure both lists are consistent.");
-                return false;
-            }
         }
     }
     return true;
@@ -317,7 +338,7 @@ SemanticAnalysisStatus checkSemantic(Program *program, Logger *logger)
         {
             if (validateDefaultConfiguration(program->justConfiguration))
             {
-                logError(_logger, "Configuration of Default program is correct");
+                logDebugging(_logger, "Configuration of Default program is correct");
                 return SEMANTIC_SUCCESS;
             }
             else
@@ -326,13 +347,14 @@ SemanticAnalysisStatus checkSemantic(Program *program, Logger *logger)
                 return SEMANTIC_FAILURE;
             }
         }
+        break;
     case TRANSITION:
         logDebugging(_logger, "The program is a TRANSITION program");
         if (validateConfiguration(program->configuration))
         {
             if (validateTransitionConfiguration(program->justConfiguration))
             {
-                logError(_logger, "Configuration of Transition program is correct");
+                logDebugging(_logger, "Configuration of Transition program is correct");
                 return SEMANTIC_SUCCESS;
             }
             else
@@ -341,13 +363,14 @@ SemanticAnalysisStatus checkSemantic(Program *program, Logger *logger)
                 return SEMANTIC_FAILURE;
             }
         }
+        break;
     case NEIGHBORHOOD_PROGRAM:
         logDebugging(_logger, "The program is a NEIGHBORHOOD_PROGRAM");
         if (validateConfiguration(program->configuration))
         {
             if (validateNeighborhoodConfiguration(program->justConfiguration))
             {
-                logError(_logger, "Configuration of Neighborhood program is correct");
+                logDebugging(_logger, "Configuration of Neighborhood program is correct");
                 return SEMANTIC_SUCCESS;
             }
             else
@@ -356,8 +379,9 @@ SemanticAnalysisStatus checkSemantic(Program *program, Logger *logger)
                 return SEMANTIC_FAILURE;
             }
         }
+        break;
     default:
         logError(logger, "Unknown program type.");
-        return SEMANTIC_FAILURE;
     }
+    return SEMANTIC_FAILURE;
 }
