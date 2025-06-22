@@ -49,7 +49,7 @@ const int main(const int count, const char **arguments)
 		SemanticAnalysisStatus semanticAnalysisStatus = checkSemantic(program, logger);
 		if (semanticAnalysisStatus == SEMANTIC_FAILURE)
 		{
-			logError(logger, "Type-checking failed: incompatinle types in the program.");
+			logError(logger, "Type-checking failed: incompatible types in the program.");
 			compilationStatus = FAILED;
 		}
 		else

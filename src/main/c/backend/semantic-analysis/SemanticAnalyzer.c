@@ -128,7 +128,7 @@ static bool validateConfigurationAux(Option *option)
 {
     if (option->type == WIDTH_OPTION || option->type == HEIGHT_OPTION)
     {
-        if (option->value <= 0)
+        if (option->value <= 0 || option->value > 300)
         {
             logError(_logger, "Semantic Error: The %s option must have a value greater than 0.",
                      option->type == WIDTH_OPTION ? "Width" : "Height");
@@ -306,10 +306,11 @@ static bool validateTransitionConfiguration(Configuration *configuration)
 static bool validateNeighborhoodConfiguration(Configuration *configuration)
 {
     Option *neigh = getOption(configuration, NEIGHBORHOOD_OPTION);
+    Option *evol = getOption(configuration, EVOLUTION_OPTION);
 
-    if (neigh == NULL)
+    if (neigh == NULL || evol == NULL)
     {
-        logError(_logger, "Semantic Error: Neighborhood configuration is missing the NEIGHBORHOOD option.");
+        logError(_logger, "Semantic Error: Neighborhood configuration is missing NEIGHBORHOOD or EVOLUTION options.");
         return false;
     }
     else if (neigh->neighborhoodEnum != CUSTOM)
