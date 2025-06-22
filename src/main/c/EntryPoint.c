@@ -60,10 +60,9 @@ const int main(const int count, const char **arguments)
 		generate(&compilerState);
 		logDebugging(logger, "Releasing AST resources...");
 		releaseProgram(program);
-		}
+		destroySymbolTable(compilerState.symbolTable);
 	}
-	else
-	{
+	else {
 		logError(logger, "The syntactic-analysis phase rejects the input program.");
 		compilationStatus = FAILED;
 	}

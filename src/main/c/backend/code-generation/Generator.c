@@ -81,94 +81,49 @@ void _generateConfiguration(Configuration * config) {
 }
 
 static char * _arithmeticExpressionTypeToString(const ArithmeticExpressionType type) {
-	char * operand = calloc(MAX_OPERAND_LENGTH, sizeof(char));
-	operand[0] = ' ';
-	operand++;
 	switch (type) {
 		case ADDITION: 
-			operand[0] = '+';
-			operand[1] = ' ';
-			break;
+			return " + ";
 		case DIVISION: 
-			operand[0] = '/';
-			operand[1] = '/';
-			operand[2] = ' ';
-			break;
+			return " // ";
 		case MULTIPLICATION: 	
-			operand[0] = '*';
-			operand[1] = ' ';
-			break;
+			return " * ";
 		case SUBTRACTION: 
-			operand[0] = '-';
-			operand[1] = ' ';
-			break;
+			return " - ";
 		case MODULE: 
-			operand[0] = '%';
-			operand[1] = ' ';
-			break;
+			return " % ";
 		case LOGIC_AND: 
-			operand[0] = 'a';
-			operand[1] = 'n';
-			operand[2] = 'd';
-			operand[3] = ' ';
-			break;
+			return " and ";
 		case LOGIC_OR:
-			operand[0] = 'o';
-			operand[1] = 'r';
-			operand[2] = ' ';
-			break;
+			return " or ";
 		case EQUALS:
-			operand[0] = '=';
-			operand[1] = '=';
-			operand[2] = ' ';
-			break;
+			return " == ";
 		case NOT_EQUALS:
-			operand[0] = '!';
-			operand[1] = '=';
-			operand[2] = ' ';
-			break;
+			return " != ";
 		case LOWER_THAN:
-			operand[0] = '<';
-			operand[1] = ' ';
-			break;
+			return " < ";
 		case LOWER_THAN_OR_EQUAL:
-			operand[0] = '<';
-			operand[1] = '=';
-			operand[2] = ' ';
-			break;
+			return " <= ";
 		case GREATER_THAN:
-			operand[0] = '>';
-			operand[1] = ' ';
-			break;
+			return " > ";
 		case GREATER_THAN_OR_EQUAL:
-			operand[0] = '>';
-			operand[1] = '=';
-			operand[2] = ' ';
-			break;
+			return " >= ";
 		case LOGIC_NOT:
-			operand[0] = 'n';
-			operand[1] = 'o';
-			operand[2] = 't';
-			operand[3] = ' ';
-			break;
+			return " not ";
 		case ALL_ARE:
-			strcpy(operand, " all(");
-			break;
+			return " all(";
 		case ANY_ARE:
-			strcpy(operand, " any(");
-			break;
+			return " any(";
 		case AT_LEAST_ARE:
-			strcpy(operand, " sum(");
-			break;
+			return " sum(";
 		case FACTOR:
 		case CONSTANT:
 		case CELL_ARITHETIC_EXPRESSION:
-			break;
+			return "";
 		default:
 			logError(_logger, "The specified expression type cannot be converted into character: %d", type);
-			return NULL;
+			return "";
 	}
-	return operand - 1;
 }
 
 static void _generateTransitionExpression(unsigned int indentation, const TransitionExpression * transitionExpression) {
@@ -466,17 +421,13 @@ static void _generateArithmeticExpression(const ArithmeticExpression * arithmeti
 static char MAX_FRONTIER_TYPE_LENGTH = 16;
 
 static const char * _getStringFromFrontierType(const FrontierEnum type) {
-	char * operand = calloc(MAX_FRONTIER_TYPE_LENGTH, sizeof(char));
     switch (type) {
         case PERIODIC: 
-			strcpy(operand, "Periodic");
-			return operand;
+			return "Periodic";
         case OPEN: 
-			strcpy(operand, "Open");
-			return operand;
+			return "Open";
         case MIRROR: 
-			strcpy(operand, "Mirror");
-			return operand;
+			return "Mirror";
         default:
             logError(_logger, "The specified frontier type is not valid: %d", type);
 			return NULL;

@@ -3,38 +3,27 @@ import pygame
 import numpy as np
 
 CELL_SIZE = 20
-
-### INICIO SECCION GENERADA POR COMPILADOR ###
-
-SCREEN_WIDTH = 1000
-SCREEN_HEIGHT = 800
-FRONTIER_MODE = 'Periodic' 
-EVOLUTION_MODE = 'SB'      
-
-STATES = {'dead': 0, 'alive': 1}
-
-STATE_COLORS = [
-    (10, 10, 10),    
-    (255, 255, 255)  
-]
-
-SURVIVE_RULES = [4,5,6,7,8]
-BIRTH_RULES = [2,5,6,7,8]
-
+N_CELLS_Y=50
+N_CELLS_X=50
+FRONTIER_MODE='Periodic'
+alive=0
+dead=1
+STATES={'alive': 0, 'dead': 1}
+STATE_COLORS=[16777215,0]
 def neighborhood_function(row, col):
     return {
         (-1, -1), (-1, 0), (-1, 1),
-        (0, -1),         (0, 1),
+        (0, -1),          (0, 1),
         (1, -1),  (1, 0),  (1, 1)
     }
-
-### FIN SECCION GENERADA POR COMPILADOR ###
-
-N_CELLS_X = SCREEN_WIDTH // CELL_SIZE
-N_CELLS_Y = SCREEN_HEIGHT // CELL_SIZE
+EVOLUTION_MODE='SB'
+SURVIVE_RULES = [2,3]
+BIRTH_RULES = [3]
+SCREEN_WIDTH = N_CELLS_X * CELL_SIZE
+SCREEN_HEIGHT = N_CELLS_Y * CELL_SIZE
 
 def get_cell_value(cells, row, col):
-    
+
     if FRONTIER_MODE == 'Periodic':
         row = row % N_CELLS_Y
         col = col % N_CELLS_X
@@ -46,26 +35,26 @@ def get_cell_value(cells, row, col):
         if row >= N_CELLS_Y: row = 2 * (N_CELLS_Y - 1) - row
         if col >= N_CELLS_X: col = 2 * (N_CELLS_X - 1) - col
         return cells[row, col]
-        
+
     if 0 <= row < N_CELLS_Y and 0 <= col < N_CELLS_X:
         return cells[row, col]
     else:
         return 0
 
 def update(screen, cells):
-    
+
     updated_cells = np.zeros((N_CELLS_Y, N_CELLS_X))
 
     for row, col in np.ndindex(cells.shape):
-        
+
         if EVOLUTION_MODE == 'SB':
             alive_neighbors = 0
             for dr, dc in neighborhood_function(row, col):
                 if get_cell_value(cells, row + dr, col + dc) == 1:
                     alive_neighbors += 1
-            
+
             current_state = cells[row, col]
-            
+
             if current_state == 1:
                 if alive_neighbors in SURVIVE_RULES:
                     updated_cells[row, col] = 1
@@ -91,16 +80,16 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
     cells = np.zeros((N_CELLS_Y, N_CELLS_X))
-    
+
     for row, col in np.ndindex(cells.shape):
         color = STATE_COLORS[0]
         pygame.draw.rect(screen, color, (col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1))
 
     pygame.display.flip()
-    
+
     running = False
     num_states = len(STATES)
-    
+
     drawing_mode = 0
     painted_cells_this_drag = set()
 
@@ -115,7 +104,7 @@ def main():
                 elif event.key == pygame.K_c:
                     running = False
                     cells = np.zeros((N_CELLS_Y, N_CELLS_X))
-            
+
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 drawing_mode = event.button
                 painted_cells_this_drag.clear()
@@ -154,7 +143,7 @@ def main():
                 pygame.draw.rect(screen, color, (col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1))
 
         pygame.display.update()
-        time.sleep(0.001)
+        time.sleep(0.01)
 
 if __name__ == '__main__':
     main()
