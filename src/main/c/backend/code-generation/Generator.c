@@ -53,7 +53,6 @@ void _generateProgram(Program * program) {
 	_generateConfiguration(program->configuration);
 	switch (program->type)
 	{
-		//@todo: si el usuario no pone return al final se puede crashear (ponemos por default que retorne el estado actual de la celda?)
 	case TRANSITION:
 		_output(0, "EVOLUTION_MODE='Transition'\n");
 		_output(0,"def transition_function(cells, row, col):\n");
@@ -257,7 +256,6 @@ static void _outputDisplacement(const DisplacementType displacementType, Arithme
 		_generateArithmeticExpression(value);
 		break;
 	case DIAGONAL_ASC_D:
-	//@todo: ver para donde crecen las columnas (si es positivo para abajp para arriba)
 		_output(0, "row+");
 		_generateArithmeticExpression(value);		
 		_output(0, ",");
@@ -469,7 +467,6 @@ static void _generateStateVariables(StringArray * states) {
 static void _generateOption(const Option * option) {
 	switch (option->type){
 		case HEIGHT_OPTION:
-		//@todo: aca deberia ir la cantidad de celdas, no el tamaño de la pantalla
 			_output(0,"N_CELLS_Y=%d\n", option->value);
 			break; 
 		case WIDTH_OPTION:   
