@@ -23,6 +23,54 @@ Set the following environment variables to control and configure the behaviour o
 | `LOG_IGNORED_LEXEMES` |    `true`     | When `true`, logs all of the ignored lexemes found with Flex at DEBUGGING level. To remove those logs from the console output set it to `false`.                      |
 | `LOGGING_LEVEL`       | `INFORMATION` | The minimum level to log in the console output. From lower to higher, the available levels are: `ALL`, `DEBUGGING`, `INFORMATION`, `WARNING`, `ERROR` and `CRITICAL`. |
 
+To run the generated Python programs, you will need Python 3 and several essential libraries installed on your system.
+
+1. Install Python 3
+You must have Python version 3.8 or newer.
+
+On Windows:
+Download the latest installer from the official Python website: python.org/downloads/
+Run the installer. Important: On the first screen, check the box at the bottom that says "Add Python to PATH" before clicking "Install Now". This allows you to run Python from any command prompt.
+On macOS:
+The recommended method is to use Homebrew. If you have Homebrew installed, simply open the Terminal and run:
+Bash
+
+brew install python3
+Alternatively, you can download the official macOS installer from the Python website.
+On Linux:
+For Debian, Ubuntu, or other derivatives, you can install Python 3 using the apt package manager in your terminal:
+
+Bash
+
+sudo apt update
+sudo apt install python3
+2. Install Required Libraries
+With Python installed, you can now install the necessary libraries (pygame and numpy) using Python's package installer, pip.
+
+Open your terminal or command prompt and run the following command:
+
+Bash
+
+pip install pygame numpy
+Note: On some macOS and Linux systems, you may need to use pip3 instead to ensure the libraries are installed for the correct Python version:
+
+Bash
+
+pip3 install pygame numpy
+3. Run the Program
+Once the prerequisites are installed, you can run the simulation.
+
+Open a terminal or command prompt.
+
+Navigate to the directory containing the generated Python file (your_program_name.py).
+
+Execute the script with the following command:
+
+Bash
+
+python3 your_program_name.py
+(On Windows, you will likely just use python instead of python3).
+
 
 ## Recommended Extensions
 
