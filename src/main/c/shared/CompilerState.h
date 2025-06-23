@@ -1,6 +1,7 @@
 #ifndef COMPILER_STATE_HEADER
 #define COMPILER_STATE_HEADER
 
+#include "SymbolTable.h"
 #include "Type.h"
 
 /**
@@ -23,12 +24,8 @@ typedef struct {
 	boolean succeed;
 
 	// TODO: Add an stack to handle nested scopes.
-	// TODO: Add a symbol table.
-	// TODO: Add configuration.
-	// TODO: ...
-
-	// The computed value of the entire program (only for the calculator).
-	int value;
+	
+	SymbolTable * symbolTable;
 } CompilerState;
 
 #endif

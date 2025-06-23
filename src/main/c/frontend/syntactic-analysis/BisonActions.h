@@ -7,6 +7,7 @@
 #include "AbstractSyntaxTree.h"
 #include "SyntacticAnalyzer.h"
 #include <stdlib.h>
+#include "../../shared/SymbolTable.h"
 
 /** Initialize module's internal state. */
 void initializeBisonActionsModule();
@@ -31,39 +32,39 @@ Option * FrontierOptionSemanticAction(const FrontierEnum value);
 Option * NeighborhoodOptionSemanticAction(const NeighborhoodEnum value);
 Option * EvolutionOptionSemanticAction(Evolution * value);
 
-Evolution * EvolutionSemanticAction(IntArray * array, const int value, const EvolutionEnum type);
+Evolution * EvolutionSemanticAction(IntArray * surviveArray, IntArray * birthArray, const EvolutionEnum type);
 
-TransitionSequence * TransitionUnarySequenceSemanticAction(TransitionExpression * expression);
+ForVariableDeclaration * ForVariableDeclarationSemanticAction(char * variable, Range * range);
+
 TransitionSequence * TransitionBinarySequenceSemanticAction(TransitionSequence * sequence, TransitionExpression * expression);
 
 TransitionExpression * TransitionAssignmentExpressionSemanticAction(char * variable, ArithmeticExpression * arithmeticExpression);
-TransitionExpression * TransitionForLoopExpressionSemanticAction(char * variable, Range * range, TransitionSequence * transitionExpression);
+TransitionExpression * TransitionForLoopExpressionSemanticAction(ForVariableDeclaration * forVariable, TransitionSequence * transitionExpression);
 TransitionExpression * TransitionIfExpressionSemanticAction(ArithmeticExpression * arithmeticExpression, TransitionSequence * transitionExpression);
 TransitionExpression * TransitionIfElseExpressionSemanticAction(ArithmeticExpression * arithmeticExpression, TransitionSequence * ifTransitionExpression, TransitionSequence * elseTransitionExpression);
 TransitionExpression * TransitionReturnExpressionSemanticAction(ArithmeticExpression * arithmeticExpression);
 
-NeighborhoodSequence * NeighborhoodUnarySequenceSemanticAction(NeighborhoodExpression * expression);
 NeighborhoodSequence * NeighborhoodBinarySequenceSemanticAction(NeighborhoodSequence * sequence, NeighborhoodExpression * expression);
 
 NeighborhoodExpression * NeighborhoodAssignmentExpressionSemanticAction(char * variable, ArithmeticExpression * arithmeticExpression);
-NeighborhoodExpression * NeighborhoodForLoopExpressionSemanticAction(char * variable, Range * range, NeighborhoodSequence * neighborhoodExpression);
+NeighborhoodExpression * NeighborhoodForLoopExpressionSemanticAction(ForVariableDeclaration * forVariable, NeighborhoodSequence * neighborhoodExpression);
 NeighborhoodExpression * NeighborhoodIfExpressionSemanticAction(ArithmeticExpression * arithmeticExpression, NeighborhoodSequence * neighborhoodExpression);
 NeighborhoodExpression * NeighborhoodIfElseExpressionSemanticAction(ArithmeticExpression * arithmeticExpression, NeighborhoodSequence * ifNeighborhoodExpression, NeighborhoodSequence * elseNeighborhoodExpression);
 NeighborhoodExpression * NeighborhoodCellExpressionSemanticAction(boolean add, CellList * cellList);
 
 
-Cell * SingleCoordinateCellSemanticAction(Constant * c, DisplacementType type);
-Cell * DoubleCoordinateCellSemanticAction(Constant * x, Constant * y);
+Cell * SingleCoordinateCellSemanticAction(ArithmeticExpression * c, DisplacementType type);
+Cell * DoubleCoordinateCellSemanticAction(ArithmeticExpression * x, ArithmeticExpression * y);
 CellList * CellListSemanticAction(Cell * cell, CellList * list);
 
 ArithmeticExpression * BinaryArithmeticExpressionSemanticAction(ArithmeticExpression * leftExpression, ArithmeticExpression * rightExpression, ArithmeticExpressionType type);
 ArithmeticExpression * UnaryArithmeticExpressionSemanticAction(ArithmeticExpression * expression, ArithmeticExpressionType type);
-ArithmeticExpression * CellListArithmeticExpressionSemanticAction(CellList * cellList, ArithmeticExpressionType type, int count);
+ArithmeticExpression * CellListArithmeticExpressionSemanticAction(CellList * cellList, ArithmeticExpressionType type, int count, char * state);
 ArithmeticExpression * ConstantArithmeticExpressionSemanticAction(Constant * cellList);
+ArithmeticExpression * CellArithmeticExpressionSemanticAction(Cell * cell);
 
 Constant * IntegerConstantSemanticAction(const int value);
 Constant * StringConstantSemanticAction(char * value);
-Constant * CellConstantSemanticAction(Cell * cell);
 
 IntArray * IntArraySemanticAction(const int value, IntArray * arr);
 StringArray * StringArraySemanticAction(char * value, StringArray * arr);

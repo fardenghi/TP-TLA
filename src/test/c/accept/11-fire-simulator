@@ -1,0 +1,50 @@
+configuration:
+   Height: 100;
+   Width: 100;
+   Frontier: Open;
+   States: {BOSQUE, FUEGO, CENIZA, AGUA, HUMEDO};
+   Colors: { #228B22, #FF4500, #696969, #4169E1, #32CD32};
+
+transition:
+   /* Si una célula de bosque tiene al menos 2 vecinos en fuego, se incendia */
+   if (0,0) == BOSQUE && at_least 2 { (1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1), (1,-1), (-1,-1) } are FUEGO then
+      ->FUEGO
+   else
+      /* Si una célula en fuego tiene al menos 3 vecinos con agua, se apaga y queda húmeda */
+      if (0,0) == FUEGO && at_least 3 { (1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1), (1,-1), (-1,-1) } are AGUA then
+         ->HUMEDO
+      else
+         /* Si una célula en fuego tiene al menos 4 vecinos húmedos, se apaga y queda húmeda */
+         if (0,0) == FUEGO && at_least 4 { (1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1), (1,-1), (-1,-1) } are HUMEDO then
+            ->HUMEDO
+         else
+            /* Si una célula húmeda tiene al menos 5 vecinos con agua, se convierte en agua */
+            if (0,0) == HUMEDO && at_least 5 { (1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1), (1,-1), (-1,-1) } are AGUA then
+               ->AGUA
+            else
+               /* Si una célula en fuego no se apaga, se convierte en ceniza */
+               if (0,0) == FUEGO then
+                  ->CENIZA
+               else
+                  /* Si una célula húmeda no se convierte en agua, permanece húmeda */
+                  if (0,0) == HUMEDO then
+                     ->HUMEDO
+                  else
+                     /* Si una célula con agua no tiene vecinos en fuego, se evapora */
+                     if (0,0) == AGUA && at_least 6 { (1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1), (1,-1), (-1,-1) } are BOSQUE then
+                        ->BOSQUE
+                     else
+                        /* Si una célula con agua tiene vecinos en fuego, permanece como agua */
+                        if (0,0) == AGUA then
+                           ->AGUA
+                        else
+                           /* Si no se cumple ninguna condición, mantener el estado actual */
+                           ->(0,0)
+                        end
+                     end
+                  end
+               end
+            end
+         end
+      end
+   end

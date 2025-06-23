@@ -1,4 +1,5 @@
 #include "BisonActions.h"
+#include <stdio.h>
 
 /* MODULE INTERNAL STATE */
 
@@ -85,17 +86,9 @@ Configuration * ConfigurationSemanticAction(Option * option, Configuration * con
 	return configuration;
 }
 
-TransitionSequence * TransitionUnarySequenceSemanticAction(TransitionExpression * expression) {
-	_logSyntacticAnalyzerAction(__FUNCTION__);
-	TransitionSequence * rta = calloc(1, sizeof(TransitionSequence));
-	rta->binary = false;
-	rta->expression = expression;
-	return rta;
-}
 TransitionSequence * TransitionBinarySequenceSemanticAction(TransitionSequence * sequence, TransitionExpression * expression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	TransitionSequence * rta = calloc(1, sizeof(TransitionSequence));
-	rta->binary = true;
 	rta->sequence = sequence;
 	rta->rightExpression = expression;
 	return rta;
@@ -106,15 +99,26 @@ TransitionExpression * TransitionAssignmentExpressionSemanticAction(char * varia
 	TransitionExpression * expression = calloc(1, sizeof(TransitionExpression));
 	expression->type = TRANSITION_ASSIGNMENT;
 	expression->variable = variable;
+	if (insertSymbol(currentCompilerState()->symbolTable, variable) == NULL) {
+		const Symbol* symbol = lookupSymbol(currentCompilerState()->symbolTable, variable);
+		if (symbol->readOnly) {
+			logError(_logger,"variable '%s' is read-only", variable);
+			currentCompilerState()->symbolTable->failure = true;
+			printScopeStack(currentCompilerState()->symbolTable, _logger);
+			printSymbolTable(currentCompilerState()->symbolTable, _logger);
+			free(expression);
+			return NULL;
+		}
+		logDebugging(_logger,"updating symbol '%s'", variable);
+	}
 	expression->assignment = arithmeticExpression;
 	return expression;
 }
-TransitionExpression * TransitionForLoopExpressionSemanticAction(char * variable, Range * range, TransitionSequence * transitionExpression) {
+TransitionExpression * TransitionForLoopExpressionSemanticAction(ForVariableDeclaration * forVariable, TransitionSequence * transitionExpression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	TransitionExpression * expression = calloc(1, sizeof(TransitionExpression));
 	expression->type = TRANSITION_FOR_LOOP;
-	expression->forVariable = variable;
-	expression->range = range;
+	expression->forVariable = forVariable;
 	expression->forBody = transitionExpression;
 	return expression;
 }
@@ -143,17 +147,26 @@ TransitionExpression * TransitionReturnExpressionSemanticAction(ArithmeticExpres
 	return expression;
 }
 
-NeighborhoodSequence * NeighborhoodUnarySequenceSemanticAction(NeighborhoodExpression * expression) {
+ForVariableDeclaration * ForVariableDeclarationSemanticAction(char * variable, Range * range) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
-	NeighborhoodSequence * rta = calloc(1, sizeof(NeighborhoodSequence));
-	rta->binary = false;
-	rta->expression = expression;
+	ForVariableDeclaration * rta = calloc(1, sizeof(ForVariableDeclaration));
+	rta->range = range;
+	rta->variable = variable;
+	Symbol * p;
+	if ( (p = insertSymbol(currentCompilerState()->symbolTable, variable)) == NULL) {
+		logError(_logger, "variable '%s' is already defined in the current scope", variable);
+		free(rta);
+		currentCompilerState()->symbolTable->failure = true;
+		printScopeStack(currentCompilerState()->symbolTable, _logger);
+		printSymbolTable(currentCompilerState()->symbolTable, _logger);
+		return NULL;
+	}
 	return rta;
 }
+
 NeighborhoodSequence * NeighborhoodBinarySequenceSemanticAction(NeighborhoodSequence * sequence, NeighborhoodExpression * expression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	NeighborhoodSequence * rta = calloc(1, sizeof(NeighborhoodSequence));
-	rta->binary = true;
 	rta->sequence = sequence;
 	rta->rightExpression = expression;
 	return rta;
@@ -164,15 +177,26 @@ NeighborhoodExpression * NeighborhoodAssignmentExpressionSemanticAction(char * v
 	NeighborhoodExpression * expression = calloc(1, sizeof(NeighborhoodExpression));
 	expression->type = NEIGHBORHOOD_ASSIGNMENT;
 	expression->variable = variable;
+	if (insertSymbol(currentCompilerState()->symbolTable, variable) == NULL) {
+		const Symbol* symbol = lookupSymbol(currentCompilerState()->symbolTable, variable);
+		if (symbol->readOnly) {
+			logError(_logger,"variable '%s' is read-only", variable);
+			free(expression);
+			currentCompilerState()->symbolTable->failure = true;
+			printScopeStack(currentCompilerState()->symbolTable, _logger);
+			printSymbolTable(currentCompilerState()->symbolTable, _logger);
+			return NULL;
+		}
+		logDebugging(_logger,"updating symbol '%s'", variable);
+	}
 	expression->assignment = arithmeticExpression;
 	return expression;
 }
-NeighborhoodExpression * NeighborhoodForLoopExpressionSemanticAction(char * variable, Range * range, NeighborhoodSequence * neighborhoodExpression) {
+NeighborhoodExpression * NeighborhoodForLoopExpressionSemanticAction(ForVariableDeclaration * forVariable, NeighborhoodSequence * neighborhoodExpression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	NeighborhoodExpression * expression = calloc(1, sizeof(NeighborhoodExpression));
 	expression->type = NEIGHBORHOOD_FOR_LOOP;
-	expression->forVariable = variable;
-	expression->range = range;
+	expression->forVariable = forVariable;
 	expression->forBody = neighborhoodExpression;
 	return expression;
 }
@@ -226,8 +250,42 @@ Option * StringArrayValuedOptionSemanticAction(StringArray * value) {
 	Option * option = calloc(1, sizeof(Option));
 	option->type = STATES_OPTION;
 	option->states = value;
+	const CompilerState * compilerState = currentCompilerState();
+	const StringArray * current = value;
+	if (current == NULL) {
+		logError(_logger, "StringArrayValuedOptionSemanticAction: The string array is NULL.");
+		free(option);
+		currentCompilerState()->symbolTable->failure = true;
+		return NULL;
+	}
+	while (current != NULL) {
+		if (current->isLast) {
+			if (insertReadOnlySymbol(compilerState->symbolTable, current->lastValue) == NULL) {
+				logError(_logger, "StringArrayValuedOptionSemanticAction: String '%s' already exists in the current scope.", current->lastValue);
+				free(option);
+				currentCompilerState()->symbolTable->failure = true;
+				printScopeStack(currentCompilerState()->symbolTable, _logger);
+				printSymbolTable(currentCompilerState()->symbolTable, _logger);
+				return NULL;
+			}
+			logDebugging(_logger, "StringArrayValuedOptionSemanticAction: String '%s' added to the symbol table.", current->lastValue);
+		}
+		else {
+			if (insertReadOnlySymbol(compilerState->symbolTable, current->value) == NULL) {
+				logError(_logger, "StringArrayValuedOptionSemanticAction: String '%s' already exists in the current scope.", current->value);
+				free(option);
+				currentCompilerState()->symbolTable->failure = true;
+				printScopeStack(currentCompilerState()->symbolTable, _logger);
+				printSymbolTable(currentCompilerState()->symbolTable, _logger);
+				return NULL;
+			}
+			logDebugging(_logger, "StringArrayValuedOptionSemanticAction: String '%s' added to the symbol table.", current->value);
+		}
+		current = current->next;
+	}
 	return option;
 }
+
 Option * FrontierOptionSemanticAction(const FrontierEnum value) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Option * option = calloc(1, sizeof(Option));
@@ -250,13 +308,13 @@ Option * EvolutionOptionSemanticAction(Evolution * value) {
 	return option;
 }
 
-Evolution * EvolutionSemanticAction(IntArray * array, const int value, const EvolutionEnum type) {
+Evolution * EvolutionSemanticAction(IntArray * surviveArray, IntArray * birthArray, const EvolutionEnum type) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Evolution * evolution = calloc(1, sizeof(Evolution));
-	if (array != NULL) {
+	if (surviveArray != NULL && birthArray != NULL) {
 		evolution->isDefault = false;
-		evolution->array = array;
-		evolution->value = value;
+		evolution->surviveArray = surviveArray;
+		evolution->birthArray = birthArray;
 	} else {
 		evolution->isDefault = true;
 		evolution->evolutionTypes = type;
@@ -266,7 +324,7 @@ Evolution * EvolutionSemanticAction(IntArray * array, const int value, const Evo
 
 
 
-Cell * SingleCoordinateCellSemanticAction(Constant * c, DisplacementType type) {
+Cell * SingleCoordinateCellSemanticAction(ArithmeticExpression * c, DisplacementType type) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Cell * cell = calloc(1, sizeof(Cell));
 	cell->isSingleCoordenate = true;
@@ -275,7 +333,7 @@ Cell * SingleCoordinateCellSemanticAction(Constant * c, DisplacementType type) {
 	return cell;
 }
 
-Cell * DoubleCoordinateCellSemanticAction(Constant * x, Constant * y) {
+Cell * DoubleCoordinateCellSemanticAction(ArithmeticExpression * x, ArithmeticExpression * y) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Cell * cell = calloc(1, sizeof(Cell));
 	cell->isSingleCoordenate = false;
@@ -314,14 +372,14 @@ Constant * StringConstantSemanticAction(char * value) {
 	strcpy(string, value);
 	constant->string = string;
 	constant->type = STRING_C;
-	return constant;
-}
-
-Constant * CellConstantSemanticAction(Cell * cell) {
-	_logSyntacticAnalyzerAction(__FUNCTION__);
-	Constant * constant = calloc(1, sizeof(Constant));
-	constant->cell = cell;
-	constant->type = CELL_C;
+	if (lookupSymbol(currentCompilerState()->symbolTable, constant->string) == NULL) {
+		logError(_logger, "ConstantArithmeticExpressionSemanticAction: String '%s' is not defined in the current scope. %d", constant->string, currentCompilerState()->symbolTable->currentScope);
+		printScopeStack(currentCompilerState()->symbolTable, _logger);
+		printSymbolTable(currentCompilerState()->symbolTable, _logger);
+		currentCompilerState()->symbolTable->failure = true;
+		free(constant);
+		return NULL;
+	}
 	return constant;
 }
 
@@ -342,12 +400,13 @@ ArithmeticExpression * UnaryArithmeticExpressionSemanticAction(ArithmeticExpress
 	return expression;
 }
 
-ArithmeticExpression * CellListArithmeticExpressionSemanticAction(CellList * cellList, ArithmeticExpressionType type, int count) {
+ArithmeticExpression * CellListArithmeticExpressionSemanticAction(CellList * cellList, ArithmeticExpressionType type, int count, char * state) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	ArithmeticExpression * expression = calloc(1, sizeof(ArithmeticExpression));
 	expression->cellList = cellList;
 	expression->count = count;
 	expression->type = type;
+	expression->state = state;
 	return expression;
 }
 
@@ -358,6 +417,15 @@ ArithmeticExpression * ConstantArithmeticExpressionSemanticAction(Constant * con
 	expression->type = CONSTANT;
 	return expression;
 }
+
+ArithmeticExpression * CellArithmeticExpressionSemanticAction(Cell * cell) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	ArithmeticExpression * expression = calloc(1, sizeof(ArithmeticExpression));
+	expression->cell = cell;
+	expression->type = CELL_ARITHETIC_EXPRESSION;
+	return expression;
+}
+
 
 IntArray * IntArraySemanticAction(const int value, IntArray * arr) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);

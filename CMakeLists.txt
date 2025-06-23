@@ -20,6 +20,7 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
 	add_compile_options(-std=gnu99)
 	add_compile_options(-O3)
 
+
 	# Compiles the scanner with Flex.
 	add_custom_command(
 		OUTPUT ../src/main/c/frontend/lexical-analysis/FlexScanner.c
@@ -41,6 +42,8 @@ elseif (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
 else ()
 	message(NOTICE "The C compiler is unknown.")
 	message(NOTICE "Add an 'elseif' statement to handle this compiler in a more specific way.")
+	add_compile_options(-fsanitize=address -g)
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
 
 	# Compiles the scanner with Flex.
 	add_custom_command(
@@ -53,7 +56,7 @@ endif ()
 # Defines the entry-point of the application, and the source-codes (*.c extension).
 # The header files (*.h extension), are automatically included from the source-codes.
 add_executable(Compiler
-	# src/main/c/backend/code-generation/Generator.c
+	src/main/c/backend/code-generation/Generator.c
 	# src/main/c/backend/domain-specific/Calculator.c
 	src/main/c/EntryPoint.c
 	src/main/c/frontend/lexical-analysis/FlexActions.c
@@ -66,6 +69,8 @@ add_executable(Compiler
 	src/main/c/shared/Environment.c
 	src/main/c/shared/Logger.c
 	src/main/c/shared/String.c
+	src/main/c/shared/SymbolTable.c
+	src/main/c/shared/semantic-analysis/SemanticAnalyzer.c
 	# Add more *.c files if needed (otherwise, they won't be compiled).
 	# ...
 )

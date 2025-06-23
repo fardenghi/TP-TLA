@@ -8,23 +8,26 @@
 #include "shared/Environment.h"
 #include "shared/Logger.h"
 #include "shared/String.h"
+#include "shared/SymbolTable.h"
+#include "shared/semantic-analysis/SemanticAnalyzer.h"
 
 /**
  * The main entry-point of the entire application. If you use "strtok" to
  * parse anything inside this project instead of using Flex and Bison, I will
  * find you, and I will kill you (Bryan Mills; "Taken", 2008).
  */
-const int main(const int count, const char ** arguments) {
-	Logger * logger = createLogger("EntryPoint");
+const int main(const int count, const char **arguments)
+{
+	Logger *logger = createLogger("EntryPoint");
 	initializeFlexActionsModule();
 	initializeBisonActionsModule();
 	initializeSyntacticAnalyzerModule();
 	initializeAbstractSyntaxTreeModule();
-	//initializeCalculatorModule();
-	//initializeGeneratorModule();
+	initializeSemanticAnalyzerModule();
 
 	// Logs the arguments of the application.
-	for (int k = 0; k < count; ++k) {
+	for (int k = 0; k < count; ++k)
+	{
 		logDebugging(logger, "Argument %d: \"%s\"", k, arguments[k]);
 	}
 
@@ -32,37 +35,46 @@ const int main(const int count, const char ** arguments) {
 	CompilerState compilerState = {
 		.abstractSyntaxtTree = NULL,
 		.succeed = false,
-		.value = 0
-	};
+		.symbolTable = createSymbolTable()};
 	const SyntacticAnalysisStatus syntacticAnalysisStatus = parse(&compilerState);
 	CompilationStatus compilationStatus = SUCCEED;
-	if (syntacticAnalysisStatus == ACCEPT) {
+	if (syntacticAnalysisStatus == ACCEPT)
+	{
 		// ----------------------------------------------------------------------------------------
 		// Beginning of the Backend... ------------------------------------------------------------
-		// logDebugging(logger, "Computing expression value...");
-		// Program * program = compilerState.abstractSyntaxtTree;
-		// ComputationResult computationResult = computeExpression(program->expression);
-		// if (computationResult.succeed) {
-		// 	compilerState.value = computationResult.value;
-		// 	generate(&compilerState);
-		// }
-		// else {
-		// 	logError(logger, "The computation phase rejects the input program.");
-		// 	compilationStatus = FAILED;
-		// }
-		// ...end of the Backend. -----------------------------------------------------------------
-		// ----------------------------------------------------------------------------------------
-		// logDebugging(logger, "Releasing AST resources...");
-		// releaseProgram(program);
+		Program *program = compilerState.abstractSyntaxtTree;
+		if (compilerState.symbolTable->failure == true)
+		{
+			logError(logger, "Symbol check failed.");
+			compilationStatus = FAILED;
+		}
+		else
+		{
+			SemanticAnalysisStatus semanticAnalysisStatus = checkSemantic(program, logger);
+			if (semanticAnalysisStatus == SEMANTIC_FAILURE)
+			{
+				logError(logger, "Type-checking failed: incompatible types in the program.");
+				compilationStatus = FAILED;
+			}
+			else
+			{
+				generate(&compilerState);
+				logDebugging(logger, "Releasing AST resources...");
+			}
+		}
+		releaseProgram(program);
 	}
-	else {
+	else
+	{
 		logError(logger, "The syntactic-analysis phase rejects the input program.");
 		compilationStatus = FAILED;
 	}
 
 	logDebugging(logger, "Releasing modules resources...");
-	//shutdownGeneratorModule();
-	//shutdownCalculatorModule();
+	// shutdownGeneratorModule();
+	// shutdownCalculatorModule();
+	destroySymbolTable(compilerState.symbolTable);
+	shutdownSemanticAnalyzerModule();
 	shutdownAbstractSyntaxTreeModule();
 	shutdownSyntacticAnalyzerModule();
 	shutdownBisonActionsModule();

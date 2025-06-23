@@ -109,7 +109,8 @@ void releaseEvolution(Evolution * evolution) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (evolution != NULL) {
 		if (!evolution->isDefault) {
-			releaseIntArray(evolution->array);
+			releaseIntArray(evolution->birthArray);
+			releaseIntArray(evolution->surviveArray);
 		}
 		free(evolution);
 	}
@@ -155,10 +156,10 @@ void releaseCell(Cell * cell) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (cell != NULL) {
 		if (cell->isSingleCoordenate) {
-			releaseConstant(cell->displacement);
+			releaseArithmeticExpression(cell->displacement);
 		} else {
-			releaseConstant(cell->x);
-			releaseConstant(cell->y);
+			releaseArithmeticExpression(cell->x);
+			releaseArithmeticExpression(cell->y);
 		}
 		free(cell);
 	}
@@ -196,12 +197,8 @@ void releaseRange(Range * range) {
 void releaseNeighborhoodSequence(NeighborhoodSequence * sequence) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (sequence != NULL) {
-		if (sequence->binary) {
-			releaseNeighborhoodSequence(sequence->sequence);
-			releaseNeighborhoodExpression(sequence->rightExpression);
-		} else {
-			releaseNeighborhoodExpression(sequence->expression);
-		}
+		releaseNeighborhoodSequence(sequence->sequence);
+		releaseNeighborhoodExpression(sequence->rightExpression);
 		free(sequence);
 	}
 }
@@ -209,13 +206,19 @@ void releaseNeighborhoodSequence(NeighborhoodSequence * sequence) {
 void releaseTransitionSequence(TransitionSequence * sequence) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (sequence != NULL) {
-		if (sequence->binary) {
-			releaseTransitionSequence(sequence->sequence);
-			releaseTransitionExpression(sequence->rightExpression);
-		} else {
-			releaseTransitionExpression(sequence->expression);
-		}
+		releaseTransitionSequence(sequence->sequence);
+		releaseTransitionExpression(sequence->rightExpression);
 		free(sequence);
+	}
+}
+
+void releaseForVariable(ForVariableDeclaration * forVariable) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (forVariable != NULL)
+	{
+		releaseRange(forVariable->range);
+		free(forVariable->variable);
+		free(forVariable);
 	}
 }
 
@@ -224,7 +227,7 @@ void releaseNeighborhoodExpression(NeighborhoodExpression * expression) {
 	if (expression != NULL) {
 		switch (expression->type) {
 			case NEIGHBORHOOD_FOR_LOOP:
-				releaseRange(expression->range);
+				releaseForVariable(expression->forVariable);
 				releaseNeighborhoodSequence(expression->forBody);
 				break;
 			case NEIGHBORHOOD_IF:
@@ -256,7 +259,7 @@ void releaseTransitionExpression(TransitionExpression * expression) {
 	if (expression != NULL) {
 		switch (expression->type) {
 			case TRANSITION_FOR_LOOP:
-				releaseRange(expression->range);
+				releaseForVariable(expression->forVariable);
 				releaseTransitionSequence(expression->forBody);
 				break;
 			case TRANSITION_IF:
