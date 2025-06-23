@@ -7,4 +7,4 @@ cd "$BASE_PATH"
 
 INPUT="$1"
 shift 1
-cat "$INPUT" | build/Compiler "$@"
+cat "$INPUT" | build/Compiler &> "$@"
