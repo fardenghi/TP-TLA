@@ -9,7 +9,7 @@
 #include "shared/Logger.h"
 #include "shared/String.h"
 #include "shared/SymbolTable.h"
-#include "backend/semantic-analysis/SemanticAnalyzer.h"
+#include "shared/semantic-analysis/SemanticAnalyzer.h"
 
 /**
  * The main entry-point of the entire application. If you use "strtok" to
@@ -39,31 +39,33 @@ const int main(const int count, const char **arguments)
 	const SyntacticAnalysisStatus syntacticAnalysisStatus = parse(&compilerState);
 	CompilationStatus compilationStatus = SUCCEED;
 	if (syntacticAnalysisStatus == ACCEPT)
-	{	
+	{
 		// ----------------------------------------------------------------------------------------
 		// Beginning of the Backend... ------------------------------------------------------------
-		Program * program = compilerState.abstractSyntaxtTree;
+		Program *program = compilerState.abstractSyntaxtTree;
 		if (compilerState.symbolTable->failure == true)
 		{
 			logError(logger, "Symbol check failed.");
 			compilationStatus = FAILED;
-		} else {
+		}
+		else
+		{
 			SemanticAnalysisStatus semanticAnalysisStatus = checkSemantic(program, logger);
 			if (semanticAnalysisStatus == SEMANTIC_FAILURE)
 			{
 				logError(logger, "Type-checking failed: incompatible types in the program.");
 				compilationStatus = FAILED;
 			}
-		else
+			else
 			{
 				generate(&compilerState);
 				logDebugging(logger, "Releasing AST resources...");
-				
 			}
-		} 
+		}
 		releaseProgram(program);
 	}
-	else {
+	else
+	{
 		logError(logger, "The syntactic-analysis phase rejects the input program.");
 		compilationStatus = FAILED;
 	}

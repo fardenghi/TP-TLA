@@ -1,5 +1,5 @@
 #include "SemanticAnalyzer.h"
-#include "../../shared/Logger.h"
+#include "../Logger.h"
 #include <stdbool.h>
 
 static Logger *_logger = NULL;
@@ -13,10 +13,12 @@ static bool validateConfigurationRec(Configuration *configuration);
 static bool validateConfigurationAux(Option *option);
 static Option *getOption(Configuration *configuration, OptionType type);
 static bool validateDefaultConfiguration(Configuration *configuration);
-static bool validateTransitionConfiguration(Configuration *configuration);
-static bool validateNeighborhoodConfiguration(Configuration *configuration);
+static bool validateTransitionConfiguration(Configuration *configuration, TransitionSequence *transitionSequence);
+static bool validateNeighborhoodConfiguration(Configuration *configuration, NeighborhoodSequence *neigborhoodSequence);
 static int getBiggerNumber(IntArray *intArray);
 static int getAmountElems(IntArray *option);
+static bool validateTransitionConfigurationRec(TransitionSequence *transitionSequence);
+static bool validateNeighborhoodConfigurationRec(NeighborhoodSequence *neighborhoodSequence);
 SemanticAnalysisStatus checkSemantic(Program *program, Logger *logger);
 
 void initializeSemanticAnalyzerModule()
@@ -358,7 +360,7 @@ static int getAmountElems(IntArray *array)
     return i;
 }
 
-static bool validateTransitionConfiguration(Configuration *configuration)
+static bool validateTransitionConfiguration(Configuration *configuration, TransitionSequence *transitionSequence)
 {
     Option *neigh = getOption(configuration, NEIGHBORHOOD_OPTION);
     Option *evol = getOption(configuration, EVOLUTION_OPTION);
@@ -368,10 +370,108 @@ static bool validateTransitionConfiguration(Configuration *configuration)
         logError(_logger, "Semantic Error: Transition configuration cannot include NEIGHBORHOOD or EVOLUTION options.");
         return false;
     }
+
+    return validateTransitionConfigurationRec(transitionSequence);
+}
+
+static bool validateTransitionConfigurationRec(TransitionSequence *transitionSequence)
+{
+    if (transitionSequence == NULL)
+    {
+        return true;
+    }
+    TransitionSequence *transSeq = transitionSequence;
+    if (transSeq->rightExpression->type == TRANSITION_FOR_LOOP)
+    {
+        if (transSeq->rightExpression->forBody == NULL)
+        {
+            return false;
+        }
+
+        return validateTransitionConfigurationRec(transSeq->rightExpression->forBody);
+    }
+    else if (transSeq->rightExpression->type == TRANSITION_IF)
+    {
+        if (transSeq->rightExpression->ifBody == NULL)
+        {
+            return false;
+        }
+        return validateTransitionConfigurationRec(transSeq->rightExpression->ifBody);
+    }
+    else if (transSeq->rightExpression->type == TRANSITION_IF_ELSE)
+    {
+        if (transSeq->rightExpression->ifElseIfBody == NULL || transSeq->rightExpression->ifElseElseBody == NULL)
+        {
+            return false;
+        }
+
+        bool something = true;
+        something = validateTransitionConfigurationRec(transSeq->rightExpression->ifElseIfBody);
+        if (!something || !validateTransitionConfigurationRec(transSeq->rightExpression->ifElseElseBody))
+        {
+            return false;
+        }
+    }
     return true;
 }
 
-static bool validateNeighborhoodConfiguration(Configuration *configuration)
+static bool validateNeighborhoodConfigurationRec(NeighborhoodSequence *neighborhoodSequence)
+{
+    if (neighborhoodSequence == NULL)
+    {
+        return true;
+    }
+
+    NeighborhoodSequence *neighSeq = neighborhoodSequence;
+    if (neighSeq->rightExpression->type == NEIGHBORHOOD_FOR_LOOP)
+    {
+        if (neighSeq->rightExpression->forBody == NULL)
+        {
+            logError(_logger, "Semantic Error: Neighborhood FOR loop has NULL body.");
+            return false;
+        }
+
+        return validateNeighborhoodConfigurationRec(neighSeq->rightExpression->forBody);
+    }
+    else if (neighSeq->rightExpression->type == NEIGHBORHOOD_IF)
+    {
+        if (neighSeq->rightExpression->ifBody == NULL)
+        {
+            logError(_logger, "Semantic Error: Neighborhood IF statement has NULL body.");
+            return false;
+        }
+        return validateNeighborhoodConfigurationRec(neighSeq->rightExpression->ifBody);
+    }
+    else if (neighSeq->rightExpression->type == NEIGHBORHOOD_IF_ELSE)
+    {
+        if (neighSeq->rightExpression->ifElseIfBody == NULL || neighSeq->rightExpression->ifElseElseBody == NULL)
+        {
+            logError(_logger, "Semantic Error: Neighborhood IF-ELSE has NULL in either IF or ELSE body.");
+            return false;
+        }
+
+        bool ifResult = validateNeighborhoodConfigurationRec(neighSeq->rightExpression->ifElseIfBody);
+        if (!ifResult)
+        {
+            return false;
+        }
+
+        bool elseResult = validateNeighborhoodConfigurationRec(neighSeq->rightExpression->ifElseElseBody);
+        if (!elseResult)
+        {
+            return false;
+        }
+    }
+
+    if (neighSeq->sequence != NULL)
+    {
+        return validateNeighborhoodConfigurationRec(neighSeq->sequence);
+    }
+
+    return true;
+}
+
+static bool validateNeighborhoodConfiguration(Configuration *configuration, NeighborhoodSequence *neighborhoodSequence)
 {
     Option *neigh = getOption(configuration, NEIGHBORHOOD_OPTION);
     Option *evol = getOption(configuration, EVOLUTION_OPTION);
@@ -387,7 +487,7 @@ static bool validateNeighborhoodConfiguration(Configuration *configuration)
         return false;
     }
 
-    return true;
+    return validateNeighborhoodConfigurationRec(neighborhoodSequence);
 }
 
 SemanticAnalysisStatus checkSemantic(Program *program, Logger *logger)
@@ -422,7 +522,7 @@ SemanticAnalysisStatus checkSemantic(Program *program, Logger *logger)
         logDebugging(_logger, "The program is a TRANSITION program");
         if (validateConfiguration(program->configuration))
         {
-            if (validateTransitionConfiguration(program->justConfiguration))
+            if (validateTransitionConfiguration(program->configuration, program->transitionSequence))
             {
                 logDebugging(_logger, "Configuration of Transition program is correct");
                 return SEMANTIC_SUCCESS;
@@ -438,7 +538,7 @@ SemanticAnalysisStatus checkSemantic(Program *program, Logger *logger)
         logDebugging(_logger, "The program is a NEIGHBORHOOD_PROGRAM");
         if (validateConfiguration(program->configuration))
         {
-            if (validateNeighborhoodConfiguration(program->justConfiguration))
+            if (validateNeighborhoodConfiguration(program->configuration, program->neighborhoodSequence))
             {
                 logDebugging(_logger, "Configuration of Neighborhood program is correct");
                 return SEMANTIC_SUCCESS;

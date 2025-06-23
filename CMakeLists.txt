@@ -70,7 +70,7 @@ add_executable(Compiler
 	src/main/c/shared/Logger.c
 	src/main/c/shared/String.c
 	src/main/c/shared/SymbolTable.c
-	src/main/c/backend/semantic-analysis/SemanticAnalyzer.c
+	src/main/c/shared/semantic-analysis/SemanticAnalyzer.c
 	# Add more *.c files if needed (otherwise, they won't be compiled).
 	# ...
 )
